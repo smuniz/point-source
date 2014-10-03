@@ -189,17 +189,18 @@ class LowLevelFunction(object):
         the current instruction.
 
         """
-        du_chains_repr = ""
+        du_chains_repr = "["
         if address in self.du_chain:
             for cur_def in self.du_chain[address]:
                 if cur_def in self.du_chain[address]:
 
-                    du_chains_repr = "{%s : " % cur_def
+                    du_chains_repr += "{%+3s : " % cur_def
 
                     for use in self.du_chain[address][cur_def]:
                         du_chains_repr += "0x%X " % use
 
-            du_chains_repr += "}"
+                    du_chains_repr += "}"
+        du_chains_repr += "]"
         return du_chains_repr
 
     def ud_chains_printable(self, address):
@@ -207,18 +208,19 @@ class LowLevelFunction(object):
         the current instruction.
 
         """
-        ud_chains_repr = ""
+        ud_chains_repr = "["
         if address in self.ud_chain:
             for cur_use in self.ud_chain[address]:
                 if cur_use in self.ud_chain[address]:
 
-                    ud_chains_repr = "{%s : " % cur_use
+                    ud_chains_repr += "{%+3s : " % cur_use
 
                     _def = self.ud_chain[address][cur_use]
 
                     ud_chains_repr += "0x%X " % _def
 
-            ud_chains_repr += "}"
+                    ud_chains_repr += "}"
+        ud_chains_repr += "]"
         return ud_chains_repr
 
     def __getitem__(self, key):
@@ -284,6 +286,8 @@ class LowLevelFunction(object):
 
                         defs = self.du_chain.setdefault(lir_inst.address, dict())
                         defs.setdefault(op, list())
+
+                        self.ud_chain.setdefault(lir_inst.address, dict())
                     else:
                         def_address = reg_defs.get(op, None)
 
@@ -293,7 +297,8 @@ class LowLevelFunction(object):
                             #
                             # Update def-use chain.
                             #
-                            defs = self.du_chain.setdefault(def_address, dict())
+                            defs = \
+                                self.du_chain.setdefault(def_address, dict())
 
                             cur_def = defs.setdefault(op, list())
                             cur_def.append(cur_address)
@@ -301,6 +306,7 @@ class LowLevelFunction(object):
                             #
                             # Update use-def chain.
                             #
-                            uses = self.ud_chain.setdefault(cur_address, dict())
+                            uses = \
+                                self.ud_chain.setdefault(cur_address, dict())
 
                             uses[op] = def_address

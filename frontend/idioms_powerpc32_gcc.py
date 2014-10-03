@@ -266,11 +266,24 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
 
             raise PowerPc32GccIdiomAnalyzerException(err)
 
+    def __is_valid_return(self, inst):
+        """Indicate if the specified instruction is a valid return instruction
+        or not.
+
+        """
+        if inst.type == self.iset.PPC_balways:
+            if not ((inst[0].type == self.iset.CRB and \
+                inst[1].type == self.iset.SPR) or \
+                (inst[0].type is self.iset.SPR)):
+                return False
+            return True
+        return False
+
     def detect_epilogue(self):
         """Check wheater the function epilogue is present or not."""
         try:
             # Check the last basic block for the prescense of the epilogue.
-            # TODO : Check all the ending basic blocks, not just 1.
+            # TODO / FIXME : Check all the ending basic blocks, not just 1.
             bb = self.lir_function[-1]
 
             # STEP 1.A
@@ -278,11 +291,9 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
             inst = bb[-1]
 
             if inst.type == self.iset.PPC_balways:
-                if not ((inst[0].type == self.iset.CRB and \
-                    inst[1].type == self.iset.SPR) or \
-                    (inst[0].type is self.iset.SPR)):
+                if not self.__is_valid_return(inst):
                     #
-                    # In case that the branch instructino is unknown to us then
+                    # In case that the branch instruction is unknown to us then
                     # we raise an exception becuase we don't know if it's a
                     # return, a goto of some kind or what it is at all.
                     #
@@ -313,7 +324,9 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 # mtlr    %r0
                 if not self.lir_function.leaf_procedure and self.ret_to_caller:
 
-                    # Check the last basic block except blr (last instruction)
+                    # Check the last basic block except blr (last instruction).
+                    # TODO / FIXME : Check all the ending basic blocks, not
+                    # just 1.
                     for inst in bb[-2::-1]:
 
                         # Find mtlr instruction to locate the register used
@@ -324,7 +337,8 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                             self.mir_function.add_epilogue_address(inst.address)
                             self.lir_function.add_epilogue_address(inst.address)
 
-                        if inst.type == self.iset.PPC_lwz and inst[0].is_reg_n(temp_lr_reg):
+                        if inst.type == self.iset.PPC_lwz and \
+                            inst[0].is_reg_n(temp_lr_reg):
                             self.mark_instruction_analyzed(inst)
                             self.mir_function.add_epilogue_address(inst.address)
                             self.lir_function.add_epilogue_address(inst.address)
@@ -594,32 +608,57 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         """Detect registers used as retun values of the current function.
 
         """
+        if not self.ret_to_caller:
+            print "    Return registers not found : Function does not return"
+            return
+
         #
         # Pre-requisites:
         #
         # interprocedural live register analysis has been performed.
         # intraprocedural reaching register definition has been performed.
         #
-
-        self.return_registers.append(self.iset.GPR3)
-
-        #parent_func = None
         blr = None
 
         for lir_basic_block in self.lir_function:
             for lir_inst in lir_basic_block:
-                # TODO / FIXME : Check if the SPR matches LR.
-                if lir_inst.is_type(self.iset.PPC_balways):
-                    #parent_func = lir_inst.basic_block.function
+                if self.__is_valid_return(lir_inst):
                     blr = lir_inst
 
+        if not blr:
+            raise PowerPc32GccIdiomAnalyzerException(
+                "Not return instruction found ")
+
+        #
+        # Add empty UD and DU chains for this instruction given that it doesn't
+        # contain any GPR so chains were never created in it.
+        #
+        self.lir_function.du_chain.setdefault(blr.address, dict())
+        self.lir_function.ud_chain.setdefault(blr.address, dict())
+
+        #
+        # TODO / FIXME : We should perform this check with a call-flow graph
+        # and make sure that the return register is indeed located before the
+        # blr instruction.
         for lir_basic_block in reversed(self.lir_function):
             for lir_inst in reversed(lir_basic_block):
-                if lir_inst.address in self.lir_function.du_chain and \
-                    "r3" in self.lir_function.du_chain[lir_inst.address]:
+                if lir_inst.address in self.lir_function.du_chain:
+                    # TODO / FIXME : We should check the the register is not
+                    # used previous to the ret (and after the def).
+                    # TODO / FIXME : We should have a list and remove the ones
+                    # found.
+                    for reg in self.iset.RETURN_REGISTERS:
+                        reg_name = "r%d" % reg
+                        if reg_name in self.lir_function.du_chain[lir_inst.address]:
+                            # Update the list of return registers for further
+                            # usage and then update the UD and DU chains of
+                            # both the return instruction and the
+                            # instruction(s) using the registers involved.
+                            self.return_registers.append(reg)
 
-                        #self.lir_function.du_chain[lir_inst.address]
-                        print "+++", lir_inst.address
+                            self.lir_function.du_chain[lir_inst.address][reg_name].append(blr.address)
+
+                            self.lir_function.ud_chain[blr.address][reg_name] = lir_inst.address
 
         print "    Return register(s) found : %s" % \
             ", ".join([self.iset.REGISTERS_NAMES[r] \
