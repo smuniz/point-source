@@ -75,7 +75,7 @@ class MiddleIrInstructionBuilder(object):
     # Arithmethic, bitwise and logical
     #
     def add(self, lhs, rhs, name=""):
-        """Generate an LLVM IR xxx instruction."""
+        """Generate an LLVM IR add instruction."""
         return MiddleIrInstruction(self.llvm_builder.add(
             lhs._ptr, rhs._ptr, name))
 
@@ -83,7 +83,7 @@ class MiddleIrInstructionBuilder(object):
     # Misc.
     #
     def call(self, fn, args, name=""):
-        """Generate an LLVM IR xxx instruction."""
+        """Generate an LLVM IR call instruction."""
         llvm_func = fn._llvm_get_definition()
         arguments = [arg._ptr for arg in args]
 
@@ -94,17 +94,17 @@ class MiddleIrInstructionBuilder(object):
     # Memory
     #
     def alloca(self, ty, name=""):
-        """Generate an LLVM IR xxx instruction."""
+        """Generate an LLVM IR alloca instruction."""
         return MiddleIrInstruction(
             self.llvm_builder.alloca(ty._ptr, name))
 
     def alloca_array(self, ty, size, name=""):
-        """Generate an LLVM IR xxx instruction."""
+        """Generate an LLVM IR alloca_array instruction."""
         return MiddleIrInstruction(
             self.llvm_builder.alloca_array(ty._ptr, size, name))
 
     def free(self, ptr):
-        """Generate an LLVM IR xxx instruction."""
+        """Generate an LLVM IR free instruction."""
         #return MiddleIrInstruction(self.llvm_builder.alloca_array(ptr))
         raise Exception("Builder.free not implemented.")
 
@@ -118,20 +118,20 @@ class MiddleIrInstructionBuilder(object):
             self.llvm_builder.gep(pointer, indices, name))
 
     def load(self, ptr, name=""):
-        """Generate an LLVM IR xxx instruction."""
+        """Generate an LLVM IR load instruction."""
         return MiddleIrInstruction(self.llvm_builder.load(ptr, name))
 
     def malloc(self, ty, name=""):
-        """Generate an LLVM IR xxx instruction."""
+        """Generate an LLVM IR malloc instruction."""
         return MiddleIrInstruction(self.llvm_builder.malloc(ty._ptr, name))
 
     def malloc_array(self, ty, size, name=""):
-        """Generate an LLVM IR xxx instruction."""
+        """Generate an LLVM IR malloc_array instruction."""
         return MiddleIrInstruction(self.llvm_builder.malloc_array(
                 ty._ptr, size, name))
 
     def store(self, mir_value, mir_ptr):
-        """Generate an LLVM IR xxx instruction."""
+        """Generate an LLVM IR store instruction."""
         return MiddleIrInstruction(self.llvm_builder.store(
                 mir_value, mir_ptr._ptr))
 
@@ -139,7 +139,7 @@ class MiddleIrInstructionBuilder(object):
     # Terminator instructions
     #
     def branch(self, bblk):
-        """Generate an LLVM IR xxx instruction."""
+        """Generate an LLVM IR branch instruction."""
         return MiddleIrInstruction(
             self.llvm_builder.branch(
                 bblk._ptr))
@@ -170,7 +170,7 @@ class MiddleIrInstructionBuilder(object):
     # Others
     #
     def pointer(self, pointee, addr_space=""):
-        """Generate an LLVM IR xxx instruction."""
+        """Generate an LLVM IR pointer instruction."""
         llvm_pointee = pointee._ptr
         return MiddleIrInstruction(
             self.llvm_builder.pointer(llvm_pointee, addr_space))
