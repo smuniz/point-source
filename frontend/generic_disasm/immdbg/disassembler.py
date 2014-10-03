@@ -52,7 +52,8 @@ class Disassembler(BaseDebugger):
 
         self.debugger = Debugger()
 
-    def get_screen_address(self):
+    @property
+    def screen_address(self):
         """Return the effective memory address under the cursor."""
         # I was unable to find a way to determine current cursor position in
         # the screen so I ended using the EIP register address because imdbg
@@ -65,9 +66,10 @@ class Disassembler(BaseDebugger):
         raise ImmunityDebuggerException(
             "Debugger must be running to execute")
 
-    def get_architecture(self):
+    @property
+    def architecture(self):
         """Return the current architecture in use."""
-        return X86_ARCH
+        return X86_ARCH  # This is the only supported architecture.
 
     def get_input_file(self):
         """Return the name of the file being disassembled."""

@@ -11,6 +11,7 @@ from idioms import IdiomAnalyzer, IdiomAnalyzerException
 # Import MIR related modules
 #from middleend.mir import *    # Not working anymore. Must import each module
                                 # manually.
+from middleend.mir_exception import MiddleIrException
 from middleend.mir.mir_function import *
 
 
@@ -533,7 +534,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 # %13 and %31.
                 # If a register between r0 and r12 is found as source operand
                 # then discard the instruction.
-                if inst[0].value < self.iset.R13:
+                if inst[0].value < self.iset.GPR13:
                     #print "not non-vol reg"
                     continue
 
@@ -600,19 +601,25 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         # intraprocedural reaching register definition has been performed.
         #
 
-        self.return_registers.append(self.iset.R3)
+        self.return_registers.append(self.iset.GPR3)
+
+        #parent_func = None
+        blr = None
 
         for lir_basic_block in self.lir_function:
-
-            for lir_instruction in lir_basic_block:
-
+            for lir_inst in lir_basic_block:
                 # TODO / FIXME : Check if the SPR matches LR.
-                if lir_instruction.is_type(self.iset.PPC_balways):
-                    parent_func = lir_instruction.basic_block.function
+                if lir_inst.is_type(self.iset.PPC_balways):
+                    #parent_func = lir_inst.basic_block.function
+                    blr = lir_inst
 
-                    address = lir_instruction.address
-                    print parent_func.du_chain.get(address, None)
-                    print parent_func.du_chain.get(lir_instruction.address, None)
+        for lir_basic_block in reversed(self.lir_function):
+            for lir_inst in reversed(lir_basic_block):
+                if lir_inst.address in self.lir_function.du_chain and \
+                    "r3" in self.lir_function.du_chain[lir_inst.address]:
+
+                        #self.lir_function.du_chain[lir_inst.address]
+                        print "+++", lir_inst.address
 
         print "    Return register(s) found : %s" % \
             ", ".join([self.iset.REGISTERS_NAMES[r] \
@@ -690,8 +697,8 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     inst[0].is_reg and \
                     inst[0].value in self.nv_regs and \
                     inst[1].is_reg and \
-                    inst[1].value >= self.iset.R3 and \
-                    inst[1].value <= self.iset.R10:
+                    inst[1].value >= self.iset.GPR3 and \
+                    inst[1].value <= self.iset.GPR10:
 
                     # TODO: check some of the function's reference to see if
                     #       any of those param registers is used immediately

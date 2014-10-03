@@ -50,12 +50,6 @@ class Disassembler(BaseDebugger):
     # Currently supported architectures by this debugger.
     SUPPORTED_ARCHS = [PPC_ARCH, MIPS_ARCH, ARM_ARCH, X86_ARCH]
 
-    # These are copy of IDA internal definitions.
-    __POWERPC_ARCHITECTURE = "ppc"
-    __MIPS_ARCHITECTURE = "mips"
-    __ARM_ARCHITECTURE = "arm"
-    __X86_ARCHITECTURE = "pc"
-
     STRING_TYPE_C = ASCSTR_TERMCHR # C-style ASCII string
     STRING_TYPE_PASCAL = ASCSTR_PASCAL  # Pascal-style ASCII string (length byte)
     STRING_TYPE_LEN2 = ASCSTR_LEN2    # Pascal-style, length is 2 bytes
@@ -85,8 +79,8 @@ class Disassembler(BaseDebugger):
         if architecture is PPC_ARCH:
             import powerpc32 as current_arch
 
-        #elif architecture is MIPS_ARCH:
-        #    import mips as current_arch
+        elif architecture is MIPS_ARCH:
+            import mips as current_arch
 
         elif architecture is ARM_ARCH:
             import arm as current_arch
@@ -110,13 +104,14 @@ class Disassembler(BaseDebugger):
         """Return the current architecture in use."""
         processor_name = get_idp_name()
 
-        if processor_name == self.__POWERPC_ARCHITECTURE:
+        # Convert IDA architectures IDs to our own.
+        if processor_name == "ppc":
             return PPC_ARCH
-        elif processor_name == self.__MIPS_ARCHITECTURE:
+        elif processor_name == "mips":
             return MIPS_ARCH
-        elif processor_name == self.__ARM_ARCHITECTURE:
+        elif processor_name == "arm":
             return ARM_ARCH
-        elif processor_name == self.__X86_ARCHITECTURE:
+        elif processor_name == "pc":
             return X86_ARCH
 
         raise DisassemblerException(

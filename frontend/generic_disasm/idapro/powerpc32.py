@@ -450,78 +450,78 @@ class InstructionSet:
     #PPC_mtocrf = idaapi.PPC_mtocrf         # Move To One Condition Register Field
     #PPC_mfocrf = idaapi.PPC_mfocrf         # Move From One Condition Register Field
 
-    R0 = 0
-    R1 = 1
-    SP = R1
-    R2 = 2
-    TOC = R2
-    R3 = 3
-    R4 = 4
-    R5 = 5
-    R6 = 6
-    R7 = 7
-    R8 = 8
-    R9 = 9
-    R10 = 10
-    R11 = 11
-    R12 = 12 
-    R13 = 13
-    R14 = 14
-    R15 = 15
-    R16 = 16
-    R17 = 17
-    R18 = 18
-    R19 = 19
-    R20 = 20
-    R21 = 21
-    R22 = 22
-    R23 = 23
-    R24 = 24
-    R25 = 25
-    R26 = 26
-    R27 = 27
-    R28 = 28
-    R29 = 29
-    R30 = 30
-    R31 = 31
+    GPR0 = 0
+    GPR1 = 1
+    SP   = GPR1
+    GPR2 = 2
+    TOC  = GPR2
+    GPR3 = 3
+    GPR4 = 4
+    GPR5 = 5
+    GPR6 = 6
+    GPR7 = 7
+    GPR8 = 8
+    GPR9 = 9
+    GPR10 = 10
+    GPR11 = 11
+    GPR12 = 12 
+    GPR13 = 13
+    GPR14 = 14
+    GPR15 = 15
+    GPR16 = 16
+    GPR17 = 17
+    GPR18 = 18
+    GPR19 = 19
+    GPR20 = 20
+    GPR21 = 21
+    GPR22 = 22
+    GPR23 = 23
+    GPR24 = 24
+    GPR25 = 25
+    GPR26 = 26
+    GPR27 = 27
+    GPR28 = 28
+    GPR29 = 29
+    GPR30 = 30
+    GPR31 = 31
 
     TOTAL_GPR = 32      # Number of general purpose registers.
 
     REGISTERS_NAMES = {
-        R0 : "r0",
-        R1 : "r1",
-        SP : "sp",
-        R2 : "r2",
-        TOC: "toc",
-        R3 : "r3",
-        R4 : "r4",
-        R5 : "r5",
-        R6 : "r6",
-        R7 : "r7",
-        R8 : "r8",
-        R9 : "r9",
-        R10 : "r10",
-        R11 : "r11",
-        R12 : "r12", 
-        R13 : "r13",
-        R14 : "r14",
-        R15 : "r15",
-        R16 : "r16",
-        R17 : "r17",
-        R18 : "r18",
-        R19 : "r19",
-        R20 : "r20",
-        R21 : "r21",
-        R22 : "r22",
-        R23 : "r23",
-        R24 : "r24",
-        R25 : "r25",
-        R26 : "r26",
-        R27 : "r27",
-        R28 : "r28",
-        R29 : "r29",
-        R30 : "r30",
-        R31 : "r31",
+        GPR0 : "r0",
+        GPR1 : "r1",
+        SP   : "sp",
+        GPR2 : "r2",
+        TOC  : "TOC",
+        GPR3 : "r3",
+        GPR4 : "r4",
+        GPR5 : "r5",
+        GPR6 : "r6",
+        GPR7 : "r7",
+        GPR8 : "r8",
+        GPR9 : "r9",
+        GPR10 : "r10",
+        GPR11 : "r11",
+        GPR12 : "r12", 
+        GPR13 : "r13",
+        GPR14 : "r14",
+        GPR15 : "r15",
+        GPR16 : "r16",
+        GPR17 : "r17",
+        GPR18 : "r18",
+        GPR19 : "r19",
+        GPR20 : "r20",
+        GPR21 : "r21",
+        GPR22 : "r22",
+        GPR23 : "r23",
+        GPR24 : "r24",
+        GPR25 : "r25",
+        GPR26 : "r26",
+        GPR27 : "r27",
+        GPR28 : "r28",
+        GPR29 : "r29",
+        GPR30 : "r30",
+        GPR31 : "r31",
     }
 
     #
@@ -534,7 +534,9 @@ class InstructionSet:
     CRB       = idaapi.o_idpspec4     # crbit        x.reg
     DCR       = idaapi.o_idpspec5     # Device control register
 
-    ARGUMENT_REGISTERS = [R3, R4, R5, R6, R7, R8, R9, R10]
+    ARGUMENT_REGISTERS = [GPR3, GPR4, GPR5, GPR6, GPR7, GPR8, GPR9, GPR10]
+
+    RETURN_REGISTERS = [GPR3, GPR4]
 
 ASSIGNMENT_TYPES = [
     InstructionSet.PPC_add,         # Add
