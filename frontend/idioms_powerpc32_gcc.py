@@ -643,22 +643,26 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         for lir_basic_block in reversed(self.lir_function):
             for lir_inst in reversed(lir_basic_block):
                 if lir_inst.address in self.lir_function.du_chain:
+
                     # TODO / FIXME : We should check the the register is not
                     # used previous to the ret (and after the def).
-                    # TODO / FIXME : We should have a list and remove the ones
-                    # found.
-                    for reg in self.iset.RETURN_REGISTERS:
-                        reg_name = "r%d" % reg
-                        if reg_name in self.lir_function.du_chain[lir_inst.address]:
+                    ret_regs_list = self.iset.RETURN_REGISTERS
+
+                    for reg in ret_regs_list:
+                        if reg in self.lir_function.du_chain[lir_inst.address]:
                             # Update the list of return registers for further
                             # usage and then update the UD and DU chains of
                             # both the return instruction and the
                             # instruction(s) using the registers involved.
                             self.return_registers.append(reg)
 
-                            self.lir_function.du_chain[lir_inst.address][reg_name].append(blr.address)
+                            self.lir_function.du_chain[lir_inst.address][reg].append(blr.address)
 
-                            self.lir_function.ud_chain[blr.address][reg_name] = lir_inst.address
+                            self.lir_function.ud_chain[blr.address][reg] = lir_inst.address
+
+                            # Remove from the list of possible return
+                            # registers.
+                            ret_regs_list.remove(reg)
 
         print "    Return register(s) found : %s" % \
             ", ".join([self.iset.REGISTERS_NAMES[r] \

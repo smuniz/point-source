@@ -278,8 +278,8 @@ class LowLevelFunction(object):
                         # Only work on tempoerary registers.
                         continue
 
-                    # TODO/FIXME : detect destination register(s) right!
-                    op = "%s" % lir_op
+                    # TODO / FIXME : detect destination register(s) right!
+                    op = lir_op.value
 
                     if lir_op_idx is 0:
                         reg_defs[op] = lir_inst.address

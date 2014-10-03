@@ -17,7 +17,8 @@ from llvm.core import *
 __all__ = [ "MiddleIrInstructionBuilder",
             "MiddleIrInstructionBuilderException",
             "MiddleIrInstruction",
-            "MiddleIrInstructionException"]
+            "MiddleIrInstructionException",
+            "MiddleIrVolatileInstruction"]
 
 
 class MiddleIrInstructionBuilderException(MiddleIrException):
@@ -314,6 +315,11 @@ class MiddleIrInstruction(MiddleIrLLVMInstance, Area):
         """Indicate if the current instruction is a commutative."""
         return self._ptr.is_commutative
 
+
+class MiddleIrVolatileInstruction(object):
+
+    def __init__(self, llvm_instruction=None):
+        self.llvm_instruction = llvm_instruction
 
 TERMINATOR_GROUP = 0
 UNKNOWN_GROUP = 3

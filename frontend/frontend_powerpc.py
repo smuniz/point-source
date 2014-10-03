@@ -18,6 +18,7 @@ from actionplan import Action, ActionPlan, ActionPlanException
 #from middleend.mir import *    # Not working anymore. Must import each module
                                 # manually.
 from middleend.mir.mir_constants import *
+from middleend.mir.mir_instruction import *
 
 
 class FrontEndPowerPcException(Exception):
@@ -100,7 +101,8 @@ class FrontEndPowerPc(FrontEnd):
             pass
 
         elif lir_inst.is_type(self.iset.PPC_li):
-            self.current_symbol_table[address] = MiddleIrConstantInt32(lir_inst[1].value)
+            self.current_symbol_table[address] = \
+                MiddleIrConstantInt32(lir_inst[1].value)
 
         elif lir_inst.is_type(self.iset.PPC_lis):
             pass
@@ -109,7 +111,17 @@ class FrontEndPowerPc(FrontEnd):
             pass
 
         elif lir_inst.is_type(self.iset.PPC_mr):
-            pass
+            reg = lir_inst[1].value
+            du_addr = self.lir_function.ud_chain[address].get(reg, None)
+
+            if du_addr is not None:
+                src = self.current_symbol_table[du_addr]
+
+                # TODO / FIXME : Check if src is another MIR volatile
+                # instruction.
+                vol = MiddleIrVolatileInstruction(src)
+
+                self.current_symbol_table[address] = vol
 
         elif lir_inst.is_type(self.iset.PPC_stb):
             pass
@@ -223,9 +235,12 @@ class FrontEndPowerPc(FrontEnd):
                 # Obtain return registers.
                 ret_reg = self.idiom_analyzer.return_registers[0]
 
-                #print self.lir_function.du_chain[address]
+                op_address = self.lir_function.ud_chain[address][ret_reg]
 
-                ret_val = self.current_symbol_table[0xC]
+                ret_val = self.current_symbol_table[op_address]
+
+                if isinstance(ret_val, MiddleIrVolatileInstruction):
+                    ret_val = ret_val.llvm_instruction
 
                 mir_inst = self.mir_inst_builder.ret(ret_val)
 
