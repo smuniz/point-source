@@ -1,6 +1,7 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[cod]
+#*.py[cod]
+*.py[co] # removed .pyd cause I need the backup of that ATM.
 
 # C extensions
 *.so
