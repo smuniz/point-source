@@ -1,4 +1,7 @@
-point-source
-============
+Point-source C decompiler
+=======================
 
-Python-based C Decompiler based on LLVM
+Point-source is a pure Python C Decompiler. It works on top of well-known
+disassemblers (i.e. IDA Pro) and makes use of LLVM / LLVMPy power to represent
+multi-platform assembly code into a common language before converting it to its
+C representation.
