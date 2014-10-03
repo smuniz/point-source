@@ -80,7 +80,7 @@ class Disassembler(BaseDebugger):
         # Set architecture specific types for the current binary being
         # analyzed.
         #
-        architecture = self.get_architecture()
+        architecture = self.architecture
 
         if architecture is PPC_ARCH:
             import powerpc32 as current_arch
@@ -100,11 +100,13 @@ class Disassembler(BaseDebugger):
         # Perform additional initializations.
         self._post_init()
 
-    def get_screen_address(self):
+    @property
+    def screen_address(self):
         """Return the effective memory address under the cursor."""
         return get_screen_ea()
 
-    def get_architecture(self):
+    @property
+    def architecture(self):
         """Return the current architecture in use."""
         processor_name = get_idp_name()
 
@@ -117,7 +119,8 @@ class Disassembler(BaseDebugger):
         elif processor_name == self.__X86_ARCHITECTURE:
             return X86_ARCH
 
-        raise DisassemblerException("Unsupported architecture %s" % processor_name)
+        raise DisassemblerException(
+            "Unsupported architecture %s" % processor_name)
 
     def get_input_file(self):
         """Return the name of the file being disassembled."""
@@ -125,7 +128,7 @@ class Disassembler(BaseDebugger):
 
     def get_current_function_name(self):
         """Return the name of the current function under the cursor."""
-        return self.get_function_name(self.get_screen_address())
+        return self.get_function_name(self.screen_address)
 
     def get_function_name(self, address):
         """Get the name of the function at the specified memory address."""

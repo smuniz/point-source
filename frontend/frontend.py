@@ -110,21 +110,15 @@ class FrontEnd(object):
         message = "Method %s in class %s was not implemented."
         raise FrontEndException(message % (methodname, classname))
 
-    def set_debugger(self, debugger):
-        """
-        Store the debugger instance for the current debugger
-        application.
-        
-        """
-        self.debugger = debugger
+    @property
+    def debugger(self):
+        """Return the debugger instance for the current application."""
+        return self._debugger
 
-    def get_debugger(self):
-        """
-        Return the debugger instance for the current debugger
-        application.
-        
-        """
-        return self.debugger
+    @debugger.setter
+    def debugger(self, debugger):
+        """Store the debugger instance for the current application."""
+        self._debugger = debugger
 
     def generate_mir_skeleton(self):
         """
@@ -509,94 +503,3 @@ class FrontEnd(object):
 
             print "\t0x%(address)08X - %(arch)s %(group)15s " \
                   "(type %(inst_numb)3d) - %(inst_repr)-25s" % vars()
-
-    def generate_mir_du_ud_chains(self):
-        """Generate DU-chains (Definition-Use) and UD-chains (Use-Definition)
-        for every instruction present in the MIR representation.
-
-        """
-        # Iterate through all the statements in the current function.
-        #for cur_stmt_idx in range(len(self.ir)):
-        for cur_stmt_idx in range(len(self.ir)):
-
-            # Get the statement at the given position an check if it's an
-            # assignment statement. If it's not, move on to the next statement
-            # in the function, otherwise analyze the statement.
-            cur_stmt = self.ir.getStatementByIndex(cur_stmt_idx)
-
-            #if isinstance(cur_stmt.get(), AssignmentExpression):
-            if lir_inst.type in self.assignment_types:
-                # Create to dictionaries to hold the obtained information.
-                du = dict()
-                ud = dict()
-
-                # Both chains (DU and UD) are stored in an internal dictionary
-                # and can be easily accessed by the statement index.
-                self.chains[cur_stmt_idx] = list((du, ud))
-
-                l_op = cur_stmt.get().left_operand
-                r_op = cur_stmt.get().right_operand
-
-                # Operand could be a binary expression so we must
-                # take it apart and iterate for every operand on
-                # that expression in case it's not derived from a
-                # displacement.
-
-                # Get the left operand of the expression.
-                # TODO: fix this kludge!!!
-                #l_ops = self.extractRegistersFromExpression(l_op)
-                l_ops = [str(l_op)]
-                for op in l_ops:
-                    du[str(op)] = list()
-
-                # Get the right operand of the expression.
-                r_ops = self.extractRegistersFromExpression(r_op)
-
-                for op in r_ops:
-                    ud[str(op)] = list()
-
-                print "-" * 20
-                print "DU ", du
-                print "UD ", ud
-
-                # Go backwards to construct DU and UD chains.
-                # For every statement present in the function, we'll go
-                # backward one statement at a time and find if it defines
-                # the operands used in the current expression.
-                prev_chain  = None
-                cur_chain   = self.chains[cur_stmt_idx]
-
-                for prev_stmt_idx in range(cur_stmt_idx-1, -1, -1):
-
-                    # Avoid non-assignment expressions
-                    if self.chains[prev_stmt_idx] is None:
-                        continue
-
-                    prev_chain = self.chains[prev_stmt_idx]
-
-                    #print "prev_stmt_idx", prev_stmt_idx
-
-                    # For each operand in the statement being analyzed, check
-                    # if it's defined in a previous statement.
-                    for cur_r_op in r_ops:
-
-                        #print "    cur_r_op is", cur_r_op
-                        if prev_chain[self.DU].has_key(str(cur_r_op)):
-
-                            prev_chain[self.DU][str(cur_r_op)].append(cur_stmt_idx)
-
-                            cur_chain[self.UD][str(cur_r_op)].append(prev_stmt_idx)
-
-                            r_ops.remove(cur_r_op)
-
-                    # If all the definitions for the given operands were
-                    # satisfied, stop the search and leave.
-                    if len(r_ops) == 0:
-                        break
-
-            else:
-                # FIXME: process other expressions.
-                #
-                # Statements without chain are left empty.
-                self.chains[cur_stmt_idx] = None
-

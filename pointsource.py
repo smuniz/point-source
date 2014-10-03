@@ -194,7 +194,7 @@ class PointSource(object):
                     self.debugger = frontend.generic_disasm.idapro.disassembler.Disassembler()
 
                     self.debugger.log("[+] Debugger detected: %s" %
-                                  self.debugger.get_debugger_name())
+                                  self.debugger.debugger_name)
 
                     break
 
@@ -217,7 +217,7 @@ class PointSource(object):
 
     def set_screen_address_function_address(self):
         """Store the address of the current selected function to decompile."""
-        self.function_address = self.debugger.get_screen_address()
+        self.function_address = self.debugger.screen_address
 
     def init_output_media(self):
         """Initialize the output device used for an enhanced information
@@ -229,11 +229,9 @@ class PointSource(object):
     def init_front_end(self):
         """Initialize the front-end of the decompiler."""
         try:
-
-            architecture = self.debugger.get_architecture_name()
+            arch_name = self.debugger.architecture_name
             factory = FrontEndFactory(self.debugger)
-            frontend_method = "create_%s" % architecture
-            #print "Got factory method %s" % frontend_method
+            frontend_method = "create_%(arch_name)s" % vars()
 
             if not hasattr(factory, frontend_method):
                 raise PointSourceException(
@@ -244,8 +242,8 @@ class PointSource(object):
         except FrontEndFactory, err :
 
             raise PointSourceException(
-                "Unable to create architecture (%s) : %s" %
-                architecture, err)
+                "Unable to create architecture (%(arch_name)s) : %(err)s" % \
+                vars())
 
         self.log("[+] Loaded front-end is %s" % self.front_end.name)
 

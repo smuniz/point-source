@@ -98,25 +98,29 @@ class BaseDebugger(object):
                 "Debugger class %s has missing \"%s\" attribute." %
                 (self.__class__.__name__, attribute_name))
 
+    @property
     @abc.abstractmethod
-    def get_screen_address(self):
+    def screen_address(self):
         """Return the effective memory address under the cursor."""
         return
 
+    @property
     @abc.abstractmethod
-    def get_architecture(self):
+    def architecture(self):
         """Return the current architecture in use."""
         return
 
-    def get_architecture_name(self):
+    @property
+    def architecture_name(self):
         """Return the name of the current architecture in use."""
         try:
-            return self.SUPPORTED_ARCHITECTURES_NAMES[self.get_architecture()]
+            return self.SUPPORTED_ARCHITECTURES_NAMES[self.architecture]
         except IndexError, err:
             raise BaseDebuggerException(
                 "Current architecture not supported: %s" % err)
 
-    def get_debugger_name(self):
+    @property
+    def debugger_name(self):
         """Return the name of the debugger application."""
         return self.DEBUGGER_NAME
 
