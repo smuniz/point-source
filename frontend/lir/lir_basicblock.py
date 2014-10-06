@@ -18,7 +18,7 @@ class LowLevelBasicBlock(SimpleGraph):
 
     """
 
-    def __init__(self, start_address=0, end_address=0):
+    def __init__(self, start_address=None, end_address=None):
         """Instance initialization."""
         # Initialize graph.
         super(LowLevelBasicBlock, self).__init__()
@@ -26,7 +26,7 @@ class LowLevelBasicBlock(SimpleGraph):
         self.instructions = dict()
         self.start_address = start_address
 
-        if end_address == 0:
+        if end_address == None:
             self.end_address = start_address
         else:
             self.end_address = end_address
@@ -72,7 +72,7 @@ class LowLevelBasicBlock(SimpleGraph):
 
         # The instruction with the smaller address is considered the start
         # address of the basic block.
-        if self.start_address == 0 or address < self.start_address:
+        if self.start_address is None or address < self.start_address:
             self.start_address = address
 
         # The instruction with the bigger address is considered the start

@@ -15,6 +15,8 @@ from middleend.mir_exception import MiddleIrException
 from middleend.mir.mir_function import *
 
 
+import idc  # TODO / FIXME : Remove this.
+
 class PowerPc32GccIdiomAnalyzerException(IdiomAnalyzerException):
     """Generic exception for idioms analyzer on PowerPC architecture."""
     pass
@@ -46,6 +48,12 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
 
         #print "Detecting parameters register."
         self.detect_parameter_registers()
+
+        #print "Detecting simple parameters register."
+        self.detect_simple_parameter_registers()
+
+        #print "Creating terporary local variables holding parameters."
+        self.__create_local_variables_for_parameters()
 
         #print "Detecting return registers."
         self.detect_return_registers()
@@ -110,12 +118,13 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 #
                 # Check if it modifies %sp and get the number of allocated
                 # bytes.
-                op0 = inst[0]
-                op1 = inst[1]
+                if inst.analyzed:
+                    continue
+
                 if inst.type == self.iset.PPC_stwu and \
-                    op0.is_reg_n(self.iset.SP) and \
-                    op1.is_displ and \
-                    op1.value[0] == self.iset.SP:
+                    inst[0].is_reg_n(self.iset.SP) and \
+                    inst[1].is_displ and \
+                    inst[1].value[0] == self.iset.SP:
 
                     #
                     # Mark instruction as already analyzed and as part of the 
@@ -126,7 +135,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     self.lir_function.add_prologue_address(inst.address)
 
                     # Add the stack size found.
-                    stack_size = abs(self.get_signed_value( op1.value[1] ))
+                    stack_size = abs(self.get_signed_value( inst[1].value[1] ))
                     self.lir_function.stack_size = stack_size
 
                     break
@@ -150,7 +159,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 print "[-] Stack allocation NOT found. Using debugger detection: ",
 
                 # TODO / FIXME : Remove IDA specific function call.
-                if GetFrameLvarSize(inst.address) == 0:
+                if idc.GetFrameLvarSize(inst.address) == 0:
                     print "OK"
                 else:
                     print "INVALID"
@@ -539,9 +548,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
 
                 # Avoid the instruction if it's part of a previously
                 # detected idiom
-                #print "inst at 0x%X...." % inst.address,
                 if inst.analyzed:
-                    #print "already analyzed"
                     continue
 
                 # Find stores on stack for non-volatile registers between 
@@ -571,10 +578,8 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     if multiple_nv_reg is False:
                         self.nv_regs = range(inst[0].value, inst[0].value + 1)
                     else:
-                        # TODO : This is probably WRONG !!!
+                        # TODO / FIXME : This is probably WRONG !!!
                         self.nv_regs = [inst[0].value, self.iset.TOTAL_GPR]
-
-                    print "--->", self.nv_regs
 
                     self.mark_instruction_analyzed(inst)
                     print "    Non-volatile registers detected:", self.nv_regs
@@ -640,13 +645,14 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         # TODO / FIXME : We should perform this check with a call-flow graph
         # and make sure that the return register is indeed located before the
         # blr instruction.
+
+        # TODO / FIXME : We should check the the register is not
+        # used previous to the ret (and after the def).
+        ret_regs_list = list(self.iset.RETURN_REGISTERS)
+
         for lir_basic_block in reversed(self.lir_function):
             for lir_inst in reversed(lir_basic_block):
                 if lir_inst.address in self.lir_function.du_chain:
-
-                    # TODO / FIXME : We should check the the register is not
-                    # used previous to the ret (and after the def).
-                    ret_regs_list = self.iset.RETURN_REGISTERS
 
                     for reg in ret_regs_list:
                         if reg in self.lir_function.du_chain[lir_inst.address]:
@@ -672,13 +678,32 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         """Detect registers used for parameter passing to the current function.
 
         """
+        # TODO / FIXME : Add this analysis.
+        #self.param_regs[0] = self.iset.GPR3
+
+        if len(self.param_regs) > 0:
+            print "    Parameter register(s) found : %s" % \
+                ", ".join([self.iset.REGISTERS_NAMES[r] \
+                    for r in self.param_regs.values()])
+
+    def __create_local_variables_for_parameters(self):
+        """..."""
         try:
-            # TODO / FIXME
-            pass
+            address = self.lir_function.start_address
+
+            mir_inst_builder = \
+                self.mir_function.get_instruction_builder_by_address(
+                    address, False)
+
+            # TODO / FIXME : Detect the parameter type.
+            var_type_preffix = "i"
+            var_name = "%(var_type_preffix)s_%(address)x" % vars()
+            mir_inst = mir_inst_builder.alloca(MiddleIrTypeInt(), None, var_name)
+
         except MiddleIrException, err:
             print format_exc() + '\n'
             raise PowerPc32GccIdiomAnalyzerException(err)
-            
+
     def detect_simple_parameter_registers(self):
         """Detect registers used for parameter passing to the current function.
         This is a simple (to say the least) version possile.
@@ -706,19 +731,22 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 if inst[0].is_reg_n() and \
                     inst[0].value in self.iset.ARGUMENT_REGISTERS:
 
-                    #self.param_regs[inst[1].value] = inst[0].value
+                    param_number = \
+                        self.iset.ARGUMENT_REGISTERS.index(inst[0].value)
+
+                    self.param_regs[param_number] = [inst[0].value, ]
                     self.mark_instruction_analyzed(inst)
 
-                    print "    Parameter register detected: %s" % \
-                            inst[0]
+                    print "    Parameter register (simple) detected: %s" % \
+                            self.iset.REGISTERS_NAMES[inst[0].value]
 
         except MiddleIrException, err:
             print format_exc() + '\n'
             raise PowerPc32GccIdiomAnalyzerException(err)
 
     def detect_parameters_copy(self):
-        """Check non-volatile registers used as a temporal function's
-        parameters holder.
+        """Check non-volatile registers used as a temporal function
+        parameter holder.
 
         """
         try:
@@ -743,11 +771,12 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     inst[1].value >= self.iset.GPR3 and \
                     inst[1].value <= self.iset.GPR10:
 
-                    # TODO: check some of the function's reference to see if
+                    # TODO: check some of the function references to see if
                     #       any of those param registers is used immediately
                     #       before the function call... Just to make sure.
 
-                    self.param_regs[inst[1].value] = inst[0].value
+                    #self.param_regs[inst[1].value] = inst[0].value
+                    raise Exception("FIXME : detect_parameters_copy")
                     self.mark_instruction_analyzed(inst)
 
                     print "    Function's parameters copy register r%d->r%d detected" % \

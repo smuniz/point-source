@@ -94,10 +94,11 @@ class MiddleIrInstructionBuilder(object):
     #
     # Memory
     #
-    def alloca(self, ty, name=""):
+    def alloca(self, ty, size=None, name=""):
         """Generate an LLVM IR alloca instruction."""
+        sizeptr = size._ptr if size else None
         return MiddleIrInstruction(
-            self.llvm_builder.alloca(ty._ptr, name))
+            self.llvm_builder.alloca(ty._ptr, sizeptr, name))
 
     def alloca_array(self, ty, size, name=""):
         """Generate an LLVM IR alloca_array instruction."""

@@ -413,8 +413,8 @@ class FrontEnd(object):
         self.generate_lir()
 
         # Output LIR for debugging purposes.
-        self.__dump_lir()
-        
+        #self.__dump_lir()
+
         try:
             #
             # Step x
@@ -441,6 +441,8 @@ class FrontEnd(object):
 
             print "[+] Initiating idioms analysis phase 1..."
             self.idiom_analyzer.perform_phase1_analysis()
+
+            self.__dump_lir()
 
             #
             # Step x

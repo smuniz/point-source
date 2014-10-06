@@ -142,7 +142,9 @@ class LowLevelInstruction(object):
         if n < len(self):
             return self.operands[n]
         else:
-            raise IndexError
+            raise IndexError(
+                "Invalid operand index (%d) on instruction \"%s\"" % (
+                n, '-'))
 
     def get_operands_count(self):
         """Return the total number of operands."""

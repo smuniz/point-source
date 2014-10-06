@@ -108,6 +108,7 @@ class FrontEndPowerPc(FrontEnd):
             pass
 
         elif lir_inst.is_type(self.iset.PPC_lwz):
+            print "PPC_lwz"
             pass
 
         elif lir_inst.is_type(self.iset.PPC_mr):
@@ -127,7 +128,10 @@ class FrontEndPowerPc(FrontEnd):
             pass
 
         elif lir_inst.is_type(self.iset.PPC_stw):
-            pass
+            # TODO / FIXME : Detect GPR3 as the first use of the first
+            # parameter.
+            self.param_regs
+            #mir_inst = 
 
         elif lir_inst.is_type(self.iset.PPC_stwu):
             pass
@@ -239,6 +243,8 @@ class FrontEndPowerPc(FrontEnd):
 
                 ret_val = self.current_symbol_table[op_address]
 
+                # In case we have a volatile instruction then obtain the real
+                # instruction from it and move on.
                 if isinstance(ret_val, MiddleIrVolatileInstruction):
                     ret_val = ret_val.llvm_instruction
 
