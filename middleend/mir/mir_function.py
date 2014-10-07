@@ -84,7 +84,7 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         # Initialize the LLVM function declaration object and initially set the
         # function parameters and return declaration to void. 
         #
-        self.return_types = MiddleIrTypeVoid()
+        self.return_type = MiddleIrTypeVoid()
         self.parameters = []
 
         self.llvm_func_type = None
@@ -97,8 +97,6 @@ class MiddleIrFunction(MiddleIrFunctionBase):
 
         # Store the Middle-end module instance.
         self.module = mir_module._ptr
-
-        #self._llvm_add_function_to_module()
 
         # Set the default calling convention.
         self.calling_convention = CALL_CONV_C
@@ -143,20 +141,20 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         return len(self._basic_blocks)
 
     @property
-    def return_types(self):
+    def return_type(self):
         """Return the value type returned by the function to it's caller when
         itfinishes executing it's instructions.
 
         """
-        return self._return_types
+        return self._return_type
 
-    @return_types.setter
-    def return_types(self, return_types):
+    @return_type.setter
+    def return_type(self, return_type):
         """Set the declaration of value returned by the function to it's caller
         when it finishes execution.
 
         """
-        self._return_types = return_types
+        self._return_type = return_type
 
     @property
     def parameters(self):
@@ -210,7 +208,7 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         # Create the LLVM function declaration object to define current
         # function.
         return MiddleIrTypeFunction(
-            self.return_types,
+            self.return_type,
             self.parameters,
             self.variadic_arguments)
 

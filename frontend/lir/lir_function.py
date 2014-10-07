@@ -171,7 +171,8 @@ class LowLevelFunction(object):
 
                 # Generate the final instruction reprenstation containing all
                 # the information gathered.
-                function_repr += "%08X %s %-30s\t; du=%-20s ud=%-20s\n"  % (
+                function_repr += \
+                    "%08X %s %-30s\t; DU=%-20s\n\t\t\t\t\t; UD=%-20s\n" % (
                     inst.address,
                     attrib,
                     inst,
@@ -194,7 +195,7 @@ class LowLevelFunction(object):
             for cur_def in self.du_chain[address]:
                 if cur_def in self.du_chain[address]:
 
-                    du_chains_repr += "{%+3s : " % cur_def
+                    du_chains_repr += "{r%-2s : " % cur_def
 
                     for use in self.du_chain[address][cur_def]:
                         du_chains_repr += "0x%X " % use
@@ -213,7 +214,7 @@ class LowLevelFunction(object):
             for cur_use in self.ud_chain[address]:
                 if cur_use in self.ud_chain[address]:
 
-                    ud_chains_repr += "{%+3s : " % cur_use
+                    ud_chains_repr += "{r%-2s : " % cur_use
 
                     _def = self.ud_chain[address][cur_use]
 

@@ -700,6 +700,9 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
             var_name = "%(var_type_preffix)s_%(address)x" % vars()
             mir_inst = mir_inst_builder.alloca(MiddleIrTypeInt(), None, var_name)
 
+            # TODO / FIXME : Obtain this address programatically.
+            self.current_symbol_table[0xC] = mir_inst
+
         except MiddleIrException, err:
             print format_exc() + '\n'
             raise PowerPc32GccIdiomAnalyzerException(err)
