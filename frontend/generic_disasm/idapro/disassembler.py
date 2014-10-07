@@ -346,7 +346,16 @@ class Disassembler(BaseDebugger):
         #lir_inst.is_macro   = False #instruction.is_macro()
         lir_inst.address = instruction.ea
         lir_inst.type = instruction.itype
+        #lir_inst.mnemonic = self.get_mnemonic(instruction.ea)
         lir_inst.mnemonic = self.get_mnemonic(instruction.ea)
+        inst_str = "%+5s %5d %5d %5d %5d %5d" % (
+            lir_inst.mnemonic,
+            instruction.get_canon_feature(),
+            instruction.auxpref,
+            instruction.segpref,
+            instruction.insnpref,
+            instruction.flags)
+        print "=> 0x%08X : %s" % (lir_inst.address, inst_str)
         lir_inst.group = self.get_group(lir_inst.type)
 
         # Parse every operand present in the instruction being analyzed
@@ -413,7 +422,7 @@ class Disassembler(BaseDebugger):
 
     def get_mnemonic(self, inst_address):
         """Return the mnemonic for the specified instruction address."""
-        return GetMnem(inst_address)
+        return ua_mnem(inst_address)
 
     def log(self, message):
         """Display a line of text in the log window."""
