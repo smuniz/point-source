@@ -58,14 +58,19 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
 
         return mir_function
 
-    def add_global_variable(self, global_variable):
+    def add_global_variable(self, global_variable, name):
         """Add the specified global variable to the current module."""
+        #ty = global_variable._ptr.type
         ty = global_variable.type._ptr
-        name = global_variable.name
+        #name = global_variable.name
         address_space = 0
 
-        global_variable._ptr = self._ptr.add_global_variable(ty, name, address_space)
-        global_variable._ptr.initializer = global_variable.value._ptr
+        global_variable._ptr = self._ptr.add_global_variable(
+            ty,
+            name,
+            address_space)
+
+        #global_variable._ptr.initializer = global_variable.value._ptr
 
     def add_function(self, mir_function):
         """Add the specified function to the current module."""

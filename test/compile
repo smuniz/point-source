@@ -75,3 +75,4 @@
 /opt/powerpc-elf/bin/powerpc-elf-gcc -nostdlib -c -g -O0 -m32 -o test79.o ../src/test79.c
 /opt/powerpc-elf/bin/powerpc-elf-gcc -nostdlib -c -g -O0 -m32 -o test80.o ../src/test80.c
 /opt/powerpc-elf/bin/powerpc-elf-gcc -nostdlib -c -g -O0 -m32 -o test81.o ../src/test81.c
+/opt/powerpc-elf/bin/powerpc-elf-gcc -nostdlib -c -g -O0 -m32 -o test82.o ../src/test82.c

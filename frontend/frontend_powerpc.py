@@ -19,7 +19,8 @@ from actionplan import Action, ActionPlan, ActionPlanException
                                 # manually.
 from middleend.mir.mir_constants import *
 from middleend.mir.mir_instruction import *
-
+from middleend.mir.mir_basicblock import *
+from middleend.mir.mir_function import *
 
 class FrontEndPowerPcException(Exception):
     """Front-end exception for PowerPC architecture."""
@@ -128,10 +129,15 @@ class FrontEndPowerPc(FrontEnd):
             pass
 
         elif lir_inst.is_type(self.iset.PPC_stw):
+
             # TODO / FIXME : Detect GPR3 as the first use of the first
             # parameter.
-            self.param_regs
-            #mir_inst = 
+            #arg = 
+            if address not in self.current_symbol_table:
+                return None
+
+            stack_alloc = self.current_symbol_table[address]
+            mir_inst = self.mir_inst_builder.store(arg, stack_alloc)
 
         elif lir_inst.is_type(self.iset.PPC_stwu):
             pass
@@ -214,7 +220,7 @@ class FrontEndPowerPc(FrontEnd):
                 called_mir_basic_block.start_address = branch_address
                 called_mir_basic_block.end_address = branch_address + 0x10
 
-                ret = called_mir_builder.return_void()
+                ret = called_mir_builder.ret()
                 ret.add_address(branch_address)
 
                 called_mir_basic_block.add_instruction(ret)
@@ -240,6 +246,11 @@ class FrontEndPowerPc(FrontEnd):
                 ret_reg = self.idiom_analyzer.return_registers[0]
 
                 op_address = self.lir_function.ud_chain[address][ret_reg]
+
+                if not op_address in self.current_symbol_table:
+                    raise FrontEndPowerPcException(
+                        "No symbol found at 0x%X for instruction at 0x%X" % \
+                        (op_address, lir_inst.address))
 
                 ret_val = self.current_symbol_table[op_address]
 

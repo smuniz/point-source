@@ -21,12 +21,10 @@ class MiddleIrGlobalValueException(MiddleIrException):
 class MiddleIrGlobalValue(MiddleIrLLVMInstance, Area):
     """Middle IR representation of a module-scope alias, variables and
     functions. Global variables are represented by the sub-class
-    MiddleIrGlobalVariable and functions by MiddleIrFunction.
+    MiddleIrGlobalValue and functions by MiddleIrFunction.
     
     """
-    def __init__(self):
-        MiddleIrLLVMInstance.__init__(self)
-        Area.__init__(self)
+    pass
 
 
 class MiddleIrGlobalVariableException(MiddleIrGlobalValueException):
@@ -41,12 +39,13 @@ class MiddleIrGlobalVariable(MiddleIrGlobalValue):
 
     def __init__(self, ty, value, name):
         """Initialize the instance."""
-        super(MiddleIrGlobalVariable, self).__init__()
+        MiddleIrLLVMInstance.__init__(self)#, ty._ptr)
+        Area.__init__(self)
+
 
         self.type = ty
         self.value = value
         self.name = name
-        self._ptr = None
 
     @property
     def type(self):

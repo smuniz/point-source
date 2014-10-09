@@ -13,9 +13,11 @@ from idioms import IdiomAnalyzer, IdiomAnalyzerException
                                 # manually.
 from middleend.mir_exception import MiddleIrException
 from middleend.mir.mir_function import *
-
+from middleend.mir.mir_global_variable import *
+from middleend.mir.mir_constants import *
 
 import idc  # TODO / FIXME : Remove this.
+import idaapi  # TODO / FIXME : Remove this.
 
 class PowerPc32GccIdiomAnalyzerException(IdiomAnalyzerException):
     """Generic exception for idioms analyzer on PowerPC architecture."""
@@ -824,6 +826,8 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                                 "[-] Couldn't locate index for 0x%X:%s" \
                                 % (hi_inst.address, hi_inst))
 
+                        # TODO / FIXME : Use DU and UD chains instead of just
+                        # the current basic block.
                         self.detect_load_word_lower(bb, hi_inst_idx)
 
         except MiddleIrException, err:
@@ -848,16 +852,17 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
             # lis     %r3, ((sub_80028C04+0x10000)@h)
             # addi    %r3, %r3, -0x73FC # sub_80028C04
             #
-            if bb[hi_inst_idx + 1] != lo_inst:
+            # TODO / FIXME : What the hell was I trying to do here?
+            #if bb[hi_inst_idx + 1] != lo_inst:
 
-                # Stop looking if the register affecting the upper
-                # part was redefined.
+            #    # Stop looking if the register affecting the upper
+            #    # part was redefined.
 
-                # TODO: distinct between store and load operations.
-                #if lo_inst.type == hi_inst.type and \
-                if lo_inst[0].value == hi_inst[0].value:
-                    #print "break at 0x%X" % lo_inst.address
-                    break
+            #    # TODO: distinct between store and load operations.
+            #    #if lo_inst.type == hi_inst.type and \
+            #    if lo_inst[0].value == hi_inst[0].value:
+            #        #print "break at 0x%X" % lo_inst.address
+            #        break
 
             if ( lo_inst.type == self.iset.PPC_addi and \
                 hi_inst[0].value == lo_inst[1].value ) \
@@ -867,24 +872,16 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 hi_inst[0].value == lo_inst[1].value[0] ):
 
                 # Obtain the memory address referenced by the idiom.
-                # TODO / FIXME: Remove IDA Pro specific API calls.
-                raise PowerPc32GccIdiomAnalyzerException("kludge!!!!")
-                address = 0x180037C  #FIXME: get_first_dref_from(hi_inst.address)
-                idiom_type = "char*"  #idc_guess_type(address)
+                # TODO / FIXME : Remove Ida Pro specifics.
+                dest_address = idaapi.get_first_dref_from(hi_inst.address)
+                idiom_type = idaapi.idc_guess_type(dest_address)
 
-                #print "    0x%X (idx %2d) ---> 0x%X - %s" % \
-                #        (lo_inst.address, hi_inst_idx, address, idiom_type)
-
-                # Additional check to see if debugger recognized the
-                # instruction sequence.
-                #if get_first_dref_from(lo_inst.address) != address:
-                    #print "[-] Unrecognized LOAD idiom at 0x%X" % \
-                            #hi_inst.address
-                    #continue
+                print "    src:0x%X (idx %2d) ---> dest:0x%X - type:%s" % \
+                        (lo_inst.address, hi_inst_idx, dest_address, idiom_type)
 
                 # Check wheater the pointed address contains a string
                 # or it's just a global variable.
-                data  = self.get_string_by_address(address)
+                data  = self.get_string_by_address(dest_address)
 
                 if (idiom_type is not None and \
                     idiom_type.find("char") == -1) or \
@@ -897,20 +894,6 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     #address  = (bb[i][1].value & 0xffff) << 16
                     #address += bb[i+1][2].value
 
-                    pass
-                    # TODO: Determine if the address belongs to a function.
-                    #f = get_func(address)
-                    #if f is not None and f.startEA == address:
-                    #    expr = get_func_name(get_func(address).startEA)
-                    #else:
-                    #    expr = IntegerLiteralExpression(address)
-
-                else:
-                    #
-                    # Add the newly detected string reference to the MIR
-                    # module by creating an array of char (int 8) type and
-                    # setting the string as its content.
-                    #
                     buffer_size = len(data) + 1 # Add one for the NULL terminator.
                     array_type = MiddleIrTypeArray(MiddleIrTypeChar(), buffer_size)
 
@@ -921,7 +904,11 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         "sz" + data.capitalize())
 
                     gvar_str.global_constant = True
-                    gvar_str.alignment = 1
+                    gvar_str.alignment = 4  # Strings are aligned to a 4-byte
+                                            # boundary in PowerPC. We don't
+                                            # actually need this here but will
+                                            # be usefull if we want to
+                                            # regenerate the binary code.
 
                     # Add the global variable to the current module.
                     self.mir_module.add_global_variable(gvar_str)
@@ -955,7 +942,49 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     mir_basic_block = \
                         self.mir_function.get_basic_block_by_address(address)
 
-                    mir_basic_block.add_instruction(gep)     # HACK / FIXME
+                    mir_basic_block.add_instruction(gep)     # TODO / FIXME
+
+                    # TODO: Determine if the address belongs to a function.
+                    #f = get_func(address)
+                    #if f is not None and f.startEA == address:
+                    #    expr = get_func_name(get_func(address).startEA)
+                    #else:
+                    #    expr = IntegerLiteralExpression(address)
+
+                else:
+                    #
+                    # Add the newly detected string reference to the MIR
+                    # module by creating an array of char (int 8) type and
+                    # setting the string as its content.
+                    #
+                    if data is None:
+                        raise PowerPc32GccIdiomAnalyzerException(
+                            "data is None")
+
+                    #buffer_size = len(data) + 1 # Add one for the NULL terminator.
+                    #array_type = MiddleIrTypeArray(MiddleIrTypeChar(), buffer_size)
+
+                    ## Create a global variable referencing the char array.
+                    #gvar_str = MiddleIrGlobalVariable(
+                    #    array_type,
+                    #    data,
+                    #    "sz" + data.capitalize())
+                    #print "=========>", str(gvar_str)
+                    #self.mir_module.add_global_variable(gvar_str, "szBuffer0")
+
+                    #gvar_str.global_constant = True
+                    #gvar_str.alignment = 4  # Strings are aligned to a 4-byte
+                    #                        # boundary in PowerPC. We don't
+                    #                        # actually need this here but will
+                    #                        # be usefull if we want to
+                    #                        # regenerate the binary code.
+
+                    const_str = MiddleIrConstantStringZ(data)
+                    self.current_symbol_table[lo_inst.address] = const_str
+                    print "--------->", str(const_str)
+                    # Add the global variable to the current module.
+                    #self.mir_module.add_global_variable(const_str, "szBuffer")
+
 
                 # Mark instructions as analyzed and remove them from
                 # the list of remaining LIR instructions.

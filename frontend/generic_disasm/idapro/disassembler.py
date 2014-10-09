@@ -67,6 +67,50 @@ class Disassembler(BaseDebugger):
     COMPILER_VISAGE = COMP_VISAGE    # Visual Age C++
     COMPILER_BP = COMP_BP        # Delphi
 
+    #
+    # instruc_t.feature
+    #
+    FEATURE_STOP = CF_STOP  #  Instruction doesn't pass execution to the next instruction
+    FEATURE_CALL = CF_CALL  #  CALL instruction (should make a procedure here)
+    FEATURE_CHG1 = CF_CHG1  #  The instruction modifies the first operand
+    FEATURE_CHG2 = CF_CHG2  #  The instruction modifies the second operand
+    FEATURE_CHG3 = CF_CHG3  #  The instruction modifies the third operand
+    FEATURE_CHG4 = CF_CHG4  #  The instruction modifies 4 operand
+    FEATURE_CHG5 = CF_CHG5  #  The instruction modifies 5 operand
+    FEATURE_CHG6 = CF_CHG6  #  The instruction modifies 6 operand
+    FEATURE_USE1 = CF_USE1  #  The instruction uses value of the first operand
+    FEATURE_USE2 = CF_USE2  #  The instruction uses value of the second operand
+    FEATURE_USE3 = CF_USE3  #  The instruction uses value of the third operand
+    FEATURE_USE4 = CF_USE4  #  The instruction uses value of the 4 operand
+    FEATURE_USE5 = CF_USE5  #  The instruction uses value of the 5 operand
+    FEATURE_USE6 = CF_USE6  #  The instruction uses value of the 6 operand
+    FEATURE_JUMP = CF_JUMP  #  The instruction passes execution using indirect jump or call (thus needs additional analysis)
+    FEATURE_SHFT = CF_SHFT  #  Bit-shift instruction (shl,shr...)
+    FEATURE_HLL  = CF_HLL   #  Instruction may be present in a high level language function.
+
+    #
+    # Instruction features supported.
+    #
+    FEATURES = {
+        FEATURE_STOP : "CF_STOP",
+        FEATURE_CALL : "CF_CALL",
+        FEATURE_CHG1 : "CF_CHG1",
+        FEATURE_CHG2 : "CF_CHG2",
+        FEATURE_CHG3 : "CF_CHG3",
+        FEATURE_CHG4 : "CF_CHG4",
+        FEATURE_CHG5 : "CF_CHG5",
+        FEATURE_CHG6 : "CF_CHG6",
+        FEATURE_USE1 : "CF_USE1",
+        FEATURE_USE2 : "CF_USE2",
+        FEATURE_USE3 : "CF_USE3",
+        FEATURE_USE4 : "CF_USE4",
+        FEATURE_USE5 : "CF_USE5",
+        FEATURE_USE6 : "CF_USE6",
+        FEATURE_JUMP : "CF_JUMP",
+        FEATURE_SHFT : "CF_SHFT",
+        FEATURE_HLL  : "CF_HLL"
+        }
+
     def __init__(self):
         """Instance initialization."""
         super(Disassembler, self).__init__()
@@ -343,18 +387,23 @@ class Disassembler(BaseDebugger):
         instance.
 
         """
-        #lir_inst.is_macro   = False #instruction.is_macro()
+        #lir_inst.is_macro = False #instruction.is_macro()
         lir_inst.address = instruction.ea
         lir_inst.type = instruction.itype
-        #lir_inst.mnemonic = self.get_mnemonic(instruction.ea)
         lir_inst.mnemonic = self.get_mnemonic(instruction.ea)
-        inst_str = "%+5s %5d %5d %5d %5d %5d" % (
+
+        feature_str = ", ".join(
+            [f_v for f_k, f_v in self.FEATURES.iteritems() \
+                if f_k & instruction.get_canon_feature() == f_k])
+
+        inst_str = "%3d %+5s aux %-5d seg %-5d insn %-5d flag %-5d %s" % (
+            lir_inst.type,
             lir_inst.mnemonic,
-            instruction.get_canon_feature(),
             instruction.auxpref,
             instruction.segpref,
             instruction.insnpref,
-            instruction.flags)
+            instruction.flags,
+            feature_str)
         print "=> 0x%08X : %s" % (lir_inst.address, inst_str)
         lir_inst.group = self.get_group(lir_inst.type)
 
@@ -422,7 +471,11 @@ class Disassembler(BaseDebugger):
 
     def get_mnemonic(self, inst_address):
         """Return the mnemonic for the specified instruction address."""
-        return ua_mnem(inst_address)
+        try:
+            return GetDisasm(inst_address).split()[0]
+        except IndexError, err:
+            return None
+        #return ua_mnem(inst_address)
 
     def log(self, message):
         """Display a line of text in the log window."""

@@ -104,12 +104,6 @@ class FrontEnd(object):
         """Return the formatted name of the current front-end."""
         return "FrontEnd%s" % self.TARGET_ARCH
 
-    def __raise(self, method):
-        classname = self.__class__.__name__
-        methodname = method.__name__
-        message = "Method %s in class %s was not implemented."
-        raise FrontEndException(message % (methodname, classname))
-
     @property
     def debugger(self):
         """Return the debugger instance for the current application."""
@@ -261,6 +255,8 @@ class FrontEnd(object):
                 try:
                     mir_inst = self.transform_to_mir_instruction(lir_inst)
                 except Exception, err:
+                    # TODO : Replace this exception handler with a front-end
+                    # one.
                     print format_exc()
                     raise FrontEndException(
                         "Unable to transform LIR instruction (%s) : %s" % \
@@ -413,7 +409,7 @@ class FrontEnd(object):
         self.generate_lir()
 
         # Output LIR for debugging purposes.
-        self.__dump_lir()
+        #self.__dump_lir()
 
         try:
             #
@@ -442,6 +438,7 @@ class FrontEnd(object):
             print "[+] Initiating idioms analysis phase 1..."
             self.idiom_analyzer.perform_phase1_analysis()
 
+            self.__dump_lir()
             #
             # Step x
             #

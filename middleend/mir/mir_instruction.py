@@ -61,7 +61,7 @@ class MiddleIrInstructionBuilder(object):
 
             llvm_inst = mir_inst._ptr
 
-            if not llvm_inst:
+            if llvm_inst is None:
                 raise MiddleIrInstructionBuilderException(
                     "Warning: _ptr returned None at 0x%X" % \
                     address)
