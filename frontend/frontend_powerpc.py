@@ -227,13 +227,14 @@ class FrontEndPowerPc(FrontEnd):
                 print "===>", self.current_symbol_table[0x40]
                 called_mir_func_args = self.current_symbol_table[0x40]
 
-                gep = self.mir_inst_builder.gep(
-                    called_mir_func_args,
-                    MiddleIrTypePointer(MiddleIrTypeChar()),
-                    "ssdzBuffer_0x%X" % address)
+                #gep = self.mir_inst_builder.gep(
+                #    called_mir_func_args,
+                #    [MiddleIrTypePointer(MiddleIrTypeChar())],
+                #    "szBuffer",
+                #    True)
 
                 mir_inst = self.mir_inst_builder.call(
-                    called_mir_func, gep)
+                    called_mir_func, called_mir_func_args)
 
         elif lir_inst.is_type(self.iset.PPC_balways):
             #

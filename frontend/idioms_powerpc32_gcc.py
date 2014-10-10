@@ -964,29 +964,42 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         raise PowerPc32GccIdiomAnalyzerException(
                             "data is None")
 
-                    #buffer_size = len(data) + 1 # Add one for the NULL terminator.
-                    #array_type = MiddleIrTypeArray(MiddleIrTypeChar(), buffer_size)
+                    buffer_size = len(data) + 1 # Add one for the NULL terminator.
+                    array_type = MiddleIrTypeArray(MiddleIrTypeChar(), buffer_size)
 
-                    ## Create a global variable referencing the char array.
-                    #gvar_str = MiddleIrGlobalVariable(
-                    #    array_type,
-                    #    data,
-                    #    "sz" + data.capitalize())
-                    #print "=========>", str(gvar_str)
-                    #self.mir_module.add_global_variable(gvar_str, "szBuffer0")
+                    # Create a global variable referencing the char array.
+                    gvar_str = MiddleIrGlobalVariable(
+                        array_type,
+                        MiddleIrConstantStringZ(data),
+                        "sz" + data.capitalize())
 
-                    #gvar_str.global_constant = True
-                    #gvar_str.alignment = 4  # Strings are aligned to a 4-byte
-                    #                        # boundary in PowerPC. We don't
-                    #                        # actually need this here but will
-                    #                        # be usefull if we want to
-                    #                        # regenerate the binary code.
+                    gvar_str.global_constant = True
+                    gvar_str.alignment = 4  # Strings are aligned to a 4-byte
+                                            # boundary in PowerPC. We don't
+                                            # actually need this here but will
+                                            # be usefull if we want to
+                                            # regenerate the binary code.
 
-                    const_str = MiddleIrConstantStringZ(data)
-                    self.current_symbol_table[lo_inst.address] = const_str
+                    #self.current_symbol_table[lo_inst.address] = gvar_str
+                    self.mir_module.add_global_variable(gvar_str, "szBuffer")
+
+                    #const_str = MiddleIrConstantStringZ(data)
+                    #self.current_symbol_table[lo_inst.address] = const_str
                     # Add the global variable to the current module.
                     #self.mir_module.add_global_variable(const_str, "szBuffer")
 
+                    mir_inst_builder = \
+                        self.mir_function.get_instruction_builder_by_address(
+                            lo_inst.address, True)
+
+                    gep = mir_inst_builder.gep(
+                        gvar_str,
+                        [MiddleIrTypePointer(MiddleIrTypeChar())],
+                        "szBuffer",
+                        True)
+
+                    print "=========>", str(gep)
+                    self.current_symbol_table[lo_inst.address] = gep
 
                 # Mark instructions as analyzed and remove them from
                 # the list of remaining LIR instructions.

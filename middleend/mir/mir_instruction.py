@@ -113,14 +113,12 @@ class MiddleIrInstructionBuilder(object):
         #return MiddleIrInstruction(self.llvm_builder.alloca_array(ptr))
         raise Exception("Builder.free not implemented.")
 
-    def gep(self, ptr, mir_indices, name=""):
+    def gep(self, pointer, mir_indices, name="", inbounds=False):
         """Generate an LLVM IR getelementptr instruction."""
-        pointer = ptr._ptr
-        #indices = mir_indices#._ptr
         indices = [idx._ptr for idx in mir_indices]
 
         return MiddleIrInstruction(
-            self.llvm_builder.gep(pointer, indices, name))
+            self.llvm_builder.gep(pointer._ptr, indices, name, inbounds))
 
     def load(self, ptr, name=""):
         """Generate an LLVM IR load instruction."""

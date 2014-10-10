@@ -76,3 +76,6 @@ class MiddleIrGlobalVariable(MiddleIrGlobalValue):
     def name(self, name):
         """Store the name of the variable."""
         self._name = name
+
+    #def __str__(self):
+    #    return str(self._ptr)
