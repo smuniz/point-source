@@ -85,7 +85,7 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         # function parameters and return declaration to void. 
         #
         self.return_type = MiddleIrTypeVoid()
-        self.parameters = []
+        self.parameters = None
 
         self.llvm_func_type = None
 
@@ -100,6 +100,8 @@ class MiddleIrFunction(MiddleIrFunctionBase):
 
         # Set the default calling convention.
         self.calling_convention = CALL_CONV_C
+
+        self._llvm_definition = None
 
     @property
     def variadic_arguments(self):
@@ -116,7 +118,7 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         # Keep updated our internal list
         self._basic_blocks.append(mir_basic_block)
 
-        mir_basic_block._llvm_set_function(self._llvm_get_definition())
+        mir_basic_block._llvm_function = self._llvm_definition
 
     def get_basic_block(self, index):
         """Return the basic block at the specified position in the basic blocks
@@ -165,12 +167,12 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         return self._parameters
 
     @parameters.setter
-    def parameters(self, parameters=[]):
+    def parameters(self, parameters=None):
         """Set the list of parameters recevied by the function when it's
         called.
 
         """
-        self._parameters = parameters
+        self._parameters = [] if parameters is None else parameters
 
     @property
     def name(self):
@@ -198,7 +200,8 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         self.epilogue_addresses.append(address)
         #self.removeStatementByAddress(address)
 
-    def _llvm_get_type(self):
+    @property
+    def _llvm_type(self):
         """Return the LLVM function declaration object."""
         # We need to represent the class of functions that accept and
         # return the specified types.
@@ -215,23 +218,27 @@ class MiddleIrFunction(MiddleIrFunctionBase):
     def set_argument_name(self, index, name):
         """Set the name for the argument at the specified index."""
         try:
-            self._llvm_get_definition().args[index] = name
+            self._llvm_definition.args[index] = name
         except IndexError, err:
-            raise MiddleIrFunctionException("No argument at index %d" % index)
+            raise MiddleIrFunctionException(
+                "Function \'%s\' has no argument at index %d." % \
+                    (self.name, index))
 
-    def _llvm_set_definition(self, llvm_func_def):
-        """Store the LLVM function object returned after being added to a LLVM
-        Module object.
-
-        """
-        self.llvm_func_def = llvm_func_def
-
-    def _llvm_get_definition(self):
+    @property
+    def _llvm_definition(self):
         """Return the LLVM function object returned after being added to a LLVM
         Module object.
 
         """
-        return self.llvm_func_def
+        return self.__llvm_func_def
+
+    @_llvm_definition.setter
+    def _llvm_definition(self, llvm_func_def):
+        """Store the LLVM function object returned after being added to a LLVM
+        Module object.
+
+        """
+        self.__llvm_func_def = llvm_func_def
 
     def _llvm_add_function_to_module(self):
         """Add the LLVM function definition object to the module."""
@@ -266,7 +273,7 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         self._calling_convention = call_conv
 
         # TODO : FIXME
-        #self._llvm_get_definition().setCallingConv(call_conv)
+        #self._llvm_definition.setCallingConv(call_conv)
 
     @property
     def calling_convention_name(self):
@@ -282,7 +289,7 @@ class MiddleIrFunction(MiddleIrFunctionBase):
 
     def __str__(self):
         """Return a string object with the function text representation."""
-        return str(self.llvm_func_def)
+        return str(self._llvm_definition)
 
     def get_basic_block_by_address(self, address):
         """Return the instruction builder for the corresponding basic block

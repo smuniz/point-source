@@ -148,12 +148,17 @@ class MiddleIrBasicBlock(MiddleIrLLVMInstance):
         """
         self.mir_inst_builder = mir_inst_builder
 
-    def _llvm_set_function(self, llvm_function):
+    @property
+    def _llvm_function(self):
+        return self.__llvm_function
+
+    @_llvm_function.setter
+    def _llvm_function(self, llvm_function):
         """Store the LLVM function object owning this basic block."""
-        self.llvm_function = llvm_function
+        self.__llvm_function = llvm_function
 
         # Add the LLVM basic block object to the current function.
-        self._ptr = self.llvm_function.append_basic_block(self.label)
+        self._ptr = self.__llvm_function.append_basic_block(self.label)
         
         #self.instruction_builder = MiddleIrInstructionBuilder(self)
 

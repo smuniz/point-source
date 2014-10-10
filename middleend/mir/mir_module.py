@@ -80,12 +80,12 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
         if mir_function not in self.mir_functions:
             self.mir_functions.append(mir_function)
 
-        fty = mir_function._llvm_get_type()._ptr
+        fty = mir_function._llvm_type._ptr
         name = mir_function.name
 
         llvm_func_def = self._ptr.add_function(fty, name)
 
-        mir_function._llvm_set_definition(llvm_func_def)
+        mir_function._llvm_definition = llvm_func_def
 
     def __repr__(self):
         """Return a string object with the module representation."""

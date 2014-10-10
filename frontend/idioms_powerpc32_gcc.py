@@ -244,6 +244,9 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 lr_store_found = False              # flag
                 self.mark_instruction_analyzed(inst)
 
+                self.mir_function.add_prologue_address(inst.address)
+                self.lir_function.add_prologue_address(inst.address)
+
                 # Check only in the first n instructions
                 for inst in bb:
 
@@ -981,7 +984,6 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
 
                     const_str = MiddleIrConstantStringZ(data)
                     self.current_symbol_table[lo_inst.address] = const_str
-                    print "--------->", str(const_str)
                     # Add the global variable to the current module.
                     #self.mir_module.add_global_variable(const_str, "szBuffer")
 

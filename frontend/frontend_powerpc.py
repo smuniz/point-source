@@ -194,40 +194,43 @@ class FrontEndPowerPc(FrontEnd):
                 #
                 func_name = self.debugger.get_function_name(branch_address)
 
-                # TODO : Obtain function parameters programatically.
-                called_mir_func_args = [
-                    #self.current_symbol_table[self.        symbol_table.keys()[0]],
-                    #self.current_symbol_table[self.        symbol_table.keys()[1]]
-                    ]
-
                 called_mir_func = MiddleIrFunction(func_name, self.mir_module)
 
-                typtr = MiddleIrTypePointer
-
                 called_mir_func.return_type = MiddleIrTypeVoid()
-                called_mir_func.parameters = [
-                    typtr(MiddleIrTypeChar()), typtr(MiddleIrTypeChar()) ]
+                #called_mir_func.parameters = [MiddleIrTypeChar()] * 15
+                called_mir_func.parameters = MiddleIrTypePointer(MiddleIrTypeChar()),
 
                 self.mir_module.add_function(called_mir_func)
 
                 ########################
-                called_mir_basic_block = MiddleIrBasicBlock()
-                called_mir_func.add_basic_block(called_mir_basic_block)
+                # TODO : Remove this fake function body.
+                #called_mir_basic_block = MiddleIrBasicBlock()
+                #called_mir_func.add_basic_block(called_mir_basic_block)
 
-                called_mir_builder = MiddleIrInstructionBuilder(called_mir_basic_block)
+                #called_mir_builder = MiddleIrInstructionBuilder(called_mir_basic_block)
 
-                called_mir_basic_block.instruction_builder = called_mir_builder
-                called_mir_basic_block.start_address = branch_address
-                called_mir_basic_block.end_address = branch_address + 0x10
+                #called_mir_basic_block.instruction_builder = called_mir_builder
+                #called_mir_basic_block.start_address = branch_address
+                #called_mir_basic_block.end_address = branch_address + 0x10
 
-                ret = called_mir_builder.ret()
-                ret.add_address(branch_address)
+                #ret = called_mir_builder.ret()
+                #ret.add_address(branch_address)
 
-                called_mir_basic_block.add_instruction(ret)
+                #called_mir_basic_block.add_instruction(ret)
                 ########################
 
-                called_mir_func.set_argument_name(0, "pszDest")
-                called_mir_func.set_argument_name(1, "pszSource")
+                # Assign a name to each parameter of the function being called.
+                for arg_index, arg in enumerate(called_mir_func.parameters):
+                    called_mir_func.set_argument_name(0, "arg%s" % arg_index)
+
+                # TODO : Obtain function parameters programatically.
+                print "===>", self.current_symbol_table[0x40]
+                called_mir_func_args = []#self.current_symbol_table[0x40]
+
+                gep = self.mir_inst_builder.gep(
+                    called_mir_func_args,
+                    [MiddleIrConstantInt32(0), MiddleIrConstantInt32(0)],
+                    "szBuffer_0x%X" % address)
 
                 mir_inst = self.mir_inst_builder.call(
                     called_mir_func, called_mir_func_args)

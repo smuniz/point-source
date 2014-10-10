@@ -101,7 +101,7 @@ class IdiomAnalyzer(object):
         """Check wheater the function epilogue is present or not."""
         return
 
-    return
+    @abc.abstractmethod
     def detect_calling_convention(self):
         """Obtain the calling convention detected by the compiler."""
         return

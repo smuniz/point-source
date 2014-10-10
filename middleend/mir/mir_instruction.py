@@ -85,11 +85,14 @@ class MiddleIrInstructionBuilder(object):
     #
     def call(self, fn, args, name=""):
         """Generate an LLVM IR call instruction."""
-        llvm_func = fn._llvm_get_definition()
+        llvm_func = fn._llvm_definition
         arguments = [arg._ptr for arg in args]
 
-        return MiddleIrInstruction(
-            self.llvm_builder.call(llvm_func, arguments, name))
+        try:
+            return MiddleIrInstruction(
+                self.llvm_builder.call(llvm_func, arguments, name))
+        except TypeError, err:
+            raise MiddleIrInstructionException(err)
 
     #
     # Memory

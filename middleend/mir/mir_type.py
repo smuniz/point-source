@@ -81,13 +81,13 @@ class MiddleIrTypePpcFp128(MiddleIrBaseType):
 class MiddleIrTypeFunction(MiddleIrBaseType):
     """Middle level intermediate representation class of function type."""
 
-    def __init__(self, return_ty, param_tys, var_arg=False):
+    def __init__(self, return_type, parameters, variadic_arguments=False):
         """Initialize the instance."""
-        return_type = return_ty._ptr
-        param_types = [param._ptr for param in param_tys]
+        ret_type = return_type._ptr
+        param_types = [param._ptr for param in parameters]
 
         super(MiddleIrTypeFunction, self).__init__(
-            Type.function(return_type, param_types, var_arg))
+            Type.function(ret_type, param_types, variadic_arguments))
 
 
 class MiddleIrTypeOpaque(MiddleIrBaseType):
