@@ -225,15 +225,15 @@ class FrontEndPowerPc(FrontEnd):
 
                 # TODO : Obtain function parameters programatically.
                 print "===>", self.current_symbol_table[0x40]
-                called_mir_func_args = []#self.current_symbol_table[0x40]
+                called_mir_func_args = self.current_symbol_table[0x40]
 
                 gep = self.mir_inst_builder.gep(
                     called_mir_func_args,
-                    [MiddleIrConstantInt32(0), MiddleIrConstantInt32(0)],
-                    "szBuffer_0x%X" % address)
+                    MiddleIrTypePointer(MiddleIrTypeChar()),
+                    "ssdzBuffer_0x%X" % address)
 
                 mir_inst = self.mir_inst_builder.call(
-                    called_mir_func, called_mir_func_args)
+                    called_mir_func, gep)
 
         elif lir_inst.is_type(self.iset.PPC_balways):
             #
