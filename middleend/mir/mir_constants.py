@@ -21,33 +21,44 @@ class MiddleIrBaseConstantException(MiddleIrException):
 
 class MiddleIrBaseConstant(MiddleIrLLVMInstance):
     """Middle IR constant expressions and values base class."""
-    pass
-    #def __init__(self, mir_type, value):
-    #    super(MiddleIrBaseConstant, self).__init__(self, mir_type, value)
+
+    def __init__(self, _type, value):
+        super(MiddleIrBaseConstant, self).__init__(_type, value)
+
+        self.type = None
+        self.name = None
+
+    @property
+    def type(self):
+        """Return the type of the constant."""
+        return self._type
+
+    @type.setter
+    def type(self, type):
+        """Store the type of the constant."""
+        self._type = type
+
+    @property
+    def name(self):
+        """Return the name of the constant."""
+        return self._name
+
+    @name.setter
+    def name(self, name):
+        """Store the name of the constant."""
+        self._name = name
 
 
-#class MiddleIrConstantFP(MiddleIrBaseConstant):
-#    """
-#    Middle level intermediate representation class of floating-point constant.
-#
-#    """
-#
-#    def __init__(self):
-#        """Initialize the instance."""
-#        super(MiddleIrConstantFP, self).__init__(Constant.FP())
-
-
-class MiddleIrConstantInt32(MiddleIrBaseConstant):
+class MiddleIrConstantInt(MiddleIrBaseConstant):
     """Middle level intermediate representation class of integer constant."""
 
-    def __init__(self, value):
+    def __init__(self, const_type, value):
         """Initialize the instance."""
-        # TODO / FIXME : check this.
-        int_type = MiddleIrTypeInt(32)._ptr
+        super(MiddleIrConstantInt, self).__init__(
+            Constant.int(const_type._ptr, value)
+            )
 
-        super(MiddleIrConstantInt32, self).__init__(
-            Constant.int(int_type, value))
-            #Constant.int(Type.int(32), value))
+        self.type = const_type
 
 
 class MiddleIrConstantStringZ(MiddleIrBaseConstant):
@@ -70,4 +81,15 @@ class MiddleIrConstantStringZ(MiddleIrBaseConstant):
 #    def __init__(self, _type, size):
 #        """Initialize the instance."""
 #        super(MiddleIrConstantArray, self).__init__(Constant.array(_type._llvm_get_type(), size))
+
+#class MiddleIrConstantFP(MiddleIrBaseConstant):
+#    """
+#    Middle level intermediate representation class of floating-point constant.
+#
+#    """
+#
+#    def __init__(self):
+#        """Initialize the instance."""
+#        super(MiddleIrConstantFP, self).__init__(Constant.FP())
+
 

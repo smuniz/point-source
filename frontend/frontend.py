@@ -131,7 +131,7 @@ class FrontEnd(object):
 
         #self.mir_function = self.mir_module.create_function(function_name)
         # TODO / FIXME : Should add address boundaries.
-        self.mir_function = MiddleIrFunction(function_name, self.mir_module)
+        self.mir_function = MiddleIrFunction(function_name)
 
         # Create basic return types in order to create the function skeleton.
         # At the moment we just create generic (integer) types with the right

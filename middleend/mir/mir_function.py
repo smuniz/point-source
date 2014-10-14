@@ -68,7 +68,8 @@ class MiddleIrFunction(MiddleIrFunctionBase):
 
     """
 
-    def __init__(self, name, mir_module):
+    def __init__(self, name, return_type=MiddleIrTypeVoid(), parameters=None,
+        variadic_arguments=False):
         """Initialize the intermediate level IR module class."""
         super(MiddleIrFunction, self).__init__()
 
@@ -84,19 +85,18 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         # Initialize the LLVM function declaration object and initially set the
         # function parameters and return declaration to void. 
         #
-        self.return_type = MiddleIrTypeVoid()
-        self.parameters = None
-
-        self.llvm_func_type = None
-
-        # No variadic args by default. Let the user set them.
-        self.variadic_arguments = False
+        self.return_type = return_type
+        self.parameters = parameters
+        self.variadic_arguments = variadic_arguments    # No variadic args by
+                                                        # default. Let the user
+                                                        # set them. 
+        self._llvm_type = None
 
         # Keep track of every basic block contained in this function.
         self._basic_blocks = list()
 
         # Store the Middle-end module instance.
-        self.module = mir_module._ptr
+        self.module = None
 
         # Set the default calling convention.
         self.calling_convention = CALL_CONV_C
@@ -210,10 +210,18 @@ class MiddleIrFunction(MiddleIrFunctionBase):
 
         # Create the LLVM function declaration object to define current
         # function.
-        return MiddleIrTypeFunction(
-            self.return_type,
-            self.parameters,
-            self.variadic_arguments)
+        if self.__llvm_type is None:
+            self._llvm_type = MiddleIrTypeFunction(
+                                self.return_type,
+                                self.parameters,
+                                self.variadic_arguments)
+
+        return self.__llvm_type
+
+    @_llvm_type.setter
+    def _llvm_type(self, llvm_type):
+        """Store the LLVM function declaration object."""
+        self.__llvm_type = llvm_type
 
     def set_argument_name(self, index, name):
         """Set the name for the argument at the specified index."""
@@ -251,12 +259,12 @@ class MiddleIrFunction(MiddleIrFunctionBase):
     @property
     def module(self):
         """Return the LLVM module object owning this function."""
-        return self.llvm_module
+        return self.mir_module
 
     @module.setter
-    def module(self, llvm_module):
+    def module(self, mir_module):
         """Store the LLVM module object owning this function."""
-        self.llvm_module = llvm_module
+        self.mir_module = mir_module
 
     @property
     def calling_convention(self):

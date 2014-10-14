@@ -37,14 +37,14 @@ class MiddleIrGlobalVariable(MiddleIrGlobalValue):
     
     """
 
-    def __init__(self, ty, value, name):
+    def __init__(self, ty, name):
         """Initialize the instance."""
-        MiddleIrLLVMInstance.__init__(self)#, ty._ptr)
+        MiddleIrLLVMInstance.__init__(self, ty._ptr)
         Area.__init__(self)
 
 
         self.type = ty
-        self.value = value
+        #self.value = None
         self.name = name
 
     @property
@@ -57,15 +57,15 @@ class MiddleIrGlobalVariable(MiddleIrGlobalValue):
         """Store the type of the variable."""
         self._type = type
 
-    @property
-    def value(self):
-        """Return the value of the variable."""
-        return self._value
+    #@property
+    #def value(self):
+    #    """Return the value of the variable."""
+    #    return self._value
 
-    @value.setter
-    def value(self, value):
-        """Store the value of the variable."""
-        self._value = value
+    #@value.setter
+    #def value(self, value):
+    #    """Store the value of the variable."""
+    #    self._value = value
 
     @property
     def name(self):
@@ -76,6 +76,3 @@ class MiddleIrGlobalVariable(MiddleIrGlobalValue):
     def name(self, name):
         """Store the name of the variable."""
         self._name = name
-
-    #def __str__(self):
-    #    return str(self._ptr)

@@ -46,6 +46,8 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
         # Create an empty LLVM IR module.
         self._ptr = Module.new(module_name)
 
+        self.target = None
+
     def create_intrinsic_function(self, name):
         """Add the specified intrinsic function to the current module."""
         return MiddleIrIntrinsicFunction(name, self)
@@ -58,11 +60,10 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
 
         return mir_function
 
-    def add_global_variable(self, global_variable, name):
+    def add_global_variable(self, global_variable): #, name):
         """Add the specified global variable to the current module."""
-        #ty = global_variable._ptr.type
         ty = global_variable.type._ptr
-        #name = global_variable.name
+        name = global_variable.name
         address_space = 0
 
         global_variable._ptr = self._ptr.add_global_variable(
@@ -72,13 +73,23 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
 
         #global_variable._ptr.initializer = global_variable.value._ptr
 
+    def get_function_named(self, name):
+        """Iterate through every function and return the one matching the
+        specifies name.
+        
+        """
+        for mir_function in self.mir_functions:
+            if mir_function.name is name:
+                return mir_function
+        return None
+
     def add_function(self, mir_function):
         """Add the specified function to the current module."""
-        mir_function.module = self._ptr
-
         # Add only if it doesn't exist yet.
         if mir_function not in self.mir_functions:
             self.mir_functions.append(mir_function)
+
+        mir_function.module = self
 
         fty = mir_function._llvm_type._ptr
         name = mir_function.name
@@ -95,13 +106,15 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
         """Return a string object with the module text representation."""
         return str(self._ptr)
 
-    def set_target(self, target):
-        """Store the target architecture."""
-        self.target = target
-
-    def get_target(self):
+    @property
+    def target(self):
         """Return the target architecture."""
-        return self.target
+        return self._target
+
+    @target.setter
+    def target(self, target):
+        """Store the target architecture."""
+        self._target = target
 
     def verify(self):
         """Verify the module checking for errors."""
@@ -145,3 +158,15 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
         else:
             raise TypeError
 
+    def to_bitcode(self, ss):
+        """Write LLVM bitcode representing the specified object."""
+        self._ptr.to_bitcode(ss)
+
+    def from_bitcode(self, ss):
+        """Write LLVM bitcode representing the specified object."""
+        self._ptr.to_bitcode(ss)
+
+    @staticmethod
+    def new(self, module_name):
+        """Create a new module."""
+        return MiddleIrModule(module_name)
