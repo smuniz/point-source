@@ -181,8 +181,9 @@ def do_value():
 
 def do_user():
     m = Module.new('a')
-    ft = MiddleIrTypeFunction(ti, [ti]*2)
-#    f = MiddleIrFunction.new(m, ft, 'func')
+    #ft = MiddleIrTypeFunction(ti, [ti]*2)
+    ft = (ti, [ti]*2)
+#    f = MiddleIrFunction.new(m, 'func', *ft)
 #    b = f.append_basic_block('a')
 #    bb = Builder.new(b)
 #    i1 = bb.add(f.args[0], f.args[1])
@@ -192,11 +193,11 @@ def do_user():
 #    i1.operands[0] is f.args[0]
 #    i1.operands[1] is f.args[1]
 #    i2.operands[0] is i1
-#
-#
-#def do_constant():
-#    print("    Testing class Constant")
-#    MiddleIrConstantNull(ti)
+
+
+def do_constant():
+    print("    Testing class Constant")
+    MiddleIrConstantNull(ti)
 #    MiddleIrConstantAll_ones(ti)
 #    MiddleIrConstantUndef(ti)
 #    MiddleIrConstantInt(ti, 10)
@@ -205,7 +206,7 @@ def do_user():
 #    MiddleIrConstantReal(MiddleIrTypeFloat(), 3.14)
 #    MiddleIrConstantString("test")
 #    MiddleIrConstantStringz("test2")
-#    MiddleIrConstantArray(ti, [MiddleIrConstantInt(ti,42)]*10)
+    MiddleIrConstantArray(ti, [MiddleIrConstantInt(ti,42)]*10)
 #    MiddleIrConstantStruct([MiddleIrConstantInt(ti,42)]*10)
 #    MiddleIrConstantPacked_struct([MiddleIrConstantInt(ti,42)]*10)
 #    MiddleIrConstantVector([MiddleIrConstantInt(ti,42)]*10)
@@ -512,7 +513,7 @@ def do_llvm_core():
     #    do_typehandle()
     do_value()
     do_user()
-#    do_constant()
+    do_constant()
 #    do_global_value()
 #    do_global_variable()
 #    do_argument()

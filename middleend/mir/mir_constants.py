@@ -22,8 +22,8 @@ class MiddleIrBaseConstantException(MiddleIrException):
 class MiddleIrBaseConstant(MiddleIrLLVMInstance):
     """Middle IR constant expressions and values base class."""
 
-    def __init__(self, _type, value):
-        super(MiddleIrBaseConstant, self).__init__(_type, value)
+    def __init__(self, _type):
+        super(MiddleIrBaseConstant, self).__init__(_type)
 
         self.type = None
         self.name = None
@@ -72,15 +72,26 @@ class MiddleIrConstantStringZ(MiddleIrBaseConstant):
         super(MiddleIrConstantStringZ, self).__init__(Constant.stringz(value))
 
 
-#class MiddleIrConstantArray(MiddleIrBaseConstant):
-#    """
-#    Middle level intermediate representation class of array constant.
-#
-#    """
-#
-#    def __init__(self, _type, size):
-#        """Initialize the instance."""
-#        super(MiddleIrConstantArray, self).__init__(Constant.array(_type._llvm_get_type(), size))
+class MiddleIrConstantNull(MiddleIrBaseConstant):
+    """
+    Middle level intermediate representation class of NULL constant.
+
+    """
+
+    def __init__(self, _type):
+        """Initialize the instance."""
+        super(MiddleIrConstantArray, self).__init__(Constant.null(_type._ptr))
+
+
+class MiddleIrConstantArray(MiddleIrBaseConstant):
+    """
+    Middle level intermediate representation class of array constant.
+
+    """
+
+    def __init__(self, _type, size):
+        """Initialize the instance."""
+        super(MiddleIrConstantArray, self).__init__(Constant.array(_type._llvm_get_type(), size))
 
 #class MiddleIrConstantFP(MiddleIrBaseConstant):
 #    """

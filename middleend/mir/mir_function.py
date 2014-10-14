@@ -326,3 +326,11 @@ class MiddleIrFunction(MiddleIrFunctionBase):
 
         raise MiddleIrFunctionException(
             "No MIR builder available for address 0x%X" % address)
+
+    @staticmethod
+    def new(module, name, return_type=MiddleIrTypeVoid(), parameters=None,
+        variadic_arguments=False):
+        """Create a new function."""
+        new_func = MiddleIrFunction(name, return_type, parameters, variadic_arguments)
+        module.add_function(new_func)
+        return new_func

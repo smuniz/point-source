@@ -167,6 +167,6 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
         self._ptr.to_bitcode(ss)
 
     @staticmethod
-    def new(self, module_name):
+    def new(module_name):
         """Create a new module."""
         return MiddleIrModule(module_name)
