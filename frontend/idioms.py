@@ -23,7 +23,7 @@ class IdiomAnalyzer(object):
         self.mir_function = mir_function
 
         self.nv_regs = list() # Non-volatile registers list
-        self.param_regs = dict() # Regsiters used as functions parameters
+        self.param_regs = dict() # Regsiters used as functions arguments
         self.ret_to_caller = False
         self.stack_size = 0
         self.stack_restore = "Unknown"

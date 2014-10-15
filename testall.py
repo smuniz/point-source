@@ -66,13 +66,14 @@ def do_module():
     m.add_global_variable(gvar)
 #    m.get_global_variable_named('b')
 #    gvs = list(m.global_variables)
+    #ft = MiddleIrTypeFunction(ti, [ti])
     func = MiddleIrFunction("func", ti, [ti])
     m.add_function(func)
     m.get_function_named("func")
 #    m.get_or_insert_function(ft, "func")
 #    m.get_or_insert_function(MiddleIrTypeFunction(ti, []), "func")
 #    m.get_or_insert_function(ft, "func2")
-    fns = list(m.mir_functions)
+    fns = list(m.functions)
     try:
         m.verify()
     except LLVMException:
@@ -266,84 +267,86 @@ def do_global_variable():
     gv = MiddleIrGlobalVariable.new(m, MiddleIrTypeInt(), 'b')
     gv = MiddleIrGlobalVariable.get(m, 'b')
     gv.delete()
-#    gv = MiddleIrGlobalVariable.new(m, MiddleIrTypeInt(), 'c')
-#    gv.initializer = MiddleIrConstantInt( ti, 10 )
+    gv = MiddleIrGlobalVariable.new(m, MiddleIrTypeInt(), 'c')
+    gv.initializer = MiddleIrConstantInt( ti, 10 )
 #    s = gv.initializer
 #    gv.global_constant = True
 #    s = gv.global_constant
-#
-#
-#def do_argument():
-#    print("    Testing class Argument")
-#    m = MiddleIrModule.new('a')
-#    tip = MiddleIrTypePointer(ti)
-#    ft = MiddleIrTypeFunction(tip, [tip])
-#    f = Function.new(m, ft, 'func')
-#    a = f.args[0]
+
+
+def do_argument():
+    print("    Testing class Argument")
+    m = MiddleIrModule.new('a')
+    tip = MiddleIrTypePointer(ti)
+    #ft = MiddleIrTypeFunction()
+    f = MiddleIrFunction.new(m, 'func', tip, [tip,])
+    a = f.arguments[0]
 #    a.add_attribute(ATTR_NEST)
 #    a.remove_attribute(ATTR_NEST)
-#    a.alignment = 16
-#    a1 = a.alignment
-#
-#
-#def do_function():
-#    print("    Testing class Function")
-#    ft = MiddleIrTypeFunction(ti, [ti]*20)
-#    zz = Function.new(MiddleIrModule.new('z'), ft, 'foobar')
-#    del zz
-#    Function.new(MiddleIrModule.new('zz'), ft, 'foobar')
-#    m = MiddleIrModule.new('a')
-#    f = Function.new(m, ft, 'func')
-#    f.delete()
-#    ft = MiddleIrTypeFunction(ti, [ti]*20)
-#    f = Function.new(m, ft, 'func2')
+    a.alignment = 16
+    a1 = a.alignment
+
+
+def do_function():
+    print("    Testing class MiddleIrFunction")
+    #ft = MiddleIrTypeFunction(ti, [ti]*20)
+    zz = MiddleIrFunction.new(MiddleIrModule.new('z'), 'foobar', ti, [ti]*20)
+    del zz
+    MiddleIrFunction.new(MiddleIrModule.new('zz'), 'foobar', ti, [ti]*20)
+    m = MiddleIrModule.new('a')
+    f = MiddleIrFunction.new(m, 'func', ti, [ti]*20)
+    f.delete()
+    ft = MiddleIrTypeFunction(ti, [ti]*20)
+    f = MiddleIrFunction.new(m, 'func2', ti, [ti]*20)
 #    has_nounwind = f.does_not_throw
 #    f.does_not_throw = True
-#    f2 = Function.intrinsic(m, INTR_COS, [ti])
+#    f2 = MiddleIrFunction.intrinsic(m, INTR_COS, [ti])
 #    g = f.intrinsic_id
-#    f.calling_convenion = CC_FASTCALL
-#    g = f.calling_convenion
+    f.calling_convenion = CC_FASTCALL
+    g = f.calling_convention
 #    f.collector = 'a'
 #    c = f.collector
-#    a = list(f.args)
-#    g = f.basic_block_count
+    a = list(f.arguments)
+    g = f.basic_block_count
 ##    g = f.entry_basic_block
 ##    g = f.append_basic_block('a')
 ##    g = f.entry_basic_block
-#    g = list(f.basic_blocks)
+    g = list(f.basic_blocks)
 #    f.add_attribute(ATTR_NO_RETURN)
 #    f.add_attribute(ATTR_ALWAYS_INLINE)
 #    #for some reason removeFnAttr is just gone in 3.3
 #    if version <= (3, 2):
 #        f.remove_attribute(ATTR_NO_RETURN)
-#
-#    # LLVM misbehaves:
-#    #try:
-#    #    f.verify()
-#    #except LLVMException:
-#    #    pass
-#
-#
-#def do_instruction():
-#    print("    Testing class Instruction")
-#    m = MiddleIrModule.new('a')
-#    ft = MiddleIrTypeFunction(ti, [ti]*20)
-#    f = Function.new(m, ft, 'func')
-#    b = f.append_basic_block('a')
-#    bb = Builder.new(b)
-#    i = bb.ret_void()
+
+    # LLVM misbehaves:
+    #try:
+    #    f.verify()
+    #except LLVMException:
+    #    pass
+
+
+def do_instruction():
+    print("    Testing class Instruction")
+    m = MiddleIrModule.new('a')
+    #ft = MiddleIrTypeFunction(ti, [ti]*20)
+    f = MiddleIrFunction.new(m, 'func', ti, [ti]*20)
+    b = MiddleIrBasicBlock('a')
+    f.add_basic_block(b)
+    bb = MiddleIrInstructionBuilder.new(b)
+    i = bb.ret()
 #    bb2 = i.basic_block
 #    ops = i.operands
 #    opcount = i.operand_count
-#
-#
-#def do_callorinvokeinstruction():
-#    print("    Testing class CallOrInvokeInstruction")
-#    m = MiddleIrModule.new('a')
-#    ft = MiddleIrTypeFunction(ti, [ti])
-#    f = Function.new(m, ft, 'func')
-#    b = f.append_basic_block('a')
-#    bb = Builder.new(b)
+
+
+def do_callorinvokeinstruction():
+    print("    Testing class CallOrInvokeInstruction")
+    m = MiddleIrModule.new('a')
+    #ft = MiddleIrTypeFunction(ti, [ti])
+    f = MiddleIrFunction.new(m, 'func', ti, [ti])
+    b = MiddleIrBasicBlock('a')
+    f.add_basic_block(b)
+    bb = Builder.new(b)
 #    i = bb.invoke(f, [MiddleIrConstantInt(ti, 10)], b, b)
 #    a = i.calling_convention
 #    i.calling_convention = CC_FASTCALL
@@ -353,13 +356,13 @@ def do_global_variable():
 #        i.set_parameter_alignment(0, 8)
 #    #tc = i.tail_call
 #    #i.tail_call = 1
-#
-#
+
+
 #def do_phinode():
 #    print("    Testing class PhiNode")
 #    m = MiddleIrModule.new('a')
 #    ft = MiddleIrTypeFunction(ti, [ti])
-#    f = Function.new(m, ft, 'func')
+#    f = MiddleIrFunction.new(m, ft, 'func')
 #    b = f.append_basic_block('b')
 #    c = f.append_basic_block('c')
 #    d = f.append_basic_block('d')
@@ -376,7 +379,7 @@ def do_global_variable():
 #    print("    Testing class SwitchInstruction")
 #    m = MiddleIrModule.new('a')
 #    ft = MiddleIrTypeFunction(ti, [ti])
-#    f = Function.new(m, ft, 'func')
+#    f = MiddleIrFunction.new(m, ft, 'func')
 #    b = f.append_basic_block('b')
 #    bb = Builder.new(b)
 #    s = bb.switch(f.args[0], b)
@@ -387,7 +390,7 @@ def do_global_variable():
 #    print("    Testing class BasicBlock")
 #    m = MiddleIrModule.new('a')
 #    ft = MiddleIrTypeFunction(ti, [ti])
-#    f = Function.new(m, ft, 'func')
+#    f = MiddleIrFunction.new(m, ft, 'func')
 #    b = f.append_basic_block('b')
 #    bb = Builder.new(b)
 #    s = bb.switch(f.args[0], b)
@@ -403,7 +406,7 @@ def do_global_variable():
 #def _do_builder_mrv():
 #    m = MiddleIrModule.new('mrv')
 #    ft = MiddleIrTypeFunction(MiddleIrTypeArray(ti, 2), [ti])
-#    f = Function.new(m, ft, 'divrem')
+#    f = MiddleIrFunction.new(m, ft, 'divrem')
 #    blk = f.append_basic_block('b')
 #    b = Builder.new(blk)
 #    v = b.call(f, [MiddleIrConstantInt(ti, 1)])
@@ -417,7 +420,7 @@ def do_global_variable():
 #    print("    Testing class Builder")
 #    m = MiddleIrModule.new('a')
 #    ft = MiddleIrTypeFunction(ti, [ti])
-#    f = Function.new(m, ft, 'func')
+#    f = MiddleIrFunction.new(m, ft, 'func')
 #    blk = f.append_basic_block('b')
 #    b = Builder.new(blk)
 #    b.ret(MiddleIrConstantInt(ti, 10))
@@ -517,16 +520,16 @@ def do_llvm_core():
     do_constant()
     do_global_value()
     do_global_variable()
-#    do_argument()
-#    do_function()
-#    do_instruction()
-#    do_callorinvokeinstruction()
+    do_argument()
+    do_function()
+    do_instruction()
+    do_callorinvokeinstruction()
 #    do_phinode()
 #    do_switchinstruction()
 #    do_basicblock()
 #    do_builder()
-#
-#
+
+
 #def do_targetdata():
 #    print("    Testing class TargetData")
 #    t = TargetData.new('')

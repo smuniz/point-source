@@ -151,7 +151,7 @@ class FrontEnd(object):
         self.mir_function.return_type = ret_type
 
         # TODO / FIXME : Determine parameter types.
-        #self.mir_function.parameters([MiddleIrTypeInt(), MiddleIrTypeInt()])
+        #self.mir_function.arguments([MiddleIrTypeInt(), MiddleIrTypeInt()])
 
         self.mir_module.add_function(self.mir_function)
         # Set the default calling convention.

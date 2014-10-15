@@ -48,20 +48,20 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         #print "Locating epilogue."
         self.detect_epilogue()
 
-        #print "Detecting parameters register."
-        self.detect_parameter_registers()
+        #print "Detecting arguments register."
+        self.detect_argument_registers()
 
-        #print "Detecting simple parameters register."
-        self.detect_simple_parameter_registers()
+        #print "Detecting simple arguments register."
+        self.detect_simple_argument_registers()
 
-        #print "Creating terporary local variables holding parameters."
-        self.__create_local_variables_for_parameters()
+        #print "Creating terporary local variables holding arguments."
+        self.__create_local_variables_for_arguments()
 
         #print "Detecting return registers."
         self.detect_return_registers()
 
-        #print "Detecting parameters copy."
-        self.detect_parameters_copy()
+        #print "Detecting arguments copy."
+        self.detect_arguments_copy()
 
         #print "Detecting 4 bytes load idioms."
         self.detect_load_word()
@@ -679,8 +679,8 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
             ", ".join([self.iset.REGISTERS_NAMES[r] \
                 for r in self.return_registers])
 
-    def detect_parameter_registers(self):
-        """Detect registers used for parameter passing to the current function.
+    def detect_argument_registers(self):
+        """Detect registers used for argument passing to the current function.
 
         """
         # TODO / FIXME : Add this analysis.
@@ -691,7 +691,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 ", ".join([self.iset.REGISTERS_NAMES[r] \
                     for r in self.param_regs.values()])
 
-    def __create_local_variables_for_parameters(self):
+    def __create_local_variables_for_arguments(self):
         """..."""
         try:
             address = self.lir_function.start_address
@@ -700,7 +700,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 self.mir_function.get_instruction_builder_by_address(
                     address, False)
 
-            # TODO / FIXME : Detect the parameter type.
+            # TODO / FIXME : Detect the argument type.
             var_type_preffix = "i"
             var_name = "%(var_type_preffix)s_%(address)x" % vars()
             mir_inst = mir_inst_builder.alloca(MiddleIrTypeInt(), None, var_name)
@@ -712,8 +712,8 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
             print format_exc() + '\n'
             raise PowerPc32GccIdiomAnalyzerException(err)
 
-    def detect_simple_parameter_registers(self):
-        """Detect registers used for parameter passing to the current function.
+    def detect_simple_argument_registers(self):
+        """Detect registers used for argument passing to the current function.
         This is a simple (to say the least) version possile.
 
         """
@@ -752,9 +752,9 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
             print format_exc() + '\n'
             raise PowerPc32GccIdiomAnalyzerException(err)
 
-    def detect_parameters_copy(self):
+    def detect_arguments_copy(self):
         """Check non-volatile registers used as a temporal function
-        parameter holder.
+        argument holder.
 
         """
         try:
@@ -784,10 +784,10 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     #       before the function call... Just to make sure.
 
                     #self.param_regs[inst[1].value] = inst[0].value
-                    raise Exception("FIXME : detect_parameters_copy")
+                    raise Exception("FIXME : detect_arguments_copy")
                     self.mark_instruction_analyzed(inst)
 
-                    print "    Function's parameters copy register r%d->r%d detected" % \
+                    print "    Function's arguments copy register r%d->r%d detected" % \
                             (inst[1].value, inst[0].value)
 
         except MiddleIrException, err:
@@ -811,7 +811,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
             for bb in self.lir_function:
 
                 for hi_inst in bb:
-                    # TODO: add an offset parameter in case lis/addi are
+                    # TODO: add an offset argument in case lis/addi are
                     #       not together (happens on fixed instruction
                     #       size architectures).
                     if hi_inst.analyzed:
@@ -981,7 +981,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                                             # regenerate the binary code.
 
                     #self.current_symbol_table[lo_inst.address] = gvar_str
-                    self.mir_module.add_global_variable(gvar_str, "szBuffer")
+                    self.mir_module.add_global_variable(gvar_str)
 
                     #const_str = MiddleIrConstantStringZ(data)
                     #self.current_symbol_table[lo_inst.address] = const_str

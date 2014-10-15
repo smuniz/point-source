@@ -131,7 +131,7 @@ class FrontEndPowerPc(FrontEnd):
         elif lir_inst.is_type(self.iset.PPC_stw):
 
             # TODO / FIXME : Detect GPR3 as the first use of the first
-            # parameter.
+            # argument.
             #arg = 
             if address not in self.current_symbol_table:
                 return None
@@ -197,8 +197,8 @@ class FrontEndPowerPc(FrontEnd):
                 called_mir_func = MiddleIrFunction(func_name, self.mir_module)
 
                 called_mir_func.return_type = MiddleIrTypeVoid()
-                #called_mir_func.parameters = [MiddleIrTypeChar()] * 15
-                called_mir_func.parameters = MiddleIrTypePointer(MiddleIrTypeChar()),
+                #called_mir_func.arguments = [MiddleIrTypeChar()] * 15
+                called_mir_func.arguments = MiddleIrTypePointer(MiddleIrTypeChar()),
 
                 self.mir_module.add_function(called_mir_func)
 
@@ -219,11 +219,11 @@ class FrontEndPowerPc(FrontEnd):
                 #called_mir_basic_block.add_instruction(ret)
                 ########################
 
-                # Assign a name to each parameter of the function being called.
-                for arg_index, arg in enumerate(called_mir_func.parameters):
+                # Assign a name to each argument of the function being called.
+                for arg_index, arg in enumerate(called_mir_func.arguments):
                     called_mir_func.set_argument_name(0, "arg%s" % arg_index)
 
-                # TODO : Obtain function parameters programatically.
+                # TODO : Obtain function arguments programatically.
                 print "===>", self.current_symbol_table[0x40]
                 called_mir_func_args = self.current_symbol_table[0x40]
 

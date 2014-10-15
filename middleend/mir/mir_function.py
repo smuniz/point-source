@@ -68,7 +68,7 @@ class MiddleIrFunction(MiddleIrFunctionBase):
 
     """
 
-    def __init__(self, name, return_type=MiddleIrTypeVoid(), parameters=None,
+    def __init__(self, name, return_type=MiddleIrTypeVoid(), arguments=None,
         variadic_arguments=False):
         """Initialize the intermediate level IR module class."""
         super(MiddleIrFunction, self).__init__()
@@ -78,22 +78,22 @@ class MiddleIrFunction(MiddleIrFunctionBase):
 
         # Epilogue and prologue instruction addresses inside the current
         # function.
-        self.prologue_addresses = list()
-        self.epilogue_addresses = list()
+        self.prologue_addresses = set()
+        self.epilogue_addresses = set()
 
         #
         # Initialize the LLVM function declaration object and initially set the
-        # function parameters and return declaration to void. 
+        # function arguments and return declaration to void. 
         #
         self.return_type = return_type
-        self.parameters = parameters
+        self.arguments = arguments
         self.variadic_arguments = variadic_arguments    # No variadic args by
                                                         # default. Let the user
                                                         # set them. 
         self._llvm_type = None
 
         # Keep track of every basic block contained in this function.
-        self._basic_blocks = list()
+        self._basic_blocks = set()
 
         # Store the Middle-end module instance.
         self.module = None
@@ -116,16 +116,35 @@ class MiddleIrFunction(MiddleIrFunctionBase):
     def add_basic_block(self, mir_basic_block):
         """Add a new basic block to the function."""
         # Keep updated our internal list
-        self._basic_blocks.append(mir_basic_block)
+        self._basic_blocks.add(mir_basic_block)
 
         mir_basic_block._llvm_function = self._llvm_definition
 
-    def get_basic_block(self, index):
+    def get_indexed_basic_block(self, index):
         """Return the basic block at the specified position in the basic blocks
         list.
 
         """
-        return self._basic_blocks[index]
+        if index < len(self.basic_blocks):
+            return list(self.basic_blocks)[index]
+
+        raise MiddleIrModuleException(
+            "Basic block index %d is out of scope." % index)
+
+    @property
+    def basic_block_count(self):
+        """Return the count of basic blocks present in the current function."""
+        return len(self._basic_blocks)
+
+    @property
+    def basic_blocks(self):
+        """Return the list of basic blocks present in the current function."""
+        return self._basic_blocks
+
+    @basic_blocks.setter
+    def basic_blocks(self, basic_blocks):
+        """Store the list of basic blocks present in the current function."""
+        self._basic_blocks = basic_blocks
 
     def __getitem__(self, key):
         if isinstance(key, slice):
@@ -133,7 +152,7 @@ class MiddleIrFunction(MiddleIrFunctionBase):
             return [self[i] for i in xrange(*indices)]
         elif isinstance(key, int) or isinstance(key, long):
             try:
-                return self.get_basic_block(key)
+                return self.get_indexed_basic_block(key)
             except KeyError:
                 raise IndexError
         else:
@@ -159,20 +178,20 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         self._return_type = return_type
 
     @property
-    def parameters(self):
-        """Return the list of parameters recevied by the function when it's
+    def arguments(self):
+        """Return the list of arguments recevied by the function when it's
         called.
         
         """
-        return self._parameters
+        return self._arguments
 
-    @parameters.setter
-    def parameters(self, parameters=None):
-        """Set the list of parameters recevied by the function when it's
+    @arguments.setter
+    def arguments(self, arguments=None):
+        """Set the list of arguments recevied by the function when it's
         called.
 
         """
-        self._parameters = [] if parameters is None else parameters
+        self._arguments = [] if arguments is None else arguments
 
     @property
     def name(self):
@@ -189,7 +208,7 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         remove it from the list of statements to analyze.
 
         """
-        self.prologue_addresses.append(address)
+        self.prologue_addresses.add(address)
         #self.removeStatementByAddress(address)
 
     def add_epilogue_address(self, address):
@@ -197,7 +216,7 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         remove it from the list of statements to analyze.
 
         """
-        self.epilogue_addresses.append(address)
+        self.epilogue_addresses.add(address)
         #self.removeStatementByAddress(address)
 
     @property
@@ -213,7 +232,7 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         if self.__llvm_type is None:
             self._llvm_type = MiddleIrTypeFunction(
                                 self.return_type,
-                                self.parameters,
+                                self.arguments,
                                 self.variadic_arguments)
 
         return self.__llvm_type
@@ -328,9 +347,17 @@ class MiddleIrFunction(MiddleIrFunctionBase):
             "No MIR builder available for address 0x%X" % address)
 
     @staticmethod
-    def new(module, name, return_type=MiddleIrTypeVoid(), parameters=None,
+    def new(module, name, return_type=MiddleIrTypeVoid(), arguments=None,
         variadic_arguments=False):
         """Create a new function."""
-        new_func = MiddleIrFunction(name, return_type, parameters, variadic_arguments)
+        new_func = MiddleIrFunction(name, return_type, arguments, variadic_arguments)
         module.add_function(new_func)
         return new_func
+
+    def delete(self):
+        """Delete ourselves."""
+        if self in self.module.functions:
+            self.module.functions.remove(self)
+
+        if self._ptr:
+            self._ptr.delete()

@@ -41,14 +41,14 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
         self.debug = True
 
         # Store the list of all the MIR functions in this module.
-        self.mir_functions = list()
+        self.functions = set()
 
         # Create an empty LLVM IR module.
         self._ptr = Module.new(module_name)
 
         self.target = None
 
-        self.global_variables = list()
+        self.global_variables = set()
 
     def create_intrinsic_function(self, name):
         """Add the specified intrinsic function to the current module."""
@@ -58,7 +58,7 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
         """Add the specified function to the current module."""
         mir_function = MiddleIrFunction(name, self)
 
-        self.mir_functions.append(mir_function)
+        self.functions.add(mir_function)
 
         return mir_function
 
@@ -75,7 +75,7 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
 
         global_variable.module = self
 
-        self.global_variables.append(global_variable)
+        self.global_variables.add(global_variable)
 
     def get_global_variable_named(self, name):
         """Iterate through every global variable and return the one matching
@@ -92,7 +92,7 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
         specified name.
         
         """
-        for mir_function in self.mir_functions:
+        for mir_function in self.functions:
             if mir_function.name is name:
                 return mir_function
         return None
@@ -100,8 +100,8 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
     def add_function(self, mir_function):
         """Add the specified function to the current module."""
         # Add only if it doesn't exist yet.
-        if mir_function not in self.mir_functions:
-            self.mir_functions.append(mir_function)
+        if mir_function not in self.functions:
+            self.functions.add(mir_function)
 
         mir_function.module = self
 
@@ -150,19 +150,19 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
 
     def get_function_by_address(self, address):
         """Return the function at the specified address."""
-        for mir_function in self.mir_functions:
+        for mir_function in self.functions:
             if mir_function.get_start_address() == address:
                 return mir_function
 
         raise MiddleIrModuleException(
             "No function with start address 0x%X" % address)
 
-    def get_function(self, index):
+    def get_indexed_function(self, index):
         """Return the function at the specified position in the functions list.
         
         """
-        if index <= len(self.mir_functions):
-            return self.mir_functions[index]
+        if index < len(self.functions):
+            return list(self.functions)[index]
 
         raise MiddleIrModuleException(
             "Function index %d is out of scope." % index)
@@ -175,7 +175,7 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
 
         elif isinstance(key, int) or isinstance(key, long):
             try:
-                return self.get_function(key)
+                return self.get_indexed_functions(key)
             except MiddleIrModuleException, err:
                 raise IndexError
 

@@ -114,3 +114,10 @@ class MiddleIrGlobalVariable(MiddleIrGlobalValue):
             MiddleIrGlobalVariableException("No global named `%s`" % name)
         return gv
 
+    def delete(self):
+        if self in self.module.global_variables:
+            self.module.global_variables.discard(self)
+
+        if self._ptr:
+            self._ptr.delete()
+

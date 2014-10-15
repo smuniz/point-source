@@ -178,6 +178,23 @@ class MiddleIrInstructionBuilder(object):
         return MiddleIrInstruction(
             self.llvm_builder.pointer(llvm_pointee, addr_space))
 
+
+    @staticmethod
+    def new(basic_block):
+        """Create a instruction builder for the current basic block."""
+        try:
+            new_builder = basic_block.instruction_builder
+        except MiddleIrException, err:
+            new_builder = MiddleIrInstructionBuilder(basic_block)
+        return new_builder
+
+    #def delete(self):
+    #    """Delete ourselves."""
+    #    if self in self.module.functions:
+    #        self.module.functions.remove(self)
+
+    #    if self._ptr:
+    #        self._ptr.delete()
 # ---------------------------------------------------------------------------------
 
 
