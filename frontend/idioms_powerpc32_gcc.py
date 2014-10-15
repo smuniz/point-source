@@ -970,32 +970,37 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     # Create a global variable referencing the char array.
                     gvar_str = MiddleIrGlobalVariable(
                         array_type,
-                        MiddleIrConstantStringZ(data),
-                        "sz" + data.capitalize())
+                        #MiddleIrConstantStringZ(data),
+                        "szBuffer")# + data.capitalize())
 
                     gvar_str.global_constant = True
-                    gvar_str.alignment = 4  # Strings are aligned to a 4-byte
+                    #gvar_str.alignment = 4  # Strings are aligned to a 4-byte
                                             # boundary in PowerPC. We don't
                                             # actually need this here but will
                                             # be usefull if we want to
                                             # regenerate the binary code.
 
                     #self.current_symbol_table[lo_inst.address] = gvar_str
-                    self.mir_module.add_global_variable(gvar_str)
-
-                    #const_str = MiddleIrConstantStringZ(data)
-                    #self.current_symbol_table[lo_inst.address] = const_str
                     # Add the global variable to the current module.
-                    #self.mir_module.add_global_variable(const_str, "szBuffer")
+                    self.mir_module.add_global_variable(gvar_str)
+                    #gvar_str = MiddleIrConstantStringZ(data)
+                    #print gvar_str
+                    print "[[[[[[]]]]]][[[[]]]]=====>", gvar_str
 
+                    const_str = MiddleIrConstantStringZ(data)
+
+                    gvar_str.initializer = const_str
+
+                    print "[[[[[[]]]]]][[[[]]]]=====>", gvar_str
                     mir_inst_builder = \
                         self.mir_function.get_instruction_builder_by_address(
                             lo_inst.address, True)
 
                     gep = mir_inst_builder.gep(
                         gvar_str,
-                        [MiddleIrTypePointer(MiddleIrTypeChar())],
-                        "szBuffer",
+                        #[MiddleIrTypePointer(MiddleIrTypeArray(MiddleIrTypeChar(), len(data)))],
+                        [MiddleIrTypePointer(array_type)],
+                        "szLoco",
                         True)
 
                     print "=========>", str(gep)

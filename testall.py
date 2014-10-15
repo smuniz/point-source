@@ -62,8 +62,9 @@ def do_module():
 
     s = str(m)
     s = m == MiddleIrModule.new('a')
-    gvar = MiddleIrGlobalVariable(ti, 'b')
-    m.add_global_variable(gvar)
+    #gvar = MiddleIrGlobalVariable(ti, 'b')
+    #m.add_global_variable(gvar)
+    gvar = MiddleIrGlobalVariable.new(m, ti, 'b')
 #    m.get_global_variable_named('b')
 #    gvs = list(m.global_variables)
     #ft = MiddleIrTypeFunction(ti, [ti])
@@ -150,9 +151,9 @@ def do_type():
 #    at = MiddleIrTypeArray(ti, 100)
 #    s = at.element
 #    s = at.count
-#    pt = MiddleIrTypePointer(ti, 10)
+    pt = MiddleIrTypePointer(ti, 10)
 #    pt.address_space
-#    vt = MiddleIrTypeVector(ti, 100)
+    vt = MiddleIrTypeVector(ti, 100)
 #    s = vt.element
 #    s = vt.count
     MiddleIrTypeInt(32) == MiddleIrTypeInt(64)
@@ -346,7 +347,7 @@ def do_callorinvokeinstruction():
     f = MiddleIrFunction.new(m, 'func', ti, [ti])
     b = MiddleIrBasicBlock('a')
     f.add_basic_block(b)
-    bb = Builder.new(b)
+    bb = MiddleIrInstructionBuilder.new(b)
 #    i = bb.invoke(f, [MiddleIrConstantInt(ti, 10)], b, b)
 #    a = i.calling_convention
 #    i.calling_convention = CC_FASTCALL

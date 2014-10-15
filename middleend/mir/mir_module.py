@@ -35,16 +35,14 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
 
     def __init__(self, module_name):
         """Initialize the intermediate level IR module class."""
-        super(MiddleIrModule, self).__init__()
+        # Create an empty LLVM IR module.
+        super(MiddleIrModule, self).__init__(Module.new(module_name))
 
         # Display debugging information during development phase.
         self.debug = True
 
         # Store the list of all the MIR functions in this module.
         self.functions = set()
-
-        # Create an empty LLVM IR module.
-        self._ptr = Module.new(module_name)
 
         self.target = None
 
@@ -68,10 +66,15 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
         name = global_variable.name
         address_space = 0
 
-        global_variable._ptr = self._ptr.add_global_variable(
+        global_variable._ptr = GlobalVariable.new(
+            self._ptr,
             ty,
             name,
             address_space)
+        #global_variable._ptr = self._ptr.add_global_variable(
+        #    ty,
+        #    name,
+        #    address_space)
 
         global_variable.module = self
 
