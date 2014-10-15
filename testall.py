@@ -49,7 +49,7 @@ def do_llvm():
 
 
 def do_module():
-    print("    Testing class Module")
+    print("    Testing class MiddleIrModule")
     m = MiddleIrModule('test')
     m.target = 'a'
     a = m.target
@@ -61,7 +61,7 @@ def do_module():
 #    m.get_type_named('a').name=''
 
     s = str(m)
-    s = m == Module.new('a')
+    s = m == MiddleIrModule.new('a')
     gvar = MiddleIrGlobalVariable(ti, 'b')
     m.add_global_variable(gvar)
 #    m.get_global_variable_named('b')
@@ -91,20 +91,20 @@ def do_module():
             return self.s
 
     ss = strstream()
-    m2 = Module.new('test')
+    m2 = MiddleIrModule.new('test')
     # m2.add_type_name('myint', ti)
     MiddleIrTypeStruct([ti], 'myint')
 
-    m2.to_bitcode(ss)
-    m3 = Module.from_bitcode(ss)
-    t = m2 == m3
+    #m2.to_bitcode(ss)
+    #m3 = MiddleIrModule.from_bitcode(ss)
+    #t = m2 == m3
 #    ss2 = strstream()
 #    ss2.write(str(m))
-#    m4 = Module.from_assembly(ss2)
+#    m4 = MiddleIrModule.from_assembly(ss2)
 #    t = m4 == m
 #    t = m4.pointer_size
-#    mA = Module.new('ma')
-#    mB = Module.new('mb')
+#    mA = MiddleIrModule.new('ma')
+#    mB = MiddleIrModule.new('mb')
 #    mA.link_in(mB)
 
 
@@ -180,7 +180,7 @@ def do_value():
 
 
 def do_user():
-    m = Module.new('a')
+    m = MiddleIrModule.new('a')
     #ft = MiddleIrTypeFunction(ti, [ti]*2)
     ft = (ti, [ti]*2)
 #    f = MiddleIrFunction.new(m, 'func', *ft)
@@ -198,32 +198,33 @@ def do_user():
 def do_constant():
     print("    Testing class Constant")
     MiddleIrConstantNull(ti)
-#    MiddleIrConstantAll_ones(ti)
-#    MiddleIrConstantUndef(ti)
-#    MiddleIrConstantInt(ti, 10)
-#    MiddleIrConstantInt_signextend(ti, 10)
-#    MiddleIrConstantReal(MiddleIrTypeFloat(), "10.0")
-#    MiddleIrConstantReal(MiddleIrTypeFloat(), 3.14)
-#    MiddleIrConstantString("test")
-#    MiddleIrConstantStringz("test2")
+    MiddleIrConstantAllOnes(ti)
+    MiddleIrConstantUndef(ti)
+    MiddleIrConstantInt(ti, 10)
+    MiddleIrConstantIntSignExtend(ti, 10)
+    MiddleIrConstantReal(MiddleIrTypeFloat(), "10.0")
+    MiddleIrConstantReal(MiddleIrTypeFloat(), 3.14)
+    MiddleIrConstantString("test")
+    MiddleIrConstantStringZ("test2")
     MiddleIrConstantArray(ti, [MiddleIrConstantInt(ti,42)]*10)
-#    MiddleIrConstantStruct([MiddleIrConstantInt(ti,42)]*10)
-#    MiddleIrConstantPacked_struct([MiddleIrConstantInt(ti,42)]*10)
-#    MiddleIrConstantVector([MiddleIrConstantInt(ti,42)]*10)
-#
-#    MiddleIrConstantSizeof(ti)
-#
-#    k = MiddleIrConstantInt(ti, 10)
-#    f = MiddleIrConstantReal(MiddleIrTypeFloat(), 3.1415)
+    MiddleIrConstantStruct([MiddleIrConstantInt(ti,42)]*10)
+    MiddleIrConstantPackedStruct([MiddleIrConstantInt(ti,42)]*10)
+    MiddleIrConstantVector([MiddleIrConstantInt(ti,42)]*10)
+
+    MiddleIrConstantSizeof(ti)
+
+    k = MiddleIrConstantInt(ti, 10)
+    f = MiddleIrConstantReal(MiddleIrTypeFloat(), 3.1415)
+    # TODO / FIXME : Add all operations
 #    k.neg().not_().add(k).sub(k).mul(k).udiv(k).sdiv(k).urem(k)
 #    k.srem(k).and_(k).or_(k).xor(k).icmp(IPRED_ULT, k)
 #    f.fdiv(f).frem(f).fcmp(RPRED_ULT, f)
 #    f.fadd(f).fmul(f).fsub(f)
-#    vi = MiddleIrConstantVector([MiddleIrConstantInt(ti,42)]*10)
-#    vf = MiddleIrConstantVector([MiddleIrConstantReal(MiddleIrTypeFloat(), 3.14)]*10)
+    vi = MiddleIrConstantVector([MiddleIrConstantInt(ti,42)]*10)
+    vf = MiddleIrConstantVector([MiddleIrConstantReal(MiddleIrTypeFloat(), 3.14)]*10)
 #    k.shl(k).lshr(k).ashr(k)
-#    return
-#    # TODO gep
+    return
+    # TODO gep
 #    k.trunc(MiddleIrTypeInt(1))
 #    k.sext(MiddleIrTypeInt(64))
 #    k.zext(MiddleIrTypeInt(64))
@@ -241,31 +242,31 @@ def do_constant():
 #    vi.extract_element( MiddleIrConstantInt(ti,0) )
 #    vi.insert_element( k, k )
 #    vi.shuffle_vector( vi, vi )
-#
-#
-#def do_global_value():
-#    print("    Testing class GlobalValue")
-#    m = Module.new('a')
-#    gv = GlobalVariable.new(m, MiddleIrTypeInt(), 'b')
-#    s = gv.is_declaration
-#    m = gv.module
+
+
+def do_global_value():
+    print("    Testing class GlobalValue")
+    m = MiddleIrModule.new('a')
+    gv = MiddleIrGlobalVariable.new(m, MiddleIrTypeInt(), 'b')
+    s = gv.is_declaration
+    m = gv.module
 #    gv.linkage = LINKAGE_EXTERNAL
 #    s = gv.linkage
 #    gv.section = '.text'
 #    s = gv.section
 #    gv.visibility = VISIBILITY_HIDDEN
 #    s = gv.visibility
-#    gv.alignment = 8
-#    s = gv.alignment
-#
-#
-#def do_global_variable():
-#    print("    Testing class GlobalVariable")
-#    m = Module.new('a')
-#    gv = GlobalVariable.new(m, MiddleIrTypeInt(), 'b')
-#    gv = GlobalVariable.get(m, 'b')
-#    gv.delete()
-#    gv = GlobalVariable.new(m, MiddleIrTypeInt(), 'c')
+    gv.alignment = 8
+    s = gv.alignment
+
+
+def do_global_variable():
+    print("    Testing class MiddleIrGlobalVariable")
+    m = MiddleIrModule.new('a')
+    gv = MiddleIrGlobalVariable.new(m, MiddleIrTypeInt(), 'b')
+    gv = MiddleIrGlobalVariable.get(m, 'b')
+    gv.delete()
+#    gv = MiddleIrGlobalVariable.new(m, MiddleIrTypeInt(), 'c')
 #    gv.initializer = MiddleIrConstantInt( ti, 10 )
 #    s = gv.initializer
 #    gv.global_constant = True
@@ -274,7 +275,7 @@ def do_constant():
 #
 #def do_argument():
 #    print("    Testing class Argument")
-#    m = Module.new('a')
+#    m = MiddleIrModule.new('a')
 #    tip = MiddleIrTypePointer(ti)
 #    ft = MiddleIrTypeFunction(tip, [tip])
 #    f = Function.new(m, ft, 'func')
@@ -288,10 +289,10 @@ def do_constant():
 #def do_function():
 #    print("    Testing class Function")
 #    ft = MiddleIrTypeFunction(ti, [ti]*20)
-#    zz = Function.new(Module.new('z'), ft, 'foobar')
+#    zz = Function.new(MiddleIrModule.new('z'), ft, 'foobar')
 #    del zz
-#    Function.new(Module.new('zz'), ft, 'foobar')
-#    m = Module.new('a')
+#    Function.new(MiddleIrModule.new('zz'), ft, 'foobar')
+#    m = MiddleIrModule.new('a')
 #    f = Function.new(m, ft, 'func')
 #    f.delete()
 #    ft = MiddleIrTypeFunction(ti, [ti]*20)
@@ -325,7 +326,7 @@ def do_constant():
 #
 #def do_instruction():
 #    print("    Testing class Instruction")
-#    m = Module.new('a')
+#    m = MiddleIrModule.new('a')
 #    ft = MiddleIrTypeFunction(ti, [ti]*20)
 #    f = Function.new(m, ft, 'func')
 #    b = f.append_basic_block('a')
@@ -338,7 +339,7 @@ def do_constant():
 #
 #def do_callorinvokeinstruction():
 #    print("    Testing class CallOrInvokeInstruction")
-#    m = Module.new('a')
+#    m = MiddleIrModule.new('a')
 #    ft = MiddleIrTypeFunction(ti, [ti])
 #    f = Function.new(m, ft, 'func')
 #    b = f.append_basic_block('a')
@@ -356,7 +357,7 @@ def do_constant():
 #
 #def do_phinode():
 #    print("    Testing class PhiNode")
-#    m = Module.new('a')
+#    m = MiddleIrModule.new('a')
 #    ft = MiddleIrTypeFunction(ti, [ti])
 #    f = Function.new(m, ft, 'func')
 #    b = f.append_basic_block('b')
@@ -373,7 +374,7 @@ def do_constant():
 #
 #def do_switchinstruction():
 #    print("    Testing class SwitchInstruction")
-#    m = Module.new('a')
+#    m = MiddleIrModule.new('a')
 #    ft = MiddleIrTypeFunction(ti, [ti])
 #    f = Function.new(m, ft, 'func')
 #    b = f.append_basic_block('b')
@@ -384,7 +385,7 @@ def do_constant():
 #
 #def do_basicblock():
 #    print("    Testing class BasicBlock")
-#    m = Module.new('a')
+#    m = MiddleIrModule.new('a')
 #    ft = MiddleIrTypeFunction(ti, [ti])
 #    f = Function.new(m, ft, 'func')
 #    b = f.append_basic_block('b')
@@ -400,7 +401,7 @@ def do_constant():
 #
 #
 #def _do_builder_mrv():
-#    m = Module.new('mrv')
+#    m = MiddleIrModule.new('mrv')
 #    ft = MiddleIrTypeFunction(MiddleIrTypeArray(ti, 2), [ti])
 #    f = Function.new(m, ft, 'divrem')
 #    blk = f.append_basic_block('b')
@@ -414,7 +415,7 @@ def do_constant():
 #
 #def do_builder():
 #    print("    Testing class Builder")
-#    m = Module.new('a')
+#    m = MiddleIrModule.new('a')
 #    ft = MiddleIrTypeFunction(ti, [ti])
 #    f = Function.new(m, ft, 'func')
 #    blk = f.append_basic_block('b')
@@ -514,8 +515,8 @@ def do_llvm_core():
     do_value()
     do_user()
     do_constant()
-#    do_global_value()
-#    do_global_variable()
+    do_global_value()
+    do_global_variable()
 #    do_argument()
 #    do_function()
 #    do_instruction()
@@ -543,7 +544,7 @@ def do_llvm_core():
 #    sty = MiddleIrTypeStruct([ty, ty])
 #    v = t.element_at_offset(sty, 0)
 #    v = t.offset_of_element(sty, 0)
-#    m = Module.new('a')
+#    m = MiddleIrModule.new('a')
 #    gv = m.add_global_variable(ty, 'gv')
 #    v = t.preferred_alignment(gv)
 #
@@ -560,7 +561,7 @@ def do_llvm_core():
 #
 #def do_executionengine():
 #    print("    Testing class ExecutionEngine")
-#    m = Module.new('a')
+#    m = MiddleIrModule.new('a')
 #    ee = ExecutionEngine.new(m, False) # True)
 #    ft = MiddleIrTypeFunction(ti, [])
 #    f = m.add_function(ft, 'func')
@@ -573,16 +574,16 @@ def do_llvm_core():
 #    ee.run_static_dtors()
 #    ee.free_machine_code_for(f)
 #    t = ee.target_data
-#    m2 = Module.new('b')
+#    m2 = MiddleIrModule.new('b')
 #    ee.add_module(m2)
-#    m3 = Module.new('c')
+#    m3 = MiddleIrModule.new('c')
 #    ee2 = ExecutionEngine.new(m3, False)
-#    m4 = Module.new('d')
-#    m5 = Module.new('e')
+#    m4 = MiddleIrModule.new('d')
+#    m5 = MiddleIrModule.new('e')
 #    #ee3 = ExecutionEngine.new(m4, False)
 #    #ee3.add_module(m5)
 #    #x = ee3.remove_module(m5)
-#    #isinstance(x, Module)
+#    #isinstance(x, MiddleIrModule)
 #
 #
 #def do_llvm_ee():
@@ -608,12 +609,12 @@ def do_llvm_core():
 #    #    for i in all_these:
 #    #        print i
 #    #        pm.add(i)
-#    pm.run(Module.new('a'))
+#    pm.run(MiddleIrModule.new('a'))
 #
 #
 #def do_functionpassmanager():
 #    print("    Testing class FunctionPassManager")
-#    m = Module.new('a')
+#    m = MiddleIrModule.new('a')
 #    ft = MiddleIrTypeFunction(ti, [])
 #    f = m.add_function(ft, 'func')
 #    bb = f.append_basic_block('entry')

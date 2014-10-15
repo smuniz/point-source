@@ -48,6 +48,8 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
 
         self.target = None
 
+        self.global_variables = list()
+
     def create_intrinsic_function(self, name):
         """Add the specified intrinsic function to the current module."""
         return MiddleIrIntrinsicFunction(name, self)
@@ -71,11 +73,23 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
             name,
             address_space)
 
-        #global_variable._ptr.initializer = global_variable.value._ptr
+        global_variable.module = self
+
+        self.global_variables.append(global_variable)
+
+    def get_global_variable_named(self, name):
+        """Iterate through every global variable and return the one matching
+        the specified name.
+        
+        """
+        for gvar in self.global_variables:
+            if gvar.name is name:
+                return gvar
+        return None
 
     def get_function_named(self, name):
         """Iterate through every function and return the one matching the
-        specifies name.
+        specified name.
         
         """
         for mir_function in self.mir_functions:
@@ -105,6 +119,16 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
     def __str__(self):
         """Return a string object with the module text representation."""
         return str(self._ptr)
+
+    @property
+    def global_variables(self):
+        """Return the global variables architecture."""
+        return self._global_variables
+
+    @global_variables.setter
+    def global_variables(self, global_variables):
+        """Store the global variables architecture."""
+        self._global_variables = global_variables
 
     @property
     def target(self):
@@ -158,13 +182,13 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
         else:
             raise TypeError
 
-    def to_bitcode(self, ss):
-        """Write LLVM bitcode representing the specified object."""
-        self._ptr.to_bitcode(ss)
+    #def to_bitcode(self, ss):
+    #    """Write LLVM bitcode representing the specified object."""
+    #    self._ptr.to_bitcode(ss)
 
-    def from_bitcode(self, ss):
-        """Write LLVM bitcode representing the specified object."""
-        self._ptr.to_bitcode(ss)
+    #def from_bitcode(self, ss):
+    #    """Write LLVM bitcode representing the specified object."""
+    #    self._ptr.from_bitcode(ss)
 
     @staticmethod
     def new(module_name):

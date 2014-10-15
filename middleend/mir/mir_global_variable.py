@@ -46,6 +46,7 @@ class MiddleIrGlobalVariable(MiddleIrGlobalValue):
         self.type = ty
         #self.value = None
         self.name = name
+        self.module = None
 
     @property
     def type(self):
@@ -76,3 +77,40 @@ class MiddleIrGlobalVariable(MiddleIrGlobalValue):
     def name(self, name):
         """Store the name of the variable."""
         self._name = name
+
+    @staticmethod
+    def new(module, _type, name):
+        """Create a new global vairable."""
+        new_gvar = MiddleIrGlobalVariable(_type, name)
+        module.add_global_variable(new_gvar)
+        return new_gvar
+
+    @property
+    def module(self):
+        """Return the module of the variable."""
+        return self._module
+
+    @module.setter
+    def module(self, module):
+        """Store the module of the variable."""
+        self._module = module
+
+    @property
+    def is_declaration(self):
+        return self._ptr.is_declaration
+
+    @property
+    def alignment(self):
+        return self._ptr.alignment
+
+    @alignment.setter
+    def alignment(self, value):
+        self._ptr.alignment = value
+
+    @staticmethod
+    def get(module, name):
+        gv = module._ptr.get_global_variable_named(name)
+        if not gv:
+            MiddleIrGlobalVariableException("No global named `%s`" % name)
+        return gv
+
