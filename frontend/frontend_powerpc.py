@@ -103,7 +103,7 @@ class FrontEndPowerPc(FrontEnd):
 
         elif lir_inst.is_type(self.iset.PPC_li):
             self.current_symbol_table[address] = \
-                MiddleIrConstantInt32(lir_inst[1].value)
+                MiddleIrConstantInt(MiddleIrTypeInt(32), lir_inst[1].value)
 
         elif lir_inst.is_type(self.iset.PPC_lis):
             pass
@@ -224,14 +224,7 @@ class FrontEndPowerPc(FrontEnd):
                     called_mir_func.set_argument_name(0, "arg%s" % arg_index)
 
                 # TODO : Obtain function arguments programatically.
-                print "===>", self.current_symbol_table[0x40]
                 called_mir_func_args = self.current_symbol_table[0x40]
-
-                #gep = self.mir_inst_builder.gep(
-                #    called_mir_func_args,
-                #    [MiddleIrTypePointer(MiddleIrTypeChar())],
-                #    "szBuffer",
-                #    True)
 
                 mir_inst = self.mir_inst_builder.call(
                     called_mir_func, called_mir_func_args)

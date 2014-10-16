@@ -270,7 +270,7 @@ def do_global_variable():
     gv.delete()
     gv = MiddleIrGlobalVariable.new(m, MiddleIrTypeInt(), 'c')
     gv.initializer = MiddleIrConstantInt( ti, 10 )
-#    s = gv.initializer
+    s = gv.initializer
 #    gv.global_constant = True
 #    s = gv.global_constant
 

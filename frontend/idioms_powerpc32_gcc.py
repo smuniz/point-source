@@ -971,7 +971,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     gvar_str = MiddleIrGlobalVariable(
                         array_type,
                         #MiddleIrConstantStringZ(data),
-                        "szBuffer")# + data.capitalize())
+                        "szBuffer_0x%X" % lo_inst.address)# + data.capitalize())
 
                     gvar_str.global_constant = True
                     #gvar_str.alignment = 4  # Strings are aligned to a 4-byte
@@ -983,15 +983,11 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     #self.current_symbol_table[lo_inst.address] = gvar_str
                     # Add the global variable to the current module.
                     self.mir_module.add_global_variable(gvar_str)
-                    #gvar_str = MiddleIrConstantStringZ(data)
-                    #print gvar_str
-                    print "[[[[[[]]]]]][[[[]]]]=====>", gvar_str
 
                     const_str = MiddleIrConstantStringZ(data)
 
                     gvar_str.initializer = const_str
 
-                    print "[[[[[[]]]]]][[[[]]]]=====>", gvar_str
                     mir_inst_builder = \
                         self.mir_function.get_instruction_builder_by_address(
                             lo_inst.address, True)
@@ -999,11 +995,10 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     gep = mir_inst_builder.gep(
                         gvar_str,
                         #[MiddleIrTypePointer(MiddleIrTypeArray(MiddleIrTypeChar(), len(data)))],
-                        [MiddleIrTypePointer(array_type)],
+                        [MiddleIrConstantInt(MiddleIrTypeInt(32), 0)] * 2,
                         "szLoco",
                         True)
 
-                    print "=========>", str(gep)
                     self.current_symbol_table[lo_inst.address] = gep
 
                 # Mark instructions as analyzed and remove them from

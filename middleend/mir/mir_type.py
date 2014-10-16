@@ -171,6 +171,9 @@ class MiddleIrTypePointer(MiddleIrBaseType):
 
     def __init__(self, pointee, addr_space=0):
         """Initialize the instance."""
+        # TODO / FIXME : Raise exception.
+        #if self.pointee is None:
+            #raise MiddleIr
         self.pointee = pointee
         super(MiddleIrTypePointer, self).__init__(
             Type.pointer(pointee._ptr, addr_space))

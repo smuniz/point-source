@@ -178,7 +178,7 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
 
         elif isinstance(key, int) or isinstance(key, long):
             try:
-                return self.get_indexed_functions(key)
+                return self.get_indexed_function(key)
             except MiddleIrModuleException, err:
                 raise IndexError
 

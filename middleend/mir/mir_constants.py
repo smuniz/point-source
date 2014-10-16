@@ -48,8 +48,9 @@ class MiddleIrBaseConstant(MiddleIrLLVMInstance):
         """Store the name of the constant."""
         self._name = name
 
-    def gep(self):
-        """..."""
+    #def gep(self):
+    #    """..."""
+    #    return self._ptr.gep(0)
 
 class MiddleIrConstantInt(MiddleIrBaseConstant):
     """Middle level intermediate representation class of integer constant."""

@@ -77,6 +77,7 @@ class MiddleIrInstructionBuilder(object):
     #
     def add(self, lhs, rhs, name=""):
         """Generate an LLVM IR add instruction."""
+        #_type = LLVM_add
         return MiddleIrInstruction(self.llvm_builder.add(
             lhs._ptr, rhs._ptr, name))
 
@@ -86,11 +87,17 @@ class MiddleIrInstructionBuilder(object):
     def call(self, fn, args, name=""):
         """Generate an LLVM IR call instruction."""
         llvm_func = fn._llvm_definition
-        arguments = [arg._ptr for arg in args]
+
+        if isinstance(args, list):
+            arguments = [arg._ptr for arg in args]
+        else:
+            arguments = [args._ptr, ]
 
         try:
+            llvm_inst = self.llvm_builder.call(llvm_func, arguments, name)
+            _type = OPCODE_CALL #LLVM_call
             return MiddleIrInstruction(
-                self.llvm_builder.call(llvm_func, arguments, name))
+                llvm_inst, _type)
         except TypeError, err:
             raise MiddleIrInstructionException(err)
 
@@ -100,8 +107,9 @@ class MiddleIrInstructionBuilder(object):
     def alloca(self, ty, size=None, name=""):
         """Generate an LLVM IR alloca instruction."""
         sizeptr = size._ptr if size else None
+        _type = OPCODE_ALLOCA #LLVM_alloca
         return MiddleIrInstruction(
-            self.llvm_builder.alloca(ty._ptr, sizeptr, name))
+            self.llvm_builder.alloca(ty._ptr, sizeptr, name), _type)
 
     def alloca_array(self, ty, size, name=""):
         """Generate an LLVM IR alloca_array instruction."""
@@ -116,17 +124,22 @@ class MiddleIrInstructionBuilder(object):
     def gep(self, pointer, mir_indices, name="", inbounds=False):
         """Generate an LLVM IR getelementptr instruction."""
         indices = [idx._ptr for idx in mir_indices]
+        llvm_inst = self.llvm_builder.gep(pointer._ptr, indices, name, inbounds)
+        _type = OPCODE_GETELEMENTPTR # LLVM_getelementptr
 
-        return MiddleIrInstruction(
-            self.llvm_builder.gep(pointer._ptr, indices, name, inbounds))
+        return MiddleIrInstruction(llvm_inst, _type)
 
     def load(self, ptr, name=""):
         """Generate an LLVM IR load instruction."""
-        return MiddleIrInstruction(self.llvm_builder.load(ptr, name))
+        _type = OPCODE_LOAD
+        return MiddleIrInstruction(self.llvm_builder.load(ptr, name), _type)
 
     def malloc(self, ty, name=""):
         """Generate an LLVM IR malloc instruction."""
-        return MiddleIrInstruction(self.llvm_builder.malloc(ty._ptr, name))
+        #_type = OPCODE_ALLOCA
+        _type = None
+        return MiddleIrInstruction(
+            self.llvm_builder.malloc(ty._ptr, name), _type)
 
     def malloc_array(self, ty, size, name=""):
         """Generate an LLVM IR malloc_array instruction."""
@@ -143,13 +156,13 @@ class MiddleIrInstructionBuilder(object):
     #
     def branch(self, bblk):
         """Generate an LLVM IR branch instruction."""
-        return MiddleIrInstruction(
-            self.llvm_builder.branch(
-                bblk._ptr))
+        _type = OPCODE_UNREACHABLE #LLVM_unreachable
+        llvm_type = self.llvm_builder.branch(bblk._ptr)
+        return MiddleIrInstruction(llvm_inst, _type)
 
     def ret(self, ret_val=None):
         """Generate an LLVM IR 'ret' instruction of the right type."""
-        _type = LLVM_ret
+        _type = OPCODE_RET #LLVM_ret
         llvm_inst = None
         operands = None
 
@@ -216,14 +229,12 @@ class MiddleIrInstruction(MiddleIrLLVMInstance, Area):
     def __init__(self, llvm_instruction=None, _type=None, operands=None):
         """Initialize the intermediate level IR module class."""
         #super(MiddleIrInstruction, self).__init__()
-        MiddleIrLLVMInstance.__init__(self)
+        # LLVM specific objects initialization.
+        MiddleIrLLVMInstance.__init__(self, llvm_instruction)
         Area.__init__(self)
 
         self.print_address = True
         
-        # LLVM specific objects initialization.
-        self._ptr = llvm_instruction
-
         self.type = _type
 
         if operands is None:
@@ -242,8 +253,43 @@ class MiddleIrInstruction(MiddleIrLLVMInstance, Area):
         self._type = _type
 
         # Automatically set group 
-        if self.is_terminator:
+        # TODO / FIXME : wtf
+        #print "type : %d" % _type
+        #print "[[[[[]]]]]]]]]]]]>>> %s" % self._ptr
+        #print str(self._ptr.name)
+        if self._ptr is None:
+            self.group = UNKNOWN_GROUP
+
+        if _type in TERMINATOR_INSTRUCTIONS:
             self.group = TERMINATOR_GROUP
+
+        elif _type in MEMORY_ACCESS_OPERATIONS:
+            self.group = MEMORY_ACCESS_GROUP
+
+        elif _type in OTHER_INSTRUCTIONS:
+            self.group = OTHER_GROUP
+
+        #if self.is_terminator:
+        #    self.group = TERMINATOR_GROUP
+
+        #elif self.is_binary_op:
+        #    self.group = BINARY_OP_GROUP
+
+        #elif self.is_shift:
+        #    self.group = SHIFT_GROUP
+
+        #elif self.is_logical_shift:
+        #    self.group = LOGICAL_SHIFT_GROUP
+
+        #elif self.is_arithmetic_shift:
+        #    self.group = ARITHMETIC_SHIFT_GROUP
+
+        #elif self.is_associative:
+        #    self.group = ASSOCIATIVE_GROUP
+
+        #elif self.is_commutative:
+        #    self.group = COMMUTATIVE_GROUP
+
         else:
             self.group = UNKNOWN_GROUP
 
@@ -301,6 +347,34 @@ class MiddleIrInstruction(MiddleIrLLVMInstance, Area):
 
     @property
     def is_binary_op(self):
+        return self._ptr.is_binary_op
+
+    @property
+    def is_shift(self):
+        return self._ptr.is_shift
+
+    @property
+    def is_cast(self):
+        return self._ptr.is_cast
+
+    @property
+    def is_logical_shift(self):
+        return self._ptr.is_logical_shift
+
+    @property
+    def is_arithmetic_shift(self):
+        return self._ptr.is_arithmetic_shift
+
+    @property
+    def is_associative(self):
+        return self._ptr.is_associative
+
+    @property
+    def is_commutative(self):
+        return self._ptr.is_commutative
+
+    @property
+    def is_binary_op(self):
         """Indicate if the current instruction is a binary operator."""
         return self._ptr.is_binary_op
 
@@ -341,13 +415,35 @@ class MiddleIrVolatileInstruction(object):
         self.llvm_instruction = llvm_instruction
 
 TERMINATOR_GROUP = 0
-UNKNOWN_GROUP = 3
+BINARY_OP_GROUP = 1
+SHIFT_GROUP = 2
+LOGICAL_SHIFT_GROUP = 3
+ARITHMETIC_SHIFT_GROUP = 4
+ASSOCIATIVE_GROUP = 5
+COMMUTATIVE_GROUP = 6
+
+MEMORY_ACCESS_GROUP = 9
+
+OTHER_GROUP = 10
+UNKNOWN_GROUP = 11
 
 GROUP_NAMES = {
     TERMINATOR_GROUP : "terminator",
+
+    BINARY_OP_GROUP : "binary",
+    SHIFT_GROUP : "shift",
+    LOGICAL_SHIFT_GROUP : "logical",
+    ARITHMETIC_SHIFT_GROUP : "arithmetic",
+    ASSOCIATIVE_GROUP : "associative",
+    COMMUTATIVE_GROUP : "commutative",
+
+    MEMORY_ACCESS_GROUP : "memory_access",
+
+    OTHER_GROUP : "other",
     UNKNOWN_GROUP : "unknown",
     }
 
+"""
 LLVM_ret = 0
 LLVM_br = 1
 LLVM_switch = 2
@@ -356,18 +452,57 @@ LLVM_invoke = 4
 LLVM_resume = 5
 LLVM_unreachable = 6
 
+LLVM_icmp = 0x10
+LLVM_fcmp = 0x11
+LLVM_phi = 0x12
+LLVM_select = 0x13
+LLVM_call = 0x14
+LLVM_va_arg = 0x15
+LLVM_landingpad = 0x16
+
+
+LLVM_alloca = 0x20
+LLVM_load = 0x21
+LLVM_store = 0x22
+LLVM_fence = 0x23
+LLVM_cmpxchg = 0x24
+LLVM_atomicrmw = 0x25
+LLVM_getelementptr = 0x26
 """
+
+
 TERMINATOR_INSTRUCTIONS = [
-    LLVM_ret,
-    LLVM_br,
-    LLVM_switch,
-    LLVM_indirectbr,
-    LLVM_invoke,
-    LLVM_resume,
-    LLVM_unreachable,
+    OPCODE_RET,
+    OPCODE_BR,
+    OPCODE_SWITCH,
+    OPCODE_INDIRECT_BR,
+    OPCODE_INVOKE,
+    OPCODE_RESUME,
+    OPCODE_UNREACHABLE,
     ]
+
+OTHER_INSTRUCTIONS = [
+    OPCODE_ICMP,
+    OPCODE_FCMP,
+    OPCODE_PHI,
+    OPCODE_SELECT,
+    OPCODE_CALL,
+    OPCODE_VAARG,
+    OPCODE_LANDINGPAD,
+    ]
+
+MEMORY_ACCESS_OPERATIONS = [
+    OPCODE_ALLOCA,
+    OPCODE_LOAD,
+    OPCODE_STORE,
+    OPCODE_FENCE,
+    OPCODE_ATOMICCMPXCHG,
+    OPCODE_ATOMICRMW,
+    OPCODE_GETELEMENTPTR,
+    ]
+
 """
-"""
+
 Binary Operations
 'add' Instruction
 Syntax:
@@ -441,6 +576,7 @@ Overview:
 Arguments:
 Semantics:
 Example:
+
 Bitwise Binary Operations
 'shl' Instruction
 Syntax:
@@ -478,6 +614,7 @@ Overview:
 Arguments:
 Semantics:
 Example:
+
 Vector Operations
 'extractelement' Instruction
 Syntax:
@@ -497,6 +634,7 @@ Overview:
 Arguments:
 Semantics:
 Example:
+
 Aggregate Operations
 'extractvalue' Instruction
 Syntax:
@@ -510,6 +648,7 @@ Overview:
 Arguments:
 Semantics:
 Example:
+
 Memory Access and Addressing Operations
 'alloca' Instruction
 Syntax:
@@ -553,6 +692,7 @@ Overview:
 Arguments:
 Semantics:
 Example:
+
 Conversion Operations
 'trunc .. to' Instruction
 Syntax:
@@ -632,6 +772,7 @@ Overview:
 Arguments:
 Semantics:
 Example:
+
 Other Operations
 'icmp' Instruction
 Syntax:
@@ -675,7 +816,9 @@ Overview:
 Arguments:
 Semantics:
 Example:
+
 Intrinsic Functions
+
 Variable Argument Handling Intrinsics
 'llvm.va_start' Intrinsic
 Syntax:
@@ -692,6 +835,7 @@ Syntax:
 Overview:
 Arguments:
 Semantics:
+
 Accurate Garbage Collection Intrinsics
 'llvm.gcroot' Intrinsic
 Syntax:
@@ -708,6 +852,7 @@ Syntax:
 Overview:
 Arguments:
 Semantics:
+
 Code Generator Intrinsics
 'llvm.returnaddress' Intrinsic
 Syntax:
@@ -749,6 +894,7 @@ Semantics:
 Syntax:
 Overview:
 Semantics:
+
 Standard C Library Intrinsics
 'llvm.memcpy' Intrinsic
 Syntax:
@@ -860,6 +1006,7 @@ Syntax:
 Overview:
 Arguments:
 Semantics:
+
 Bit Manipulation Intrinsics
 'llvm.bswap.*' Intrinsics
 Syntax:
@@ -880,6 +1027,7 @@ Syntax:
 Overview:
 Arguments:
 Semantics:
+
 Arithmetic with Overflow Intrinsics
 'llvm.sadd.with.overflow.*' Intrinsics
 Syntax:
@@ -917,6 +1065,7 @@ Overview:
 Arguments:
 Semantics:
 Examples:
+
 Specialised Arithmetic Intrinsics
 'llvm.fmuladd.*' Intrinsic
 Syntax:
@@ -924,6 +1073,7 @@ Overview:
 Arguments:
 Semantics:
 Examples:
+
 Half Precision Floating Point Intrinsics
 'llvm.convert.to.fp16' Intrinsic
 Syntax:
@@ -937,8 +1087,11 @@ Overview:
 Arguments:
 Semantics:
 Examples:
+
 Debugger Intrinsics
+
 Exception Handling Intrinsics
+
 Trampoline Intrinsics
 'llvm.init.trampoline' Intrinsic
 Syntax:
@@ -950,6 +1103,7 @@ Syntax:
 Overview:
 Arguments:
 Semantics:
+
 Memory Use Markers
 'llvm.lifetime.start' Intrinsic
 Syntax:
@@ -971,6 +1125,7 @@ Syntax:
 Overview:
 Arguments:
 Semantics:
+
 General Intrinsics
 'llvm.var.annotation' Intrinsic
 Syntax:
@@ -1027,5 +1182,6 @@ Syntax:
 Overview:
 Arguments:
 Semantics:
+
 Stack Map Intrinsics
 """

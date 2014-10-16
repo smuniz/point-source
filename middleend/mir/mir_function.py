@@ -7,6 +7,7 @@
 from llvm import *
 from llvm.core import *
 
+#from middleend.mir_exception import MiddleIrException
 from mir_function_base import MiddleIrFunctionBase, \
                                 MiddleIrFunctionBaseException
 from mir_type import *
@@ -128,7 +129,7 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         if index < len(self.basic_blocks):
             return list(self.basic_blocks)[index]
 
-        raise MiddleIrModuleException(
+        raise MiddleIrFunctionException(
             "Basic block index %d is out of scope." % index)
 
     @property
@@ -152,7 +153,8 @@ class MiddleIrFunction(MiddleIrFunctionBase):
             return [self[i] for i in xrange(*indices)]
         elif isinstance(key, int) or isinstance(key, long):
             try:
-                return self.get_indexed_basic_block(key)
+                # TODO / FIXME
+                return list(self.basic_blocks)[key]
             except KeyError:
                 raise IndexError
         else:
