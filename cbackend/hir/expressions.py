@@ -203,9 +203,11 @@ class TemporalStorage(Expression):
 
 class FunctionCallExpression(Expression):
     """..."""
+
     def __init__(self, func_name=None, arguments=[]):
-        super(FunctionCallExpression, self).__init__(
-            self.format_values(func_name, arguments))
+        super(FunctionCallExpression, self).__init__()
+
+        self.format_values(func_name, arguments)
 
     def format_values(self, func_name, arguments):
         type_name  = PrimaryExpression(func_name)

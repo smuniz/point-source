@@ -7,6 +7,7 @@
 from traceback import format_exc
 
 from middleend.mir.mir_type import *
+from middleend.mir.mir_instruction import *
 
 import cbackend.hir.area
 reload(cbackend.hir.area)
@@ -168,8 +169,8 @@ class CBackEnd(object):
             self.hir.add_block(hir_block_stmt)
 
             for bb_idx, mir_basic_block in enumerate(mir_function):
-                #print "-> Basic block %d (%s):%s" % (
-                #    bb_idx, mir_basic_block.label, mir_basic_block)
+                print "-> Basic block %d (%s):%s" % (
+                    bb_idx, mir_basic_block.label, mir_basic_block)
 
                 hir_block_stmt.label = mir_basic_block.label
 
@@ -217,18 +218,22 @@ class CBackEnd(object):
         # statement(s).
         #
         hir_stmt = None
-        group = mir_inst.group_name
+        group_name = mir_inst.group_name
 
-        if mir_inst.is_terminator:
+        print "group name ---> %s" % group_name
+        if mir_inst.group is TERMINATOR_GROUP:
             hir_stmt = self.on_terminator(mir_inst)
 
+        elif mir_inst.group is OTHER_GROUP:
+            hir_stmt = self.on_other(mir_inst)
+
         else:
-            #hir_stmt = self.on_unknown(lir_inst)
+            print "BBBBBBBBBBAAAAAA"
             raise CBackEndException(
                 "Unsupported instruction (%s) at %s on '%s' group." % (
                     str(mir_inst).strip(),
                     ", ".join(["0x%08x" % a for a in mir_inst.addresses]),
-                    group))
+                    group_name))
 
         if hir_stmt is not None:
             # Set HIR statement address equal to the MIR instruction used
@@ -239,19 +244,19 @@ class CBackEnd(object):
             # original one.
             hir_stmt.addresses = mir_inst.addresses
 
-            self.__display_instruction_information(mir_inst, group)
+            self.__display_instruction_information(mir_inst, group_name)
 
         else:
             raise CBackEndException(
                 "Empty instruction (%s) at %s on '%s' group." % (
                     str(mir_inst).strip(),
                     ", ".join(["0x%08x" % a for a in mir_inst.addresses]),
-                    group))
+                    group_name))
 
         return hir_stmt
 
     def on_terminator(self, mir_inst):
-        """..."""
+        """Process a MIR terminator instruction."""
         addresses = mir_inst.addresses
         hir_stmt = None
 
@@ -269,6 +274,17 @@ class CBackEnd(object):
             hir_stmt = ReturnStatement(int(ret_val))
         else:
             hir_stmt = ReturnStatement()
+
+        return hir_stmt
+
+    def on_other(self, mir_inst):
+        """Process a MIR 'other' instruction."""
+        addresses = mir_inst.addresses
+        hir_stmt = None
+
+        print "X" * 20
+        
+        hir_stmt = FunctionCallOperator("hola")
 
         return hir_stmt
 

@@ -14,11 +14,11 @@ from area import Area
 from llvm import *
 from llvm.core import *
 
-__all__ = [ "MiddleIrInstructionBuilder",
-            "MiddleIrInstructionBuilderException",
-            "MiddleIrInstruction",
-            "MiddleIrInstructionException",
-            "MiddleIrVolatileInstruction"]
+#__all__ = [ "MiddleIrInstructionBuilder",
+#            "MiddleIrInstructionBuilderException",
+#            "MiddleIrInstruction",
+#            "MiddleIrInstructionException",
+#            "MiddleIrVolatileInstruction"]
 
 
 class MiddleIrInstructionBuilderException(MiddleIrException):
@@ -326,7 +326,7 @@ class MiddleIrInstruction(MiddleIrLLVMInstance, Area):
         try:
             return GROUP_NAMES[self.group]
         except IndexError, err:
-            raise FrontEndException(
+            raise MiddleIrInstructionException(
                 "Unable to get type name for type (%d) specified." % \
                 self.group)
 

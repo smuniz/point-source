@@ -702,7 +702,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
 
             # TODO / FIXME : Detect the argument type.
             var_type_preffix = "i"
-            var_name = "%(var_type_preffix)s_%(address)x" % vars()
+            var_name = "%(var_type_preffix)s_0x%(address)x" % vars()
             mir_inst = mir_inst_builder.alloca(MiddleIrTypeInt(), None, var_name)
 
             # TODO / FIXME : Obtain this address programatically.
