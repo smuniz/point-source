@@ -45,13 +45,14 @@ class Statement(Area):
 
         self.expression = expression
         self.removed = False
-        #self.has_expression = has_expression
 
-    def set(self, expression):
-        self.expression = expression
+    @property
+    def expression(self):
+        return self._expression
 
-    def get(self):
-        return self.expression
+    @expression.setter
+    def expression(self, expression):
+        self._expression = expression
 
     @property
     def removed(self):
@@ -60,15 +61,6 @@ class Statement(Area):
     @removed.setter
     def removed(self, removed):
         self._removed = removed
-
-    #@property
-    #def has_expression(self):
-    #    return self._has_expression
-
-    #@has_expression.setter
-    #def has_expression(self, has_expression):
-    #    self._has_expression = bool(has_expression)
-
 
 class CompoundStatement(object): #Statement): #, Graph):
     """A block statement, or compound statement, lets you group any number of

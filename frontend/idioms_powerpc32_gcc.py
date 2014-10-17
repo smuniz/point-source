@@ -965,14 +965,15 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         raise PowerPc32GccIdiomAnalyzerException(
                             "data is None")
 
-                    buffer_size = len(data) + 1 # Add one for the NULL terminator.
-                    array_type = MiddleIrTypeArray(MiddleIrTypeChar(), buffer_size)
+                    # Add one for the NULL terminator and make sure se create a
+                    # builder.stringz to hold the NULL terminator. Otherwise we
+                    # should use builder.string.
+                    array_type = MiddleIrTypeArray(MiddleIrTypeChar(), len(data) + 1)
 
                     # Create a global variable referencing the char array.
                     gvar_str = MiddleIrGlobalVariable(
                         array_type,
-                        #MiddleIrConstantStringZ(data),
-                        "szBuffer_0x%X" % lo_inst.address)# + data.capitalize())
+                        "szBuffer_0x%X" % dest_address)# + data.capitalize())
 
                     gvar_str.global_constant = True
                     #gvar_str.alignment = 4  # Strings are aligned to a 4-byte

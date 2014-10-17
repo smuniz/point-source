@@ -258,7 +258,6 @@ class CBackEnd(object):
         addresses = mir_inst.addresses
         hir_stmt = None
 
-        #print dir(mir_inst)
         if len(mir_inst.operands) > 0:
 
             ret_op = mir_inst.operands[0]
@@ -269,6 +268,7 @@ class CBackEnd(object):
                     ret_op)
 
             ret_type, ret_val = ret_tuple
+            print "---->", ret_type, ret_val
             hir_stmt = ReturnStatement(int(ret_val))
         else:
             hir_stmt = ReturnStatement()
@@ -281,8 +281,8 @@ class CBackEnd(object):
         hir_stmt = None
 
         if isinstance(mir_inst, MiddleIrCallInstruction):
-            print mir_inst.get_arguments_readable()
-            hir_stmt = FunctionCallExpression(mir_inst.callee.name)
+            arguments = mir_inst.get_readable_inners()
+            hir_stmt = FunctionCallExpression(mir_inst.callee.name, arguments)
 
         return hir_stmt
 

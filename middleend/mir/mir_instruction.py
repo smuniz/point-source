@@ -1211,13 +1211,15 @@ class MiddleIrCallInstruction(MiddleIrInstruction):
             raise MiddleIrInstructionException(
                 "Unable to create MIR \'call\' instruction (%s)" % err)
 
-    def get_arguments_readable(self):
+    def get_readable_inners(self):
         """Return the arguments list in a readable fashion."""
         arguments = list()
 
         for idx, argument in enumerate(self.arguments):
             print "arg idx:%d -> %s" % (idx, argument)
+            arguments.append(argument.get_readable_inners())
         return arguments
+
 
 class MiddleIrGepInstruction(MiddleIrInstruction):
     """Generate a MIR IR 'gep' instruction."""
@@ -1226,5 +1228,16 @@ class MiddleIrGepInstruction(MiddleIrInstruction):
         super(MiddleIrGepInstruction, self).__init__(
             _type=OPCODE_GETELEMENTPTR)
 
+        self.pointer = pointer
+        self.indices = indices
+        self.name = name
+
+        #
+        # LLVM specifics.
+        #
         indices_ptr = [idx._ptr for idx in indices]
         self._ptr = builder._ptr.gep(pointer._ptr, indices_ptr, name, inbounds)
+
+    def get_readable_inners(self):
+        """..."""
+        return self.pointer.get_readable_inners()

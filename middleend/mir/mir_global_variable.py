@@ -40,7 +40,8 @@ class MiddleIrGlobalVariable(MiddleIrGlobalValue):
     def __init__(self, ty, name):
         """Initialize the instance."""
         #MiddleIrLLVMInstance.__init__(self, ty._ptr)
-        MiddleIrLLVMInstance.__init__(self)#, GlobalVariable(ty._ptr, name))
+        #MiddleIrLLVMInstance.__init__(self)#, GlobalVariable(ty._ptr, name))
+        super(MiddleIrGlobalVariable, self).__init__()
         Area.__init__(self)
 
         self.type = ty
@@ -130,3 +131,7 @@ class MiddleIrGlobalVariable(MiddleIrGlobalValue):
     def initializer(self, initializer):
         """Store the global variable initializer."""
         self._ptr.initializer = initializer._ptr
+
+    def get_readable_inners(self):
+        """..."""
+        return str(self.name)
