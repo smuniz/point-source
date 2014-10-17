@@ -1,5 +1,5 @@
 # 
-# Copyright (c) 2013 Sebastian Muniz
+# Copyright (c) 2014 Sebastian Muniz
 # 
 # This code is part of point source decompiler
 #
@@ -23,7 +23,7 @@ from cbackend.hir.operators import *
 
 import cbackend.hir.expressions
 reload(cbackend.hir.expressions)
-from cbackend.hir.expressions import Expression
+from cbackend.hir.expressions import *
 
 import cbackend.hir.statements
 reload(cbackend.hir.statements)
@@ -138,8 +138,8 @@ class CBackEnd(object):
         try:
             # Obtain the current being decompiled to start the final
             # decompilation process.
-            #address = self.function_address
-            mir_function = self.mir[0]#.get_function_by_address(address)
+            address = self.function_address
+            mir_function = self.mir.get_function_by_address(address)
 
             # self.hir must contain a global scope and the newly created
             # function in it.
@@ -169,8 +169,8 @@ class CBackEnd(object):
             self.hir.add_block(hir_block_stmt)
 
             for bb_idx, mir_basic_block in enumerate(mir_function):
-                print "-> Basic block %d (%s):%s" % (
-                    bb_idx, mir_basic_block.label, mir_basic_block)
+                #print "-> Basic block %d (%s):%s" % (
+                #    bb_idx, mir_basic_block.label, mir_basic_block)
 
                 hir_block_stmt.label = mir_basic_block.label
 
@@ -220,7 +220,6 @@ class CBackEnd(object):
         hir_stmt = None
         group_name = mir_inst.group_name
 
-        print "group name ---> %s" % group_name
         if mir_inst.group is TERMINATOR_GROUP:
             hir_stmt = self.on_terminator(mir_inst)
 
@@ -228,7 +227,6 @@ class CBackEnd(object):
             hir_stmt = self.on_other(mir_inst)
 
         else:
-            print "BBBBBBBBBBAAAAAA"
             raise CBackEndException(
                 "Unsupported instruction (%s) at %s on '%s' group." % (
                     str(mir_inst).strip(),
@@ -282,9 +280,8 @@ class CBackEnd(object):
         addresses = mir_inst.addresses
         hir_stmt = None
 
-        print "X" * 20
-        
-        hir_stmt = FunctionCallOperator("hola")
+        #print "---> %s" % dir(mir_inst)
+        hir_stmt = FunctionCallExpression(mir_inst.name)
 
         return hir_stmt
 

@@ -1,5 +1,5 @@
 # 
-# Copyright (c) 2013 Sebastian Muniz
+# Copyright (c) 2014 Sebastian Muniz
 # 
 # This code is part of point source decompiler
 #
@@ -188,7 +188,7 @@ class CompoundStatement(object): #Statement): #, Graph):
 
         # Walk through all the statements and get each one of them.
         for stmt in self.statements:
-            _str += str(stmt)
+            _str += "%s\n" % stmt
 
         return _str
 

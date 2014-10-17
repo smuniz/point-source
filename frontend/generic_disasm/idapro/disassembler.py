@@ -169,6 +169,10 @@ class Disassembler(BaseDebugger):
         """Return the name of the current function under the cursor."""
         return self.get_function_name(self.screen_address)
 
+    def get_current_function_address(self):
+        """Return the address of the current function under the cursor."""
+        return get_func(self.screen_address).startEA
+
     def get_function_name(self, address):
         """Get the name of the function at the specified memory address."""
         name = get_func_name(address)

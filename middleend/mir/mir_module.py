@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2013 Sebastian Muniz
+# Copyright (c) 2014 Sebastian Muniz
 #
 # This code is part of point source decompiler
 #
@@ -80,7 +80,7 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
 
         self.global_variables.add(global_variable)
 
-    def get_global_variable_named(self, name):
+    def get_global_variable_by_name(self, name):
         """Iterate through every global variable and return the one matching
         the specified name.
         
@@ -90,7 +90,7 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
                 return gvar
         return None
 
-    def get_function_named(self, name):
+    def get_function_by_name(self, name):
         """Iterate through every function and return the one matching the
         specified name.
         
@@ -151,10 +151,20 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
         except LLVMException, err:
             raise MiddleIrModuleException(err)
 
+    #def get_function_by_address(self, address):
+    #    """Iterate through every function and return the one matching the
+    #    specified address.
+    #    
+    #    """
+    #    for mir_function in self.functions:
+    #        if address in mir_function.prologue_addresses:
+    #            return mir_function
+    #    return None
+
     def get_function_by_address(self, address):
         """Return the function at the specified address."""
         for mir_function in self.functions:
-            if mir_function.get_start_address() == address:
+            if mir_function.start_address == address:
                 return mir_function
 
         raise MiddleIrModuleException(

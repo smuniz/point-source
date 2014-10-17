@@ -1,5 +1,5 @@
 # 
-# Copyright (c) 2013 Sebastian Muniz
+# Copyright (c) 2014 Sebastian Muniz
 # 
 # This code is part of point source decompiler
 #
@@ -243,6 +243,16 @@ class MiddleIrFunction(MiddleIrFunctionBase):
     def _llvm_type(self, llvm_type):
         """Store the LLVM function declaration object."""
         self.__llvm_type = llvm_type
+
+    @property
+    def prologue_addresses(self):
+        """Return the prologue addresses list."""
+        return self._prologue_addresses
+
+    @prologue_addresses.setter
+    def prologue_addresses(self, prologue_addresses):
+        """Store the prologue addresses list."""
+        self._prologue_addresses = prologue_addresses
 
     def set_argument_name(self, index, name):
         """Set the name for the argument at the specified index."""

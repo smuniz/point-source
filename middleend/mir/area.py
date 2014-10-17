@@ -1,5 +1,5 @@
 # 
-# Copyright (c) 2013 Sebastian Muniz
+# Copyright (c) 2014 Sebastian Muniz
 # 
 # This code is part of point source decompiler
 #
@@ -59,9 +59,19 @@ class Area(object):
     @property
     def start_address(self):
         """Return the initial address."""
-        return self._addresses[0]
+        try:
+            return self.addresses[0]
+        except IndexError, err:
+            pass
+
+        return None
 
     @property
     def end_address(self):
         """Return the end address."""
-        return self._addresses[-1]
+        try:
+            return self._addresses[-1]
+        except IndexError, err:
+            pass
+
+        return None

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # 
-# Copyright (c) 2013 Sebastian Muniz
+# Copyright (c) 2014 Sebastian Muniz
 # 
 # This code is part of point source decompiler
 #
@@ -217,7 +217,7 @@ class PointSource(object):
 
     def set_screen_address_function_address(self):
         """Store the address of the current selected function to decompile."""
-        self.function_address = self.debugger.screen_address
+        self.function_address = self.debugger.get_current_function_address()
 
     def init_output_media(self):
         """Initialize the output device used for an enhanced information

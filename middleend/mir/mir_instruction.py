@@ -1,5 +1,5 @@
 # 
-# Copyright (c) 2013 Sebastian Muniz
+# Copyright (c) 2014 Sebastian Muniz
 # 
 # This code is part of point source decompiler
 #
@@ -96,8 +96,7 @@ class MiddleIrInstructionBuilder(object):
         try:
             llvm_inst = self.llvm_builder.call(llvm_func, arguments, name)
             _type = OPCODE_CALL #LLVM_call
-            return MiddleIrInstruction(
-                llvm_inst, _type)
+            return MiddleIrInstruction(llvm_inst, _type)
         except TypeError, err:
             raise MiddleIrInstructionException(err)
 

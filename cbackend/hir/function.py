@@ -1,5 +1,5 @@
 # 
-# Copyright (c) 2013 Sebastian Muniz
+# Copyright (c) 2014 Sebastian Muniz
 # 
 # This code is part of point source decompiler
 #
@@ -355,7 +355,8 @@ class Function(object):
         _str = ""
 
         indent_level = 1
-        indent = " " * (indent_level * 4)
+        indent_spaces = 4
+        indent = " " * (indent_level * indent_spaces)
 
         ret_type = self.return_type
         name = self.name
@@ -364,6 +365,7 @@ class Function(object):
         _str += "%(ret_type)s %(name)s %(params)s\n" % vars()
         _str += "{\n"
 
+        #from textwrap import TextWrapper
         if len(self) == 0:
             _str += "%(indent)s// Empty function.\n" % vars()
         else:
@@ -376,7 +378,13 @@ class Function(object):
                     label = block.label
                     _str += "%(indent)s%(label)s:\n" % vars()
 
-                _str += "%(indent)s%(block)s\n" % vars()
+                #w = TextWrapper()
+                #w.initial_indent = indent_level * indent_spaces
+                #w.subsequent_indent = w.initial_indent
+                block_str = ""
+                for line in str(block).splitlines():
+                    block_str += "%(indent)s%(line)s\n" % vars()
+                _str += "%(block_str)s\n" % vars()
 
         _str += "}"
 

@@ -1,5 +1,5 @@
 # 
-# Copyright (c) 2013 Sebastian Muniz
+# Copyright (c) 2014 Sebastian Muniz
 #
 # This code is part of point source decompiler
 #
@@ -693,6 +693,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
 
     def __create_local_variables_for_arguments(self):
         """..."""
+        return # TODO / FIXME : remove this
         try:
             address = self.lir_function.start_address
 

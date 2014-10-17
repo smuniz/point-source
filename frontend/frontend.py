@@ -1,5 +1,5 @@
 # 
-# Copyright (c) 2013 Sebastian Muniz
+# Copyright (c) 2014 Sebastian Muniz
 # 
 # This code is part of point source decompiler
 #
@@ -132,6 +132,7 @@ class FrontEnd(object):
         #self.mir_function = self.mir_module.create_function(function_name)
         # TODO / FIXME : Should add address boundaries.
         self.mir_function = MiddleIrFunction(function_name)
+        self.mir_function.add_address(self.lir_function.start_address)
 
         # Create basic return types in order to create the function skeleton.
         # At the moment we just create generic (integer) types with the right
@@ -376,8 +377,7 @@ class FrontEnd(object):
         # Get every instruction with it's operands and basic blocks
         # information and generate the Low level IR (aka LIR).
         #
-        self.lir_function = self.debugger.generate_lir(
-            self.function_address)
+        self.lir_function = self.debugger.generate_lir(self.function_address)
 
         #
         # Perform a basic check on newly generated LIR function.

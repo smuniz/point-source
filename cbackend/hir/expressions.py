@@ -1,5 +1,5 @@
 # 
-# Copyright (c) 2013 Sebastian Muniz
+# Copyright (c) 2014 Sebastian Muniz
 # 
 # This code is part of point source decompiler
 #
@@ -16,10 +16,10 @@ class Expression(Area):
         self.value = value
 
     def set(self, value):
-        self._value = value
+        self.value = value
 
     def get(self):
-        return self._value
+        return self.value
 
     def __str__(self):
         if self.get() is None:
@@ -207,19 +207,19 @@ class FunctionCallExpression(Expression):
     def __init__(self, func_name=None, arguments=[]):
         super(FunctionCallExpression, self).__init__()
 
-        self.format_values(func_name, arguments)
+        self.set(func_name, arguments)
 
     def format_values(self, func_name, arguments):
         type_name  = PrimaryExpression(func_name)
         #operator   = FunctionCallOperator()             # useless
         arguments  = ParenthesizedExpression(arguments)
-        return (type_name, arguments)
+        return [type_name, arguments]
 
     def set(self, func_name, arguments):
         self.value = self.format_values(func_name, arguments)
 
     def __str__(self):
-        return "%s %s" % (self.get()[0], self.get()[1])
+        return "%s %s;" % (self.get()[0], self.get()[1])
 
     
 class ParenthesizedExpression(Expression):
@@ -228,4 +228,4 @@ class ParenthesizedExpression(Expression):
         super(ParenthesizedExpression, self).__init__(arguments)
 
     def __str__(self):
-        return "( %s )" % ", ".join([str(x) for x in self.get()])
+        return "(%s)" % ", ".join([str(x) for x in self.get()])

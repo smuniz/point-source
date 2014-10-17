@@ -1,5 +1,5 @@
 # 
-# Copyright (c) 2013 Sebastian Muniz
+# Copyright (c) 2014 Sebastian Muniz
 # 
 # This code is part of point source decompiler
 #
@@ -24,5 +24,7 @@ class MiddleIrFunctionBase(MiddleIrLLVMInstance, Area):
 
     def __init__(self):
         """Initialize the intermediate level IR module class."""
-        super(MiddleIrFunctionBase, self).__init__()
+        #super(MiddleIrFunctionBase, self).__init__()
+        MiddleIrLLVMInstance.__init__(self)
+        Area.__init__(self)
 

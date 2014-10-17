@@ -58,19 +58,19 @@ def do_module():
     # m.add_type_name('a', ti)
     # m.delete_type_name('a')
     MiddleIrTypeStruct([ti], name='a')
-#    m.get_type_named('a').name=''
+#    m.get_type_by_name('a').name=''
 
     s = str(m)
     s = m == MiddleIrModule.new('a')
     #gvar = MiddleIrGlobalVariable(ti, 'b')
     #m.add_global_variable(gvar)
     gvar = MiddleIrGlobalVariable.new(m, ti, 'b')
-#    m.get_global_variable_named('b')
+#    m.get_global_variable_by_name('b')
 #    gvs = list(m.global_variables)
     #ft = MiddleIrTypeFunction(ti, [ti])
     func = MiddleIrFunction("func", ti, [ti])
     m.add_function(func)
-    m.get_function_named("func")
+    m.get_function_by_name("func")
 #    m.get_or_insert_function(ft, "func")
 #    m.get_or_insert_function(MiddleIrTypeFunction(ti, []), "func")
 #    m.get_or_insert_function(ft, "func2")
