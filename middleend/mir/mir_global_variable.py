@@ -39,8 +39,6 @@ class MiddleIrGlobalVariable(MiddleIrGlobalValue):
 
     def __init__(self, ty, name):
         """Initialize the instance."""
-        #MiddleIrLLVMInstance.__init__(self, ty._ptr)
-        #MiddleIrLLVMInstance.__init__(self)#, GlobalVariable(ty._ptr, name))
         super(MiddleIrGlobalVariable, self).__init__()
         Area.__init__(self)
 
@@ -125,13 +123,15 @@ class MiddleIrGlobalVariable(MiddleIrGlobalValue):
     @property
     def initializer(self):
         """Return the global variable initializer."""
-        return self._ptr.initializer
+        #return self._ptr.initializer
+        return self._initializer
 
     @initializer.setter
     def initializer(self, initializer):
         """Store the global variable initializer."""
+        self._initializer = initializer
         self._ptr.initializer = initializer._ptr
 
     def get_readable_inners(self):
         """..."""
-        return str(self.name)
+        return self.initializer.get_readable_inners()

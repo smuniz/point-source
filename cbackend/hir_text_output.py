@@ -119,7 +119,8 @@ class HirTextOutput(TextOutputMedia):
             block_repr = str(block)
             for stmt in block_repr.splitlines():
                 inst = "%(indent)s%(stmt)s" % vars()
-                s = self.as_string("%-40s" % inst)
+                #s = self.as_string("%-40s" % inst)
+                s = "%-40s" % inst
                 self.__colorize_line(s)
 
         # Generate function's epilogue

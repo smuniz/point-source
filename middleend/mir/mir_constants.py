@@ -3,7 +3,6 @@
 # 
 # This code is part of point source decompiler
 #
-
 from middleend.mir_exception import MiddleIrException
 from middleend.mir.mir_type import *
 from middleend.mir.mir_llvm_instance import MiddleIrLLVMInstance
@@ -27,6 +26,7 @@ class MiddleIrBaseConstant(MiddleIrLLVMInstance):
 
         self.type = None
         self.name = None
+        self.value = None
 
     @property
     def type(self):
@@ -48,9 +48,9 @@ class MiddleIrBaseConstant(MiddleIrLLVMInstance):
         """Store the name of the constant."""
         self._name = name
 
-    #def gep(self):
-    #    """..."""
-    #    return self._ptr.gep(0)
+    def get_readable_inners(self):
+        """Return internal object representation in a readable fashion."""
+        return self.value
 
 class MiddleIrConstantInt(MiddleIrBaseConstant):
     """Middle level intermediate representation class of integer constant."""
@@ -61,8 +61,11 @@ class MiddleIrConstantInt(MiddleIrBaseConstant):
             Constant.int(const_type._ptr, value)
             )
 
+        self.value = value
         self.type = const_type
 
+    def get_readable_inners(self):
+        return self.value
 
 class MiddleIrConstantString(MiddleIrBaseConstant):
     """Middle level intermediate representation class of non-null-terminated
@@ -74,6 +77,7 @@ class MiddleIrConstantString(MiddleIrBaseConstant):
         """Initialize the instance."""
         super(MiddleIrConstantString, self).__init__(Constant.string(value))
 
+        self.value = repr(value).replace("'", "\"")
 
 class MiddleIrConstantStringZ(MiddleIrBaseConstant):
     """Middle level intermediate representation class of null-terminated string
@@ -84,6 +88,8 @@ class MiddleIrConstantStringZ(MiddleIrBaseConstant):
     def __init__(self, value):
         """Initialize the instance."""
         super(MiddleIrConstantStringZ, self).__init__(Constant.stringz(value))
+
+        self.value = repr(value).replace("'", "\"")
 
 
 class MiddleIrConstantNull(MiddleIrBaseConstant):

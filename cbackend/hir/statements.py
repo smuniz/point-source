@@ -245,7 +245,7 @@ class ReturnStatement(Statement):
             expression=expression, addresses=addresses)
 
     def __str__(self):
-        if self.expression:
+        if self.expression is not None:
             return "return 0x%x;" % self.expression
         else:
             return "return;"

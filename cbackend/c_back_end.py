@@ -268,7 +268,6 @@ class CBackEnd(object):
                     ret_op)
 
             ret_type, ret_val = ret_tuple
-            print "---->", ret_type, ret_val
             hir_stmt = ReturnStatement(int(ret_val))
         else:
             hir_stmt = ReturnStatement()

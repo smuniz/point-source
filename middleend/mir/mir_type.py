@@ -3,7 +3,6 @@
 # 
 # This code is part of point source decompiler
 #
-
 from middleend.mir.mir_llvm_instance import MiddleIrLLVMInstance
 
 from llvm.core import Type
