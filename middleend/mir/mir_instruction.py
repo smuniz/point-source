@@ -37,16 +37,27 @@ class MiddleIrInstructionBuilder(object):
         self.mir_basic_block = mir_basic_block
 
         #
-        # Instantiate an LLVM instruction builder for further usage.
+        # Instantiate a LLVM instruction builder to create each instruction
+        # specified by the user.
         #
-        self.llvm_builder = Builder.new(mir_basic_block._ptr)
+        self._ptr = Builder.new(mir_basic_block._ptr)
+
+    @property
+    def _ptr(self):
+        """Return builder type."""
+        return self._llvm_ptr
+
+    @_ptr.setter
+    def _ptr(self, ptr):
+        """Store builder type."""
+        self._llvm_ptr = ptr
 
     def position_at_address(self, address):
         """Position the builder at the specified address."""
         if len(self.mir_basic_block) == 0:
             llvm_basic_block = self.mir_basic_block._ptr
 
-            self.llvm_builder.position_at_beginning(llvm_basic_block)
+            self._ptr.position_at_beginning(llvm_basic_block)
             return
 
         for mir_inst in self.mir_basic_block:
@@ -66,7 +77,7 @@ class MiddleIrInstructionBuilder(object):
                     "Warning: _ptr returned None at 0x%X" % \
                     address)
 
-            self.llvm_builder.position_before(llvm_inst)
+            self._ptr.position_before(llvm_inst)
             return
 
         raise MiddleIrInstructionBuilderException(
@@ -76,119 +87,85 @@ class MiddleIrInstructionBuilder(object):
     # Arithmethic, bitwise and logical
     #
     def add(self, lhs, rhs, name=""):
-        """Generate an LLVM IR add instruction."""
+        """Generate a LLVM IR add instruction."""
         #_type = LLVM_add
-        return MiddleIrInstruction(self.llvm_builder.add(
+        return MiddleIrInstruction(self._ptr.add(
             lhs._ptr, rhs._ptr, name))
 
     #
     # Misc.
     #
-    def call(self, fn, args, name=""):
-        """Generate an LLVM IR call instruction."""
-        llvm_func = fn._llvm_definition
-
-        if isinstance(args, list):
-            arguments = [arg._ptr for arg in args]
-        else:
-            arguments = [args._ptr, ]
-
-        try:
-            llvm_inst = self.llvm_builder.call(llvm_func, arguments, name)
-            _type = OPCODE_CALL #LLVM_call
-            return MiddleIrInstruction(llvm_inst, _type)
-        except TypeError, err:
-            raise MiddleIrInstructionException(err)
+    def call(self, callee, arguments, name=""):
+        """Generate a LLVM IR call instruction."""
+        return MiddleIrCallInstruction(self, callee, arguments, name)
 
     #
     # Memory
     #
     def alloca(self, ty, size=None, name=""):
-        """Generate an LLVM IR alloca instruction."""
+        """Generate a LLVM IR alloca instruction."""
         sizeptr = size._ptr if size else None
         _type = OPCODE_ALLOCA #LLVM_alloca
         return MiddleIrInstruction(
-            self.llvm_builder.alloca(ty._ptr, sizeptr, name), _type)
+            self._ptr.alloca(ty._ptr, sizeptr, name), _type)
 
     def alloca_array(self, ty, size, name=""):
-        """Generate an LLVM IR alloca_array instruction."""
+        """Generate a LLVM IR alloca_array instruction."""
         return MiddleIrInstruction(
-            self.llvm_builder.alloca_array(ty._ptr, size, name))
+            self._ptr.alloca_array(ty._ptr, size, name))
 
     def free(self, ptr):
-        """Generate an LLVM IR free instruction."""
-        #return MiddleIrInstruction(self.llvm_builder.alloca_array(ptr))
+        """Generate a LLVM IR free instruction."""
+        #return MiddleIrInstruction(self._ptr.alloca_array(ptr))
         raise Exception("Builder.free not implemented.")
 
-    def gep(self, pointer, mir_indices, name="", inbounds=False):
-        """Generate an LLVM IR getelementptr instruction."""
-        indices = [idx._ptr for idx in mir_indices]
-        llvm_inst = self.llvm_builder.gep(pointer._ptr, indices, name, inbounds)
-        _type = OPCODE_GETELEMENTPTR # LLVM_getelementptr
-
-        return MiddleIrInstruction(llvm_inst, _type)
+    def gep(self, pointer, indices, name="", inbounds=False):
+        """Generate a LLVM IR getelementptr instruction."""
+        return MiddleIrGepInstruction(self, pointer, indices, name, inbounds)
 
     def load(self, ptr, name=""):
-        """Generate an LLVM IR load instruction."""
+        """Generate a LLVM IR load instruction."""
         _type = OPCODE_LOAD
-        return MiddleIrInstruction(self.llvm_builder.load(ptr, name), _type)
+        return MiddleIrInstruction(self._ptr.load(ptr, name), _type)
 
     def malloc(self, ty, name=""):
-        """Generate an LLVM IR malloc instruction."""
+        """Generate a LLVM IR malloc instruction."""
         #_type = OPCODE_ALLOCA
         _type = None
         return MiddleIrInstruction(
-            self.llvm_builder.malloc(ty._ptr, name), _type)
+            self._ptr.malloc(ty._ptr, name), _type)
 
     def malloc_array(self, ty, size, name=""):
-        """Generate an LLVM IR malloc_array instruction."""
-        return MiddleIrInstruction(self.llvm_builder.malloc_array(
+        """Generate a LLVM IR malloc_array instruction."""
+        return MiddleIrInstruction(self._ptr.malloc_array(
                 ty._ptr, size, name))
 
     def store(self, mir_value, mir_ptr):
-        """Generate an LLVM IR store instruction."""
-        return MiddleIrInstruction(self.llvm_builder.store(
+        """Generate a LLVM IR store instruction."""
+        return MiddleIrInstruction(self._ptr.store(
                 mir_value, mir_ptr._ptr))
 
     #
     # Terminator instructions
     #
     def branch(self, bblk):
-        """Generate an LLVM IR branch instruction."""
+        """Generate a LLVM IR branch instruction."""
         _type = OPCODE_UNREACHABLE #LLVM_unreachable
-        llvm_type = self.llvm_builder.branch(bblk._ptr)
+        llvm_type = self._ptr.branch(bblk._ptr)
         return MiddleIrInstruction(llvm_inst, _type)
 
     def ret(self, ret_val=None):
-        """Generate an LLVM IR 'ret' instruction of the right type."""
-        _type = OPCODE_RET #LLVM_ret
-        llvm_inst = None
-        operands = None
-
-        if ret_val is None:
-            #Generate an LLVM IR 'ret_void' instruction.
-            llvm_inst = self.llvm_builder.ret_void()
-
-        elif type(ret_val) in (tuple, list):
-            # Generate an LLVM IR 'ret_many' instruction.
-            raise Exception("TODO / FIXME: ret_many native llvmpy objs")
-            llvm_inst = self.llvm_builder.ret_many(ret_val)
-
-        else:
-            # We're returning just one value.
-            llvm_inst = self.llvm_builder.ret(ret_val._ptr)
-            operands = [ret_val, ]
-
-        return MiddleIrInstruction(llvm_inst, _type, operands=operands)
+        """Generate a LLVM IR 'ret' instruction of the right type."""
+        return MiddleIrRetInstruction(self, ret_val)
 
     #
     # Others
     #
     def pointer(self, pointee, addr_space=""):
-        """Generate an LLVM IR pointer instruction."""
+        """Generate a LLVM IR pointer instruction."""
         llvm_pointee = pointee._ptr
         return MiddleIrInstruction(
-            self.llvm_builder.pointer(llvm_pointee, addr_space))
+            self._ptr.pointer(llvm_pointee, addr_space))
 
 
     @staticmethod
@@ -1184,3 +1161,70 @@ Semantics:
 
 Stack Map Intrinsics
 """
+
+class MiddleIrRetInstruction(MiddleIrInstruction):
+    """Generate a MIR IR 'ret' instruction of the right type."""
+
+    def __init__(self, builder, ret_val):
+        super(MiddleIrRetInstruction, self).__init__(_type=OPCODE_RET)
+        llvm_inst = None
+        operands = None
+
+        if ret_val is None:
+            #Generate a LLVM IR 'ret_void' instruction.
+            self._ptr = self._ptr.ret_void()
+
+        elif type(ret_val) in (tuple, list):
+            # Generate a LLVM IR 'ret_many' instruction.
+            raise MiddleIrInstructionException("TODO / FIXME: ret_many native llvmpy objs")
+            self._ptr = builder._ptr.ret_many(ret_val)
+
+        else:
+            # We're returning just one value.
+            self._ptr = builder._ptr.ret(ret_val._ptr)
+            self.operands = [ret_val, ]
+
+
+class MiddleIrCallInstruction(MiddleIrInstruction):
+    """Generate a MIR IR 'call' instruction."""
+
+    def __init__(self, builder, callee, arguments, name=""):
+        super(MiddleIrCallInstruction, self).__init__(_type=OPCODE_CALL)
+
+        self.name = name
+        self.callee = callee
+        self.arguments = arguments
+
+        #
+        # LLVM specifics.
+        #
+        llvm_func = callee._llvm_definition
+
+        if isinstance(arguments, list):
+            arguments_ptr = [arg._ptr for arg in arguments]
+        else:
+            arguments_ptr = [arguments._ptr, ]
+
+        try:
+            self._ptr = builder._ptr.call(llvm_func, arguments_ptr, name)
+        except TypeError, err:
+            raise MiddleIrInstructionException(
+                "Unable to create MIR \'call\' instruction (%s)" % err)
+
+    def get_arguments_readable(self):
+        """Return the arguments list in a readable fashion."""
+        arguments = list()
+
+        for idx, argument in enumerate(self.arguments):
+            print "arg idx:%d -> %s" % (idx, argument)
+        return arguments
+
+class MiddleIrGepInstruction(MiddleIrInstruction):
+    """Generate a MIR IR 'gep' instruction."""
+
+    def __init__(self, builder, pointer, indices, name, inbounds):
+        super(MiddleIrGepInstruction, self).__init__(
+            _type=OPCODE_GETELEMENTPTR)
+
+        indices_ptr = [idx._ptr for idx in indices]
+        self._ptr = builder._ptr.gep(pointer._ptr, indices_ptr, name, inbounds)

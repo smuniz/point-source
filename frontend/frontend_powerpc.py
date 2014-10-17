@@ -194,18 +194,18 @@ class FrontEndPowerPc(FrontEnd):
                 #
                 func_name = self.debugger.get_function_name(branch_address)
 
-                called_mir_func = MiddleIrFunction(func_name, self.mir_module)
+                mir_callee = MiddleIrFunction(func_name, self.mir_module)
 
-                called_mir_func.return_type = MiddleIrTypeVoid()
-                #called_mir_func.arguments = [MiddleIrTypeChar()] * 15
-                called_mir_func.arguments = MiddleIrTypePointer(MiddleIrTypeChar()),
+                mir_callee.return_type = MiddleIrTypeVoid()
+                #mir_callee.arguments = [MiddleIrTypeChar()] * 15
+                mir_callee.arguments = MiddleIrTypePointer(MiddleIrTypeChar()),
 
-                self.mir_module.add_function(called_mir_func)
+                self.mir_module.add_function(mir_callee)
 
                 ########################
                 # TODO : Remove this fake function body.
                 #called_mir_basic_block = MiddleIrBasicBlock()
-                #called_mir_func.add_basic_block(called_mir_basic_block)
+                #mir_callee.add_basic_block(called_mir_basic_block)
 
                 #called_mir_builder = MiddleIrInstructionBuilder(called_mir_basic_block)
 
@@ -220,14 +220,14 @@ class FrontEndPowerPc(FrontEnd):
                 ########################
 
                 # Assign a name to each argument of the function being called.
-                for arg_index, arg in enumerate(called_mir_func.arguments):
-                    called_mir_func.set_argument_name(0, "arg%s" % arg_index)
+                for arg_index, arg in enumerate(mir_callee.arguments):
+                    mir_callee.set_argument_name(0, "arg%s" % arg_index)
 
                 # TODO : Obtain function arguments programatically.
-                called_mir_func_args = self.current_symbol_table[0x40]
+                mir_callee_args = [self.current_symbol_table[0x40], ]
 
                 mir_inst = self.mir_inst_builder.call(
-                    called_mir_func, called_mir_func_args)
+                    mir_callee, mir_callee_args)
 
         elif lir_inst.is_type(self.iset.PPC_balways):
             #

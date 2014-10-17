@@ -280,8 +280,9 @@ class CBackEnd(object):
         addresses = mir_inst.addresses
         hir_stmt = None
 
-        #print "---> %s" % dir(mir_inst)
-        hir_stmt = FunctionCallExpression(mir_inst.name)
+        if isinstance(mir_inst, MiddleIrCallInstruction):
+            print mir_inst.get_arguments_readable()
+            hir_stmt = FunctionCallExpression(mir_inst.callee.name)
 
         return hir_stmt
 
