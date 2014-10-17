@@ -109,7 +109,6 @@ class FrontEndPowerPc(FrontEnd):
             pass
 
         elif lir_inst.is_type(self.iset.PPC_lwz):
-            print "PPC_lwz"
             pass
 
         elif lir_inst.is_type(self.iset.PPC_mr):

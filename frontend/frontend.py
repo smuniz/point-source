@@ -130,14 +130,13 @@ class FrontEnd(object):
         function_name = self.debugger.get_current_function_name()
 
         #self.mir_function = self.mir_module.create_function(function_name)
-        # TODO / FIXME : Should add address boundaries.
         self.mir_function = MiddleIrFunction(function_name)
         self.mir_function.add_address(self.lir_function.start_address)
 
+        # TODO / FIXME: Correctly detect return type.
         # Create basic return types in order to create the function skeleton.
         # At the moment we just create generic (integer) types with the right
         # amount of return values.
-        # TODO / FIXME: Fix this horrible kludge!!!
         self.return_type = 1
 
         if self.return_type == 0:

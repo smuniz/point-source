@@ -6,6 +6,7 @@
 
 from middleend.mir_exception import MiddleIrException
 from middleend.mir.mir_llvm_instance import MiddleIrLLVMInstance
+
 from area import Area
 
 __all__ = ["MiddleIrFunctionBase", "MiddleIrFunctionBaseException"]
@@ -27,4 +28,3 @@ class MiddleIrFunctionBase(MiddleIrLLVMInstance, Area):
         #super(MiddleIrFunctionBase, self).__init__()
         MiddleIrLLVMInstance.__init__(self)
         Area.__init__(self)
-
