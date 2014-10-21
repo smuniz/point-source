@@ -293,7 +293,9 @@ class CBackEnd(object):
 
         if isinstance(mir_inst, MiddleIrCallInstruction):
             arguments = mir_inst.get_readable_inners()
-            hir_stmt = FunctionCallExpression(mir_inst.callee.name, arguments)
+            hir_stmt = Statement(
+                FunctionCallExpression(mir_inst.callee.name, arguments),
+                mir_inst.addresses)
 
         return hir_stmt
 

@@ -84,6 +84,7 @@ class HirTextOutput(TextOutputMedia):
 
         # Update HIR map for addresses relations.
         self.address_map = dict()
+        self.addresses_coloured = dict()
 
     @property
     def hir(self):
@@ -133,14 +134,19 @@ class HirTextOutput(TextOutputMedia):
 
                 self.add_line(s)
 
-            block_repr = str(block)
-            for stmt in block_repr.splitlines():
-                inst = "%(indent)s%(stmt)s" % vars()
-                #s = self.as_string("%-40s" % inst)
-                s = "%-40s" % inst
-                self.__colorize_line(s)
+            block_repr = ""
+            for stmt in block.statements:
+                #print "---> stmt : %s" % stmt
+                #block_repr += "%s\n" % stmt
 
-                #self.address_map[line_number] = stmt.address # self.hir.prologue_addresses
+            #block_repr = str(block)
+            #for stmt in block_repr.splitlines():
+                stmt_fmt = "%(indent)s%(stmt)s" % vars()
+                stmt_fmt = "%-40s" % stmt_fmt
+                self.__colorize_line(stmt_fmt)
+
+                self.address_map[line_number] = stmt.addresses
+                print "statement : cur_line_number %d - line_number %d" % (cur_line_number, line_number)
                 line_number += 1 # Move forward line number index.
 
         #
@@ -329,7 +335,20 @@ class HirTextOutput(TextOutputMedia):
         """Cursor position changed callback."""
         cur_line_number = self.GetLineNo()
         addresses = self.address_map.get(cur_line_number, None)
+
+        print ", ".join(
+            ["0x%08x" % addr for addr in addresses])
+
         if not addresses:
+            print "No address(es) for line number %d" % cur_line_number
             return
-        #print ", ".join(
-        #    ["0x%08x" % addr for addr in addresses])
+
+        # First we restablish the previously coloured lines.
+        for address, colour in self.addresses_coloured.iteritems():
+            self.set_colour(address, colour)
+
+        self.addresses_coloured.clear()
+            
+        for address in addresses:
+            self.addresses_coloured[address] = self.get_colour(address)
+        

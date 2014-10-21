@@ -103,23 +103,12 @@ class TextOutputMedia(OutputMediaBase, idaapi.simplecustviewer_t):
 
     def OnKeydown(self, vkey, shift):
         """Handle every key pressed in the newly created window."""
-        #print "got ordi %d" % vkey
         if vkey == 27:
             # The ESC key was pressed so close the window and leave.
             self.Close()
-        #elif vkey in [ord("R"), ord("r")]:
-        #    #print "refreshing (forced)..."
-        #    self.refresh()
-        #elif vkey == ord("I"):
-        #    print "inserting..."
-        #    self.ClearLines()
-        #    self.add_line("hola")
-        #    self.refresh()
-        #    return False
         else:
             # An unknown key was pressed.
             return self.on_key_down(vkey, shift)
-            #pass
 
         return True
 
@@ -180,3 +169,11 @@ class TextOutputMedia(OutputMediaBase, idaapi.simplecustviewer_t):
     def as_function_name(self, string):
         """Display the specified text as a function name."""
         return idaapi.COLSTR(string, idaapi.SCOLOR_CNAME)
+
+    def get_colour(self, address):
+        """Return the items colour."""
+        return idaapi.get_item_color(address)
+
+    def set_colour(self, address, colour):
+        """Store an item colour."""
+        idaapi.set_item_color(address, colour)

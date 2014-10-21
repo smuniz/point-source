@@ -62,6 +62,9 @@ class Statement(Area):
     def removed(self, removed):
         self._removed = removed
 
+    def __str__(self):
+        return str(self.expression)
+
 class CompoundStatement(object): #Statement): #, Graph):
     """A block statement, or compound statement, lets you group any number of
     data definitions, declarations, and statements into one statement.
