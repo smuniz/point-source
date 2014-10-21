@@ -43,11 +43,20 @@ class TextOutputMedia(OutputMediaBase, idaapi.simplecustviewer_t):
             # the data we want to display.
             self.title = title
 
-            self.create()
+            crea = self.create()
+
+            if not crea:
+                self.ClearLines()
+                #self.add_line("hola manola")
+                self.refresh()
+            else:
+                #print "1 OK..."
+                pass
 
             self.show()
-
-            self.colorize() # This must be implemented in the derived class.
+            self.colorize() # This must be implemented in the
+                                        # derived class.
+            #self.refresh()
 
         except Exception, err:
             print format_exc()
@@ -62,7 +71,9 @@ class TextOutputMedia(OutputMediaBase, idaapi.simplecustviewer_t):
     def create(self):
         """Create the new window with the specified title."""
         if not self.Create(self.title):
-            raise TextOutputMediaException("Unable to create custom viewer")
+            #raise TextOutputMediaException("Unable to create custom viewer")
+            return False
+        return True
 
     def show(self):
         """Display the window inside the current application."""
@@ -83,14 +94,37 @@ class TextOutputMedia(OutputMediaBase, idaapi.simplecustviewer_t):
 
     def OnKeydown(self, vkey, shift):
         """Handle every key pressed in the newly created window."""
+        print "got ordi %d" % vkey
         if vkey == 27:
             # The ESC key was pressed so close the window and leave.
             self.Close()
+        #elif vkey in [ord("R"), ord("r")]:
+        #    #print "refreshing (forced)..."
+        #    self.refresh()
+        #elif vkey == ord("I"):
+        #    print "inserting..."
+        #    self.ClearLines()
+        #    self.add_line("hola")
+        #    self.refresh()
+        #    return False
         else:
             # An unknown key was pressed.
-            return False
+            return self.on_key_down(vkey, shift)
+            #pass
 
         return True
+
+    def OnCursorPosChanged(self):
+        """
+        Cursor position changed.
+        @return: Nothing
+        """
+        #print "A" * 20
+        self.on_curor_position_changed()
+
+    def refresh(self):
+        """Refresh the current output."""
+        self.Refresh()
 
     #
     # Colorize specific output.

@@ -91,6 +91,8 @@ class HirTextOutput(TextOutputMedia):
     def hir(self, hir):
         """Store the high level IR for further usage."""
         self._hir = hir
+        # Update HIR map for addresses relations.
+        self.__build_hir_map()
 
     def generate_output(self, title):
         """Generate C-like readble output in the log window."""
@@ -243,7 +245,7 @@ class HirTextOutput(TextOutputMedia):
 
     def generate_function_opening(self):
         """Create the C functions opening text to represent."""
-        self.add_line()
+        #self.add_line()
 
         ret_type = self.as_identifier(self.hir.return_type)
 
@@ -272,3 +274,42 @@ class HirTextOutput(TextOutputMedia):
     def generate_function_closure(self):
         """Create the C functions closure text to represent."""
         self.add_line(self.as_string("}"))
+
+    def on_key_down(self, vkey, shift):
+        """
+        User pressed a key
+        @param vkey: Virtual key code
+        @param shift: Shift flag
+        @return: Boolean. True if you handled the event
+        """
+        if vkey in [ord("R"), ord("r")]:
+            #print "refreshing (forced)..."
+            self.refresh()
+        else:
+            # An unknown key was pressed.
+            return False
+
+        return True
+
+    def __build_hir_map(self):
+        """..."""
+        self.hir_map = dict()
+
+        print "prologue addresses : %s" % \
+            ", ".join(["0x%X" % x for x in self.hir.prologue_addresses])
+
+        for block in self.hir.blocks:
+            for stmt in block.statements:
+                print "statement addresses : %s" % \
+                    ", ".join(["0x%X" % x for x in stmt.addresses])
+                #self.hir_map[addresse
+
+        print "epilogue addresses : %s" % \
+            ", ".join(["0x%X" % x for x in self.hir.epilogue_addresses])
+
+
+    def on_curor_position_changed(self):
+        """Cursor position changed callback."""
+        #print "Current position is %r" % self.GetLineNo()
+        cur_line = self.GetLineNo()
+        #print self.hir

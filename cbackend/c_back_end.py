@@ -180,7 +180,7 @@ class CBackEnd(object):
                     # This is where most of the MIR instruction are translated
                     # to its HIR equivalents for further usage.
                     #
-                    hir_stmt = self.transform_to_hir_statement(mir_inst)
+                    hir_stmt = self.transform_to_hir(mir_inst)
 
                     if hir_stmt is not None:
                         # Now the newly created instruction is stored in a basic
@@ -198,7 +198,7 @@ class CBackEnd(object):
             raise CBackEndException(
                 "High level IR code generation failed : %s" % err)
 
-    def transform_to_hir_statement(self, mir_inst):
+    def transform_to_hir(self, mir_inst):
         """Get the corresponding HIR statement according to the MIR
         instruction.
 
@@ -327,6 +327,6 @@ class CBackEnd(object):
         # Create an output instance to display the current C code
         # representation hosted inside the HIR.
         print "[+] Creating HIR representation..."
-        print str(self.hir)
-        #hir_output = HirTextOutput(self.hir)
-        #hir_output.generate_output("Decompiled code")
+        #print str(self.hir)
+        hir_output = HirTextOutput(self.hir)
+        hir_output.generate_output("Decompiled code")

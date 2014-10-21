@@ -156,6 +156,16 @@ class Function(object):
         """Store the end address of the function."""
         self._end_address = address
 
+    @property
+    def prologue_addresses(self):
+        """Return the list of prologue addresses."""
+        return self._prologue_addresses
+
+    @property
+    def epilogue_addresses(self):
+        """Return the list of epilogue addresses."""
+        return self._epilogue_addresses
+
     def add_prologue_address(self, address):
         """Mark the specified address as part of the function prologue and
         remove it from the list of statements to analyze.
