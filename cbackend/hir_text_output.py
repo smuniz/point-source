@@ -84,7 +84,7 @@ class HirTextOutput(TextOutputMedia):
 
         # Update HIR map for addresses relations.
         self.address_map = dict()
-        self.addresses_coloured = dict()
+        self.coloured_addresses = dict()
 
     @property
     def hir(self):
@@ -114,9 +114,9 @@ class HirTextOutput(TextOutputMedia):
 
         self.add_lines(func_opening)
 
-        for cur_line_number in xrange(len(func_opening)):
-            print "prologue : cur_line_number %d - line_number %d" % (cur_line_number, line_number)
-            self.address_map[cur_line_number] = self.hir.prologue_addresses
+        for index in xrange(len(func_opening)):
+            print "prologue : index %d - line_number %d" % (index, line_number)
+            self.address_map[line_number] = self.hir.prologue_addresses
             line_number += 1 # Move forward line number index.
 
         #
@@ -135,7 +135,7 @@ class HirTextOutput(TextOutputMedia):
                 self.add_line(s)
 
             block_repr = ""
-            for stmt in block.statements:
+            for index, stmt in enumerate(block.statements):
                 #print "---> stmt : %s" % stmt
                 #block_repr += "%s\n" % stmt
 
@@ -146,7 +146,7 @@ class HirTextOutput(TextOutputMedia):
                 self.__colorize_line(stmt_fmt)
 
                 self.address_map[line_number] = stmt.addresses
-                print "statement : cur_line_number %d - line_number %d" % (cur_line_number, line_number)
+                print "statement : index %d - line_number %d" % (index, line_number)
                 line_number += 1 # Move forward line number index.
 
         #
@@ -156,9 +156,9 @@ class HirTextOutput(TextOutputMedia):
 
         self.add_lines(func_closure)
 
-        for cur_line_number in xrange(len(func_closure)):
-            print "epilogue : cur_line_number %d - line_number %d" % (cur_line_number, line_number)
-            self.address_map[cur_line_number] = self.hir.prologue_addresses
+        for index in xrange(len(func_closure)):
+            print "epilogue : index %d - line_number %d" % (index, line_number)
+            self.address_map[line_number] = self.hir.epilogue_addresses
             line_number += 1 # Move forward line number index.
 
 
@@ -336,19 +336,29 @@ class HirTextOutput(TextOutputMedia):
         cur_line_number = self.GetLineNo()
         addresses = self.address_map.get(cur_line_number, None)
 
+        if not addresses:
+            #print "No address(es) for line number %d" % cur_line_number
+            return
+
+        print "current line is %d" % cur_line_number
         print ", ".join(
             ["0x%08x" % addr for addr in addresses])
 
-        if not addresses:
-            print "No address(es) for line number %d" % cur_line_number
-            return
-
         # First we restablish the previously coloured lines.
-        for address, colour in self.addresses_coloured.iteritems():
+        for address, colour in self.coloured_addresses.iteritems():
+            #print "Setting color 0x%X for address 0x%X" % (
+            #    colour, address)
             self.set_colour(address, colour)
 
-        self.addresses_coloured.clear()
+        self.coloured_addresses.clear()
             
         for address in addresses:
-            self.addresses_coloured[address] = self.get_colour(address)
+            #print "Getting color for address 0x%X" % (address)
+            self.coloured_addresses[address] = self.get_colour(address)
+            self.set_colour(address, 0x2020c0)
         
+    def on_close(self):
+        """Handle close event"""
+        # First we restablish the previously coloured lines.
+        for address, colour in self.coloured_addresses.iteritems():
+            self.set_colour(address, colour)

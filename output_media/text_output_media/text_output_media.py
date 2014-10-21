@@ -101,6 +101,14 @@ class TextOutputMedia(OutputMediaBase, idaapi.simplecustviewer_t):
         # Invoke the simple viewer method.
         self.AddLine(string)
 
+    @abc.abstractmethod
+    def on_close(self):
+        return
+
+    def OnClose(self):
+        """Handle close event."""
+        self.on_close()
+
     def OnKeydown(self, vkey, shift):
         """Handle every key pressed in the newly created window."""
         if vkey == 27:
