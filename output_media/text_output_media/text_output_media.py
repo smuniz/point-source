@@ -84,6 +84,15 @@ class TextOutputMedia(OutputMediaBase, idaapi.simplecustviewer_t):
         """Fill the recently created window with the text."""
         return
 
+    def add_lines(self, lines):
+        """Add multiple lines to the current display."""
+        # Make sure this is a line or a list of lines.
+        if isinstance(lines, str):
+            self.add_lines(lines)
+        else:
+            for line in lines:
+                self.add_line(line)
+
     def add_line(self, string=None):
         """Display the specified text at the current line."""
         if not string:
@@ -94,7 +103,7 @@ class TextOutputMedia(OutputMediaBase, idaapi.simplecustviewer_t):
 
     def OnKeydown(self, vkey, shift):
         """Handle every key pressed in the newly created window."""
-        print "got ordi %d" % vkey
+        #print "got ordi %d" % vkey
         if vkey == 27:
             # The ESC key was pressed so close the window and leave.
             self.Close()
@@ -119,7 +128,6 @@ class TextOutputMedia(OutputMediaBase, idaapi.simplecustviewer_t):
         Cursor position changed.
         @return: Nothing
         """
-        #print "A" * 20
         self.on_curor_position_changed()
 
     def refresh(self):

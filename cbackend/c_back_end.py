@@ -145,6 +145,13 @@ class CBackEnd(object):
             # function in it.
             self.hir = Function()
 
+            # Pass addresses for instruction tracking purposes.
+            for address in mir_function.prologue_addresses:
+                self.hir.add_prologue_address(address)
+
+            for address in mir_function.epilogue_addresses:
+                self.hir.add_epilogue_address(address)
+
             #
             # Get all the information for the function declaration.
             #
@@ -233,23 +240,28 @@ class CBackEnd(object):
                     ", ".join(["0x%08x" % a for a in mir_inst.addresses]),
                     group_name))
 
-        if hir_stmt is not None:
-            # Set HIR statement address equal to the MIR instruction used
-            # to get it.
-            #
-            # Store the instruction address for debugging purposes.
-            # TODO / FIXME : Create a new dict instead of referencing the
-            # original one.
-            hir_stmt.addresses = mir_inst.addresses
-
-            self.__display_instruction_information(mir_inst, group_name)
-
-        else:
+        # Check if the translation mechanism worked. In case it didn't we;ll
+        # raise an exception and notify the user about the offending
+        # instruction.
+        #
+        # This should be submitted for analysis in case that the user agrees.
+        #
+        if hir_stmt is None:
             raise CBackEndException(
                 "Empty instruction (%s) at %s on '%s' group." % (
                     str(mir_inst).strip(),
                     ", ".join(["0x%08x" % a for a in mir_inst.addresses]),
                     group_name))
+
+        # Set HIR statement address equal to the MIR instruction used
+        # to get it.
+        #
+        # Store the instruction address for debugging purposes.
+        # TODO / FIXME : Create a new dict instead of referencing the
+        # original one.
+        hir_stmt.addresses = mir_inst.addresses
+
+        self.__display_instruction_information(mir_inst, group_name)
 
         return hir_stmt
 

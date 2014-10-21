@@ -150,6 +150,11 @@ class FrontEndPowerPc(FrontEnd):
 
             #mir_inst = self.mir_inst_builder.add(rhs_offset, rhs_reg)
             ##print "--->", mir_inst._ptr
+        else:
+            raise FrontEndPowerPcException(
+                "Unable to transform LIR instruction (%s) at 0x%X "
+                "on '%s' group." % (
+                    lir_inst, lir_inst.address, lir_inst.group_name))
 
         return mir_inst
 
@@ -263,6 +268,12 @@ class FrontEndPowerPc(FrontEnd):
                     "Unsupported multiple return values %s" % \
                     self.idiom_analyzer.return_registers)
 
+        else:
+            raise FrontEndPowerPcException(
+                "Unable to transform LIR instruction (%s) at 0x%X "
+                "on '%s' group." % (
+                    lir_inst, lir_inst.address, lir_inst.group_name))
+
         return mir_inst
 
     def on_conditional_branch(self, lir_inst):
@@ -274,6 +285,12 @@ class FrontEndPowerPc(FrontEnd):
 
         if lir_inst.is_type(self.iset.PPC_beq):
             pass
+
+        else:
+            raise FrontEndPowerPcException(
+                "Unable to transform LIR instruction (%s) at 0x%X "
+                "on '%s' group." % (
+                    lir_inst, lir_inst.address, lir_inst.group_name))
 
         return mir_inst
 

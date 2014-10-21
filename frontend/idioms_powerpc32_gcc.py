@@ -133,7 +133,6 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     # standard prologue instruction to avoid output representation.
                     #
                     self.mark_instruction_analyzed(inst)
-                    self.mir_function.add_prologue_address(inst.address)
                     self.lir_function.add_prologue_address(inst.address)
 
                     # Add the stack size found.
@@ -189,7 +188,6 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 if inst.type == self.iset.PPC_mr and inst[1].is_reg_n(self.iset.SP):
                     # Seems that we've found an SP being moved to another
                     # register.
-                    self.mir_function.add_prologue_address(inst.address)
                     self.lir_function.add_prologue_address(inst.address)
                     self.lir_function.add_stack_access_register(inst[0].value)
 
@@ -244,7 +242,6 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 lr_store_found = False              # flag
                 self.mark_instruction_analyzed(inst)
 
-                self.mir_function.add_prologue_address(inst.address)
                 self.lir_function.add_prologue_address(inst.address)
 
                 # Check only in the first n instructions
@@ -257,7 +254,6 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         inst[0].is_reg_n(lr_backup_reg):
 
                         # Found LR store operation from previous move
-                        self.mir_function.add_prologue_address(inst.address)
                         self.lir_function.add_prologue_address(inst.address)
                         self.mark_instruction_analyzed(inst)
 
@@ -320,8 +316,9 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 # we'll use it to create the 'return' instruction
                 # when translating to MIR.
                 #self.mark_instruction_analyzed(inst)
-                self.mir_function.add_epilogue_address(inst.address)
-                self.lir_function.add_epilogue_address(inst.address)
+                # TODO : Make sure we don't need this ret instruction as an
+                # epilogue address in the list.
+                #self.lir_function.add_epilogue_address(inst.address)
 
                 self.ret_to_caller = True
                 print "    Function returns to caller."
@@ -348,13 +345,11 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                             temp_lr_reg = inst[0].value
 
                             self.mark_instruction_analyzed(inst)
-                            self.mir_function.add_epilogue_address(inst.address)
                             self.lir_function.add_epilogue_address(inst.address)
 
                         if inst.type == self.iset.PPC_lwz and \
                             inst[0].is_reg_n(temp_lr_reg):
                             self.mark_instruction_analyzed(inst)
-                            self.mir_function.add_epilogue_address(inst.address)
                             self.lir_function.add_epilogue_address(inst.address)
 
                             print "    Link-register restoration found."
@@ -404,7 +399,6 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         
                         for inst in prologue_block:
                             self.mark_instruction_analyzed(inst)
-                            self.mir_function.add_epilogue_address(inst.address)
                             self.lir_function.add_epilogue_address(inst.address)
                         return  # Don't keep checking
 
@@ -459,7 +453,6 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 if restore_stages_found == 3:
                     for inst in prologue_block:
                         self.mark_instruction_analyzed(inst)
-                        self.mir_function.add_epilogue_address(inst.address)
                         self.lir_function.add_epilogue_address(inst.address)
                     return
 
@@ -515,7 +508,6 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 if restore_stages_found == 3:
                     for inst in prologue_block:
                         self.mark_instruction_analyzed(inst)
-                        self.mir_function.add_epilogue_address(inst.address)
                         self.lir_function.add_epilogue_address(inst.address)
                     return
 

@@ -408,7 +408,7 @@ class Disassembler(BaseDebugger):
             instruction.insnpref,
             instruction.flags,
             feature_str)
-        print "=> 0x%08X : %s" % (lir_inst.address, inst_str)
+        #print "=> 0x%08X : %s" % (lir_inst.address, inst_str)
         lir_inst.group = self.get_group(lir_inst.type)
 
         # Parse every operand present in the instruction being analyzed

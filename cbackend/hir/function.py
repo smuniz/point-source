@@ -39,8 +39,8 @@ class Function(object):
     """Function class representing a HIR function."""
 
     def __init__(self):
-        self._prologue_addresses = list()
-        self._epilogue_addresses = list()
+        self._prologue_addresses = set()
+        self._epilogue_addresses = set()
         self.parameters = list()
         self.blocks = list()
 
@@ -171,7 +171,7 @@ class Function(object):
         remove it from the list of statements to analyze.
 
         """
-        self._prologue_addresses.append(address)
+        self._prologue_addresses.add(address)
         #self.remove_statement_by_address(address)
 
     def add_epilogue_address(self, address):
@@ -179,7 +179,7 @@ class Function(object):
         remove it from the list of statements to analyze.
 
         """
-        self._epilogue_addresses.append(address)
+        self._epilogue_addresses.add(address)
         #self.remove_statement_by_address(address)
 
     #def get_statement_by_address(self, address):

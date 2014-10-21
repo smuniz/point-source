@@ -82,6 +82,9 @@ class HirTextOutput(TextOutputMedia):
 
         self.hir = hir
 
+        # Update HIR map for addresses relations.
+        self.address_map = dict()
+
     @property
     def hir(self):
         """Return the high level IR."""
@@ -91,8 +94,6 @@ class HirTextOutput(TextOutputMedia):
     def hir(self, hir):
         """Store the high level IR for further usage."""
         self._hir = hir
-        # Update HIR map for addresses relations.
-        self.__build_hir_map()
 
     def generate_output(self, title):
         """Generate C-like readble output in the log window."""
@@ -103,9 +104,23 @@ class HirTextOutput(TextOutputMedia):
 
     def colorize(self):
         """Fill the recently created window with the text."""
-        # Generate function's prologue
-        self.generate_function_opening()
+        line_number = 0
 
+        #
+        # Generate function prologue.
+        #
+        func_opening = self.generate_function_opening()
+
+        self.add_lines(func_opening)
+
+        for cur_line_number in xrange(len(func_opening)):
+            print "prologue : cur_line_number %d - line_number %d" % (cur_line_number, line_number)
+            self.address_map[cur_line_number] = self.hir.prologue_addresses
+            line_number += 1 # Move forward line number index.
+
+        #
+        # Generate function body.
+        #
         self.label_indent = 1
         indent_level = 1
         indent = " " * (indent_level * 4)
@@ -125,8 +140,21 @@ class HirTextOutput(TextOutputMedia):
                 s = "%-40s" % inst
                 self.__colorize_line(s)
 
-        # Generate function's epilogue
-        self.generate_function_closure()
+                #self.address_map[line_number] = stmt.address # self.hir.prologue_addresses
+                line_number += 1 # Move forward line number index.
+
+        #
+        # Generate function epilogue.
+        #
+        func_closure = self.generate_function_closure()
+
+        self.add_lines(func_closure)
+
+        for cur_line_number in xrange(len(func_closure)):
+            print "epilogue : cur_line_number %d - line_number %d" % (cur_line_number, line_number)
+            self.address_map[cur_line_number] = self.hir.prologue_addresses
+            line_number += 1 # Move forward line number index.
+
 
         return True
 
@@ -245,7 +273,8 @@ class HirTextOutput(TextOutputMedia):
 
     def generate_function_opening(self):
         """Create the C functions opening text to represent."""
-        #self.add_line()
+        # Store the function code representation for the prologue.
+        func_repr = list()
 
         ret_type = self.as_identifier(self.hir.return_type)
 
@@ -264,16 +293,21 @@ class HirTextOutput(TextOutputMedia):
             params += ", ".join([param_tuple \
                 for param_tuple in self.hir.paramters[1 : ]])
 
-        func_prototype = \
-            "%(ret_type)s %(call_conv)s%(name)s (%(params)s)" % vars()
+        func_repr.append(
+            "%(ret_type)s %(call_conv)s%(name)s (%(params)s)" % vars())
 
-        self.add_line(func_prototype)
+        func_repr.append(self.as_string("{"))
 
-        self.add_line(self.as_string("{"))
+        return func_repr
 
     def generate_function_closure(self):
         """Create the C functions closure text to represent."""
-        self.add_line(self.as_string("}"))
+        # Store the function code representation for the epilogue.
+        func_repr = list()
+
+        func_repr.append(self.as_string("}"))
+
+        return func_repr
 
     def on_key_down(self, vkey, shift):
         """
@@ -291,25 +325,11 @@ class HirTextOutput(TextOutputMedia):
 
         return True
 
-    def __build_hir_map(self):
-        """..."""
-        self.hir_map = dict()
-
-        print "prologue addresses : %s" % \
-            ", ".join(["0x%X" % x for x in self.hir.prologue_addresses])
-
-        for block in self.hir.blocks:
-            for stmt in block.statements:
-                print "statement addresses : %s" % \
-                    ", ".join(["0x%X" % x for x in stmt.addresses])
-                #self.hir_map[addresse
-
-        print "epilogue addresses : %s" % \
-            ", ".join(["0x%X" % x for x in self.hir.epilogue_addresses])
-
-
     def on_curor_position_changed(self):
         """Cursor position changed callback."""
-        #print "Current position is %r" % self.GetLineNo()
-        cur_line = self.GetLineNo()
-        #print self.hir
+        cur_line_number = self.GetLineNo()
+        addresses = self.address_map.get(cur_line_number, None)
+        if not addresses:
+            return
+        #print ", ".join(
+        #    ["0x%08x" % addr for addr in addresses])

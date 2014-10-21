@@ -129,9 +129,7 @@ class FrontEnd(object):
         #
         function_name = self.debugger.get_current_function_name()
 
-        #self.mir_function = self.mir_module.create_function(function_name)
         self.mir_function = MiddleIrFunction(function_name)
-        self.mir_function.add_address(self.lir_function.start_address)
 
         # TODO / FIXME: Correctly detect return type.
         # Create basic return types in order to create the function skeleton.
@@ -227,7 +225,22 @@ class FrontEnd(object):
         initial step.
 
         """
+        # Add each prologue and epilogue address to the list of addresses in
+        # the MIR function in order to keep track of assembly->MIR addrresses
+        # during translation.
+        print "[+] Propagatin LIR-to-MIR prologue and epilogue addresses."
 
+        for address in self.lir_function.prologue_addresses:
+            self.mir_function.add_prologue_address(address)
+        self.mir_function.add_address(self.lir_function.start_address)
+
+        for address in self.lir_function.epilogue_addresses:
+            self.mir_function.add_epilogue_address(address)
+        self.mir_function.add_address(self.lir_function.start_address)
+
+        #
+        # Initiate instruction translation phase.
+        #
         for lir_basic_block_index, lir_basic_block in enumerate(self.lir_function):
 
             address = lir_basic_block.start_address
@@ -295,23 +308,27 @@ class FrontEnd(object):
         mir_inst = None
         group = lir_inst.group_name
 
-        if lir_inst.type in self.assignment_types:
-            mir_inst = self.on_assignment(lir_inst)
+        try:
+            if lir_inst.type in self.assignment_types:
+                mir_inst = self.on_assignment(lir_inst)
 
-        elif lir_inst.type in self.unconditional_branch_types:
-            mir_inst = self.on_unconditional_branch(lir_inst)
+            elif lir_inst.type in self.unconditional_branch_types:
+                mir_inst = self.on_unconditional_branch(lir_inst)
 
-        elif lir_inst.type in self.conditional_branch_types:
-            mir_inst = self.on_conditional_branch(lir_inst)
+            elif lir_inst.type in self.conditional_branch_types:
+                mir_inst = self.on_conditional_branch(lir_inst)
 
-        elif lir_inst.type in self.unimplemented_types:
-            mir_inst = self.on_unknown(lir_inst)
+            elif lir_inst.type in self.unimplemented_types:
+                mir_inst = self.on_unknown(lir_inst)
 
-        else:
-            #mir_inst = self.on_unknown(lir_inst)
-            raise FrontEndException(
-                "Unsupported instruction at 0x%X on '%s' group." % \
-                    (lir_inst.address, group))
+            else:
+                #mir_inst = self.on_unknown(lir_inst)
+                raise FrontEndException(
+                    "Unsupported instruction at 0x%X on '%s' group." % \
+                        (lir_inst.address, group))
+
+        except FrontEndException, err:
+            raise FrontEndException(err)
 
         if mir_inst is not None:
             # Set MIR instruction address equal to the LIR instruction used
@@ -320,15 +337,8 @@ class FrontEnd(object):
             # Some LLVM IR code are not instructions but declarations or other
             # stuff that doesn't support add_address method.
             mir_inst.add_address(lir_inst.address)
-        #else:
-        #    raise FrontEndException(
-        #        "Empty instruction at 0x%X on '%s' group." % \
-        #            (lir_inst.address, group))
 
-        self.__display_instruction_information(lir_inst, group)
-
-        #if not mir_inst:
-        #    mir_inst = self.on_unknown(lir_inst)
+            self.__display_instruction_information(lir_inst, group)
 
         return mir_inst
 
@@ -437,7 +447,7 @@ class FrontEnd(object):
             print "[+] Initiating idioms analysis phase 1..."
             self.idiom_analyzer.perform_phase1_analysis()
 
-            self.__dump_lir()
+            #self.__dump_lir()
             #
             # Step x
             #
