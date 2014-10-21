@@ -418,7 +418,7 @@ class FrontEnd(object):
         self.generate_lir()
 
         # Output LIR for debugging purposes.
-        #self.__dump_lir()
+        self.__dump_lir()
 
         try:
             #

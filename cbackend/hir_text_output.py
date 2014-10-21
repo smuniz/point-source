@@ -161,7 +161,6 @@ class HirTextOutput(TextOutputMedia):
             self.address_map[line_number] = self.hir.epilogue_addresses
             line_number += 1 # Move forward line number index.
 
-
         return True
 
     def __colorize_line(self, line):
