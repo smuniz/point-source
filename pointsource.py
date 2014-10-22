@@ -122,17 +122,16 @@ class PointSource(object):
     """Decompiler main class."""
 
     # List of supported output media
-    GRAPH_OUTPUT = 0
+    #GRAPH_OUTPUT = 0
     TEXT_OUTPUT = 1
 
-    def __init__(self, output_type=TEXT_OUTPUT):
+    def __init__(self):#, output_type=TEXT_OUTPUT):
         """Initialization method."""
         # Development flag. Will be more verbose on errors.
         self.__debug = True
 
         # Store the current debugger instance to interact with the debugger
         # application that invoked us. Used mostly for output.
-        # TODO: Create an output class.
         self.debugger = None
 
         # Store the current debugger instance invoking us. This needs to be
@@ -144,7 +143,7 @@ class PointSource(object):
         self.function_address = None
 
         # Set the output media use to display decompilation information.
-        self.output_type = output_type
+        self.output_type = self.TEXT_OUTPUT#output_type
 
         self.init_output_media()
 
@@ -224,7 +223,7 @@ class PointSource(object):
         display.
 
         """
-        self.output = None  # TODO
+        self.output = None
 
     def init_front_end(self):
         """Initialize the front-end of the decompiler."""

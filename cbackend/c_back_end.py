@@ -4,6 +4,7 @@
 # This code is part of point source decompiler
 #
 
+from copy import deepcopy
 from traceback import format_exc
 
 from middleend.mir.mir_type import *
@@ -155,7 +156,8 @@ class CBackEnd(object):
             #
             # Get all the information for the function declaration.
             #
-            # TODO / FIXME : Make this right.
+            # TODO : Enchance this code to get the right representation for all
+            # built-in types and opques, too.
             self.hir.name = mir_function.name
 
             if isinstance(mir_function.return_type, MiddleIrTypeInt):
@@ -257,9 +259,7 @@ class CBackEnd(object):
         # to get it.
         #
         # Store the instruction address for debugging purposes.
-        # TODO / FIXME : Create a new dict instead of referencing the
-        # original one.
-        hir_stmt.addresses = mir_inst.addresses
+        hir_stmt.addresses = deepcopy(mir_inst.addresses)
 
         self.__display_instruction_information(mir_inst, group_name)
 

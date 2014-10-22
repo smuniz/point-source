@@ -274,7 +274,7 @@ class Function(object):
     #    return self._blocks.index(block)
 
     #def get_block_by_address(self, ea):
-    #    raise FunctionException("TODO: Function.get_block_by_address()")
+    #    raise FunctionException("Function.get_block_by_address()")
 
     #def get_blocks_count(self):
     #    """Return the total number of blocks currently stored."""

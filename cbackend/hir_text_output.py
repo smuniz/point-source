@@ -115,7 +115,7 @@ class HirTextOutput(TextOutputMedia):
         self.add_lines(func_opening)
 
         for index in xrange(len(func_opening)):
-            print "prologue : index %d - line_number %d" % (index, line_number)
+            #print "prologue : index %d - line_number %d" % (index, line_number)
             self.address_map[line_number] = self.hir.prologue_addresses
             line_number += 1 # Move forward line number index.
 
@@ -146,7 +146,7 @@ class HirTextOutput(TextOutputMedia):
                 self.__colorize_line(stmt_fmt)
 
                 self.address_map[line_number] = stmt.addresses
-                print "statement : index %d - line_number %d" % (index, line_number)
+                #print "statement : index %d - line_number %d" % (index, line_number)
                 line_number += 1 # Move forward line number index.
 
         #
@@ -157,7 +157,7 @@ class HirTextOutput(TextOutputMedia):
         self.add_lines(func_closure)
 
         for index in xrange(len(func_closure)):
-            print "epilogue : index %d - line_number %d" % (index, line_number)
+            #print "epilogue : index %d - line_number %d" % (index, line_number)
             self.address_map[line_number] = self.hir.epilogue_addresses
             line_number += 1 # Move forward line number index.
 
@@ -338,10 +338,6 @@ class HirTextOutput(TextOutputMedia):
         if not addresses:
             #print "No address(es) for line number %d" % cur_line_number
             return
-
-        print "current line is %d" % cur_line_number
-        print ", ".join(
-            ["0x%08x" % addr for addr in addresses])
 
         # First we restablish the previously coloured lines.
         for address, colour in self.coloured_addresses.iteritems():
