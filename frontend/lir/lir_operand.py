@@ -69,13 +69,14 @@ class LowLevelOperandException(Exception):
 class LowLevelOperand(object):
     """Operand item optionally used by an instruction."""
 
-    def __init__(self, reg_names=None):
+    def __init__(self, gpr_names=None, spr_names=None):
         """Initialize instance."""
         self.number = 0
         self.value = None
         self.type = O_VOID
         self.analyzed = False
-        self.reg_names = reg_names
+        self.gpr_names = gpr_names
+        self.spr_names = spr_names
 
     @property
     def value(self):
@@ -168,10 +169,17 @@ class LowLevelOperand(object):
         any).
         
         """
+        print "====> SPECIAL v: %s - t: %d" % (self.value, self.type)
         if self.is_reg:
-            return self.reg_names.get(self.value, None)
+            if self.is_special:
+                return self.spr_names.get(self.type, None)
+            else:
+                return self.gpr_names.get(self.value, None)
         elif self.is_displ:
-            return self.reg_names.get(self.value[1], None)
+            if self.is_special:
+                return self.spr_names.get(self.type, None)
+            else:
+                return self.gpr_names.get(self.value[1], None)
         else:
             return None
 

@@ -423,7 +423,7 @@ class Disassembler(BaseDebugger):
             # Create a new operand representation and pass the registers names
             # table so the instance can translate registers numbers to its
             # string representation.
-            lir_op = LowLevelOperand(self.instruction_set.SPR_NAMES)
+            lir_op = LowLevelOperand(self.instruction_set.GPR_NAMES, self.instruction_set.SPR_NAMES)
 
             #print "ea 0x%X has operand idx %d - ty %d val %d/%d" % \
             #    (instruction.ea, operand_index, inst_operand.type,
