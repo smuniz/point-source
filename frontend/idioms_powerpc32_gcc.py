@@ -216,7 +216,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
             # Output stack access information found.
             stack_access_registers = self.lir_function.stack_access_registers
             stack_access_registers = [
-                self.iset.REGISTERS_NAMES[r] for r in stack_access_registers]
+                self.iset.GPR_NAMES[r] for r in stack_access_registers]
 
             if self.iset.SP in self.lir_function.stack_access_registers:
                 stack_access_type = "    Stack accessed via stack-pointer: "
@@ -668,7 +668,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                             ret_regs_list.remove(reg)
 
         print "    Return register(s) found : %s" % \
-            ", ".join([self.iset.REGISTERS_NAMES[r] \
+            ", ".join([self.iset.GPR_NAMES[r] \
                 for r in self.return_registers])
 
     def detect_argument_registers(self):
@@ -680,7 +680,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
 
         if len(self.param_regs) > 0:
             print "    Parameter register(s) found : %s" % \
-                ", ".join([self.iset.REGISTERS_NAMES[r] \
+                ", ".join([self.iset.GPR_NAMES[r] \
                     for r in self.param_regs.values()])
 
     def __create_local_variables_for_arguments(self):
@@ -739,7 +739,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     self.mark_instruction_analyzed(inst)
 
                     print "    Parameter register (simple) detected: %s" % \
-                            self.iset.REGISTERS_NAMES[inst[0].value]
+                            self.iset.GPR_NAMES[inst[0].value]
 
         except MiddleIrException, err:
             print format_exc() + '\n'

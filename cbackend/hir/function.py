@@ -299,7 +299,7 @@ class Function(object):
         return sum([len(b) for b in self.blocks])
 
     #def __delitem__(self, item):
-    #    raise FunctionException("TODO: Function.__delitem__()")
+    #    raise FunctionException("Function.__delitem__()")
 
     @property
     def is_calling_convention_c(self):

@@ -420,7 +420,10 @@ class Disassembler(BaseDebugger):
             if not inst_operand or inst_operand.type is o_void:
                 break
 
-            lir_op = LowLevelOperand()
+            # Create a new operand representation and pass the registers names
+            # table so the instance can translate registers numbers to its
+            # string representation.
+            lir_op = LowLevelOperand(self.instruction_set.SPR_NAMES)
 
             #print "ea 0x%X has operand idx %d - ty %d val %d/%d" % \
             #    (instruction.ea, operand_index, inst_operand.type,

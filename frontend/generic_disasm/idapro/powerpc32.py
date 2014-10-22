@@ -487,7 +487,7 @@ class InstructionSet:
 
     TOTAL_GPR = 32      # Number of general purpose registers.
 
-    REGISTERS_NAMES = {
+    GPR_NAMES = {
         GPR0 : "r0",
         GPR1 : "r1",
         SP   : "sp",
@@ -533,6 +533,15 @@ class InstructionSet:
     CRF       = idaapi.o_idpspec3     # crfield      x.reg
     CRB       = idaapi.o_idpspec4     # crbit        x.reg
     DCR       = idaapi.o_idpspec5     # Device control register
+
+    SPR_NAMES = {
+        SPR       : "SPR",
+        TWOFPR    : "TWOFPR",
+        SHMBME    : "SHMBME",
+        CRF       : "CRF",
+        CRB       : "CRB",
+        DCR       : "DCR",
+    }
 
     ARGUMENT_REGISTERS = [GPR3, GPR4, GPR5, GPR6, GPR7, GPR8, GPR9, GPR10]
 

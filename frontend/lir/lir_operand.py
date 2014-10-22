@@ -69,12 +69,13 @@ class LowLevelOperandException(Exception):
 class LowLevelOperand(object):
     """Operand item optionally used by an instruction."""
 
-    def __init__(self):
+    def __init__(self, reg_names=None):
         """Initialize instance."""
         self.number = 0
         self.value = None
         self.type = O_VOID
         self.analyzed = False
+        self.reg_names = reg_names
 
     @property
     def value(self):
@@ -161,32 +162,39 @@ class LowLevelOperand(object):
     def analyzed(self, state):
         self._analyzed = bool(state)
 
+    @property
+    def reg_name(self):
+        """Retur nthe name of the register represented by the operand (if
+        any).
+        
+        """
+        if self.is_reg:
+            return self.reg_names.get(self.value, None)
+        elif self.is_displ:
+            return self.reg_names.get(self.value[1], None)
+        else:
+            return None
+
     def __str__(self):
         if self.is_void: # or self.value is None:
             return ""
 
         elif self.is_displ or self.is_phrase:
-            # TODO : Obtain correct or well-known operand representation.
-            return "0x%X(r%d)" % (self.value[1], self.value[0])
+            return "0x%X(%s)" % (self.value[1], self.reg_name)
 
         elif self.is_reg:
-            # TODO : Obtain correct or well-known operand representation.
-            return "r%d" % self.value
+            return "%s" % self.reg_name
 
         elif self.is_near or self.is_far:
-            # TODO : Determine address pointer size for the format.
             return "0x%08X" % self.value
 
         elif self.is_mem:
-            # TODO: Use a name as reference instead of the address.
             return "0x%08X" % self.value
 
         elif self.is_imm:
             return "0x%08X" % self.value
 
         elif self.is_special:
-            # TODO / FIXME : Determine the right representation.
-            # Ask the debugger ?!?!?!
-            return "SPRx"
+            return "%s" % self.reg_name
 
         raise LowLevelOperandException("Unknown operand type : %r" % self.type)
