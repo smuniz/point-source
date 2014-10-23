@@ -169,17 +169,12 @@ class LowLevelOperand(object):
         any).
         
         """
-        print "====> SPECIAL v: %s - t: %d" % (self.value, self.type)
         if self.is_reg:
-            if self.is_special:
-                return self.spr_names.get(self.type, None)
-            else:
-                return self.gpr_names.get(self.value, None)
+            return self.gpr_names.get(self.value, None)
         elif self.is_displ:
-            if self.is_special:
-                return self.spr_names.get(self.type, None)
-            else:
-                return self.gpr_names.get(self.value[1], None)
+            return self.gpr_names.get(self.value[1], None)
+        elif self.is_special:
+            return self.spr_names.get(self.type, None)
         else:
             return None
 
