@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 """
 
-(c) Sebastian Muniz 2013
-
-
-U{Groundworks Tecnologies http://www.groundworkstech.com>}
+(c) Sebastian Muniz 2014
 
 Point Source decompiler init script for Immunity Debugger
 

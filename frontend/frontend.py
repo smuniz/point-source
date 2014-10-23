@@ -12,6 +12,10 @@ from idioms import IdiomAnalyzerException
 
 from misc.prerequisites import require
 
+#reload(middleend.mir_exception)
+require("middleend.mir_exception")
+from middleend.mir_exception import MiddleIrException
+
 #reload(middleend.mir.mir_module)
 require("middleend.mir.mir_module")
 from middleend.mir.mir_module import MiddleIrModule, MiddleIrModuleException
@@ -468,6 +472,10 @@ class FrontEnd(object):
         except IdiomAnalyzerException, err:
             #print format_exc() + '\n'
             raise FrontEndException("Idioms analysis failed (%s)" % err)
+
+        except MiddleIrException, err:
+            #print format_exc() + '\n'
+            raise FrontEndException("Middle IR error (%s)" % err)
 
         #
         # Step x

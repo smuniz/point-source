@@ -26,6 +26,15 @@ O_SPEC3     = 11 #  Special register 4 (arch. specific)
 O_SPEC4     = 12 #  Special register 5 (arch. specific)
 O_SPEC5     = 13 #  Special register 6 (arch. specific)
 
+SPR_TYPES = [
+    O_SPEC0,
+    O_SPEC1,
+    O_SPEC2,
+    O_SPEC3,
+    O_SPEC4,
+    O_SPEC5,
+    ]
+
 OPERAND_TYPES = [
     O_VOID,
     O_REG,
@@ -52,12 +61,12 @@ OPERAND_DESCRIPTION = {
     O_IMM       : "Immediate Value",
     O_FAR       : "Immediate Far Address  (CODE)",
     O_NEAR      : "Immediate Near Address (CODE)",
-    O_SPEC0     : "Special register 0",
-    O_SPEC1     : "Special register 1",
-    O_SPEC2     : "Special register 2",
-    O_SPEC3     : "Special register 3",
-    O_SPEC4     : "Special register 4",
-    O_SPEC5     : "Special register 5"
+    O_SPEC0     : "Special operand 0",
+    O_SPEC1     : "Special operand 1",
+    O_SPEC2     : "Special operand 2",
+    O_SPEC3     : "Special operand 3",
+    O_SPEC4     : "Special operand 4",
+    O_SPEC5     : "Special operand 5"
     }
 
 
@@ -123,10 +132,6 @@ class LowLevelOperand(object):
 
         return False
 
-    #@property
-    #def is_reg(self):
-    #    return self.type is O_REG
-
     @property
     def is_mem(self):
         return self.type is O_MEM
@@ -153,7 +158,7 @@ class LowLevelOperand(object):
 
     @property
     def is_special(self):
-        return self.type >= O_SPEC0
+        return self.type in SPR_TYPES
 
     @property
     def analyzed(self):
@@ -167,7 +172,7 @@ class LowLevelOperand(object):
     def reg_name(self):
         """Retur nthe name of the register represented by the operand (if
         any).
-        
+
         """
         if self.is_reg:
             return self.gpr_names.get(self.value, None)

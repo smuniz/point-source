@@ -103,17 +103,20 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
     def add_function(self, mir_function):
         """Add the specified function to the current module."""
         # Add only if it doesn't exist yet.
-        if mir_function not in self.functions:
-            self.functions.add(mir_function)
+        try:
+            if mir_function not in self.functions:
+                self.functions.add(mir_function)
 
-        mir_function.module = self
+            mir_function.module = self
 
-        fty = mir_function._llvm_type._ptr
-        name = mir_function.name
+            fty = mir_function._llvm_type._ptr
+            name = mir_function.name
 
-        llvm_func_def = self._ptr.add_function(fty, name)
+            llvm_func_def = self._ptr.add_function(fty, name)
 
-        mir_function._llvm_definition = llvm_func_def
+            mir_function._llvm_definition = llvm_func_def
+        except LLVMException, err:
+            raise MiddleIrModuleException(err)
 
     def __repr__(self):
         """Return a string object with the module representation."""
