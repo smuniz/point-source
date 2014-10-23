@@ -325,7 +325,7 @@ class MiddleIrFunction(MiddleIrFunctionBase):
 
     def __repr__(self):
         """Return a string object with the function representation."""
-        return repr(self.llvm_func_def)
+        return repr(self._llvm_definition)
 
     def __str__(self):
         """Return a string object with the function text representation."""

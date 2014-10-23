@@ -126,9 +126,9 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
         specified name.
         
         """
-        #print "looking through %d functions" % len(self.functions)
+        print "----> Looking through %d functions" % len(self.functions)
         for mir_function in self.functions:
-            #print "-name : %r %r" % (mir_function.name, name)
+            print "------------ NAME : %r %r %s" % (mir_function.name, name, mir_function.name == name)
             if mir_function.name == name:
                 return mir_function
         return None
@@ -248,4 +248,11 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
     def new(name):
         """Create a new module."""
         global modules_cache
-        return modules_cache.get(name, MiddleIrModule(name))
+        print "======> MODULES CACHE : %r" % modules_cache
+        res = modules_cache.get(name, None)
+        if res is None:
+            print "No match!!!!!!!!!!!!!!!!"
+            return MiddleIrModule(name)
+        else:
+            return res
+        #return modules_cache.get(name, MiddleIrModule(name))

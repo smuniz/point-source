@@ -97,7 +97,7 @@ class FrontEnd(object):
         # Set the module in charge of idiom analysis.
         self.idiom_analyzer_type = idiom_analyzer_type
         self.idiom_analyzer = None
-                
+
         # Setup symbol table for local/global variables refrences, etc..
         global symbol_tables
         self.symbol_tables = symbol_tables
@@ -152,11 +152,19 @@ class FrontEnd(object):
             raise FrontEndException("Unknown return type (%d)" % \
                 self.return_type)
 
+        print "SYMBOL TABLES LEN %d" % len(self.symbol_tables)
+        print "CONTENT : %r" % self.symbol_tables
         self.mir_function = MiddleIrFunction.get(self.mir_module, function_name)
+        print "00" * 20
         if self.mir_function is not None:
             # Delete the previously created function and create a new one. This
             # is what the user requested so do it (definition might have
             # changed, etc.).
+            print "AA" * 20
+            print "MIR %r" % self.mir_function
+            if self.mir_function in self.symbol_tables:
+                print "XX" * 20
+                del self.symbol_tables[self.mir_function.name]
             self.mir_function.delete()
 
         # Seems like the function doesn't already exists in our store so
@@ -239,9 +247,9 @@ class FrontEnd(object):
         initial step.
 
         """
-        # Add each prologue and epilogue address to the list of addresses in
-        # the MIR function in order to keep track of assembly->MIR addrresses
-        # during translation.
+        # Propagate addresses by adding each prologue and epilogue address to
+        # the list of addresses in the MIR function in order to keep track of
+        # assembly->MIR addrresses during translation.
         print "[+] Propagatin LIR-to-MIR prologue and epilogue addresses."
 
         for address in self.lir_function.prologue_addresses:
@@ -432,7 +440,7 @@ class FrontEnd(object):
         self.generate_lir()
 
         # Output LIR for debugging purposes.
-        self.__dump_lir()
+        #self.__dump_lir()
 
         try:
             #
@@ -448,7 +456,10 @@ class FrontEnd(object):
             #
             # Invoke the appropriate idiom analyzer for the current architecture.
             #
-            self.current_symbol_table = self.symbol_tables.setdefault(self.mir_function, dict())
+            print "=>", str(self.symbol_tables)
+            self.current_symbol_table = \
+                self.symbol_tables.setdefault(self.mir_function.name, dict())
+            print "=>", str(self.current_symbol_table)
 
             print "[+] Initializing idioms analyser..."
             if self.idiom_analyzer is None:

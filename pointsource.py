@@ -147,9 +147,9 @@ class PointSource(object):
 
         self.init_output_media()
 
-        self.init_back_end()
-        self.init_middle_end()
-        self.init_front_end()
+        # Front-end holders.
+        self.front_end = None
+        self.determine_front_end()
 
     def init_debugger_module(self):
         """Detect the current debugger invoking the decompiler and perform the
@@ -225,8 +225,8 @@ class PointSource(object):
         """
         self.output = None
 
-    def init_front_end(self):
-        """Initialize the front-end of the decompiler."""
+    def determine_front_end(self):
+        """Determine the right front-end for the current architecture."""
         try:
             arch_name = self.debugger.architecture_name
             factory = FrontEndFactory(self.debugger)
@@ -236,13 +236,20 @@ class PointSource(object):
                 raise PointSourceException(
                     "Unsupported architecture (%s)." % architecture)
 
-            self.front_end = getattr(factory, frontend_method)()
+            self.front_end_type = getattr(factory, frontend_method)
 
         except FrontEndFactory, err :
-
             raise PointSourceException(
-                "Unable to create architecture (%(arch_name)s) : %(err)s" % \
+                "Unable to detect architecture (%(arch_name)s) : %(err)s" % \
                 vars())
+
+    def init_front_end(self):
+        """Initialize the front-end of the decompiler."""
+        try:
+            self.front_end = self.front_end_type()
+        except FrontEndFactory, err :
+            raise PointSourceException(
+                "Unable to initialize front-end : %(err)s" % vars())
 
         self.log("[+] Loaded front-end is %s" % self.front_end.name)
 
@@ -257,6 +264,11 @@ class PointSource(object):
     def decompile(self):
         """Decompile the previously specified function."""
         try:
+            # Perform helpers initialization.
+            self.init_back_end()
+            self.init_middle_end()
+            self.init_front_end()
+
             #
             # Front-end phase
             #
