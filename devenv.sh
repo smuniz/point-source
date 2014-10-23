@@ -1,6 +1,6 @@
 #!/bin/bash
 
-gvim -O2 pointsource.py \
+gvim -O2 ./*.py \
     frontend/*.py \
     frontend/lir/*.py \
     middleend/mir/*.py \

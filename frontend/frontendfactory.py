@@ -37,6 +37,7 @@ class FrontEndFactory(object):
         # Register known front-ends for further creation.
         self.register("create_x86", FrontEndX86, debugger)
         self.register("create_ARM", FrontEndArm, debugger)
+        self.register("create_MIPS", FrontEndMips, debugger)
         self.register("create_PowerPC", FrontEndPowerPc, debugger)
 
     def register(self, methodName, constructor, *args, **kargs):
