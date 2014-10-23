@@ -7,6 +7,7 @@
 from llvm import *
 from llvm.core import *
 
+from mir_module import *
 #from middleend.mir_exception import MiddleIrException
 from mir_function_base import MiddleIrFunctionBase, \
                                 MiddleIrFunctionBaseException
@@ -362,14 +363,43 @@ class MiddleIrFunction(MiddleIrFunctionBase):
     def new(module, name, return_type=MiddleIrTypeVoid(), arguments=None,
         variadic_arguments=False):
         """Create a new function."""
-        new_func = MiddleIrFunction(name, return_type, arguments, variadic_arguments)
-        module.add_function(new_func)
-        return new_func
+        # Make sure that the module exists and it's of the right type.
+        if not isinstance(module, MiddleIrModule):
+            raise MiddleIrFunctionException(
+                "No module specified to add function '%s'." % name)
+
+        # Check if the function already exists inside the module. In case it
+        # doesn't exists then we create a new one.
+        # Otherwise we'll raise an exception.
+        new_func = module.get_function_by_name(name)
+
+        if new_func is None:
+            new_func = MiddleIrFunction(name, return_type, arguments, variadic_arguments)
+            module.add_function(new_func)
+            return new_func
+
+        print "===> new func : %s" % new_func
+        raise MiddleIrFunctionException(
+            "Function '%s' already exists in module '%s'" % (
+            name, module.name))
+
+    @staticmethod
+    def get(module, name):
+        """Return an existing function matching the specified name."""
+        # Make sure that the module exists and it's of the right type.
+        if not isinstance(module, MiddleIrModule):
+            raise MiddleIrFunctionException(
+                "No module specified to add function '%s'." % name)
+
+        # Return the result whether it's an existing function or not.
+        return module.get_function_by_name(name)
 
     def delete(self):
         """Delete ourselves."""
-        if self in self.module.functions:
-            self.module.functions.remove(self)
+        self.module.remove_function(self)
 
-        if self._ptr:
-            self._ptr.delete()
+        if self._llvm_definition:
+            self._llvm_definition.delete()
+
+        #print "DELETING SELF" + ("-" * 30)
+        del self

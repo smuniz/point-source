@@ -16,6 +16,13 @@ from middleend.mir.mir_function import MiddleIrFunction
 from llvm import *
 from llvm.core import *
 
+#
+# Keep track of modules created during a session so if the user specifies a new
+# module based on a previously analyzed filename then we'll return the existing
+# one and avoid recreation of a new module and possible collisions.
+#
+modules_cache = dict()
+
 
 class MiddleIrModuleException(MiddleIrException):
     """Middle IR module exception."""
@@ -33,10 +40,10 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
 
     ALLOW_MIR_VERIFY = False
 
-    def __init__(self, module_name):
+    def __init__(self, name):
         """Initialize the intermediate level IR module class."""
         # Create an empty LLVM IR module.
-        super(MiddleIrModule, self).__init__(Module.new(module_name))
+        super(MiddleIrModule, self).__init__(Module.new(name))
 
         # Display debugging information during development phase.
         self.debug = True
@@ -47,6 +54,30 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
         self.target = None
 
         self.global_variables = set()
+
+        # Update the modules cache to keep it updated.
+        global modules_cache
+        if name in modules_cache:
+            raise MiddleIrModuleException(
+                "Error creating new module instance named '%s' because it "
+                "already exists." % name)
+
+    @property
+    def name(self):
+        """Return the current module name."""
+        return self._ptr.id
+
+    @name.setter
+    def name(self, name):
+        """Store the current module name."""
+        old_name = self.name
+        self._ptr.id = name
+
+        # Update the modules cache to keep it updated.
+        global modules_cache
+        if name in modules_cache:
+            del modules_cache[name]
+        modules_cache.set(name, self)
 
     def create_intrinsic_function(self, name):
         """Add the specified intrinsic function to the current module."""
@@ -95,8 +126,10 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
         specified name.
         
         """
+        #print "looking through %d functions" % len(self.functions)
         for mir_function in self.functions:
-            if mir_function.name is name:
+            #print "-name : %r %r" % (mir_function.name, name)
+            if mir_function.name == name:
                 return mir_function
         return None
 
@@ -117,6 +150,11 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
             mir_function._llvm_definition = llvm_func_def
         except LLVMException, err:
             raise MiddleIrModuleException(err)
+
+    def remove_function(self, mir_function):
+        """Remove the specified middle end function."""
+        if mir_function in self.functions:
+            self.functions.remove(mir_function)
 
     def __repr__(self):
         """Return a string object with the module representation."""
@@ -207,6 +245,7 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
     #    self._ptr.from_bitcode(ss)
 
     @staticmethod
-    def new(module_name):
+    def new(name):
         """Create a new module."""
-        return MiddleIrModule(module_name)
+        global modules_cache
+        return modules_cache.get(name, MiddleIrModule(name))

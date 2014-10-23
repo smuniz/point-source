@@ -214,7 +214,7 @@ class PointSource(object):
         """Store the address of the function being decompiled."""
         self.func_address = address
 
-    def set_screen_address_function_address(self):
+    def set_screen_address_to_decompile(self):
         """Store the address of the current selected function to decompile."""
         self.function_address = self.debugger.get_current_function_address()
 
@@ -327,16 +327,12 @@ def main():
     start = None
 
     try:
-        # TODO / FIXME: Delete these IDA-specific code after development.
-        from idc import Jump
-        Jump(0x8000000)
-
         point_source = PointSource()
         point_source.log("[+] Initiating decompilation process...")
 
         start = clock()
 
-        point_source.set_screen_address_function_address()
+        point_source.set_screen_address_to_decompile()
 
         point_source.decompile()
 

@@ -61,7 +61,7 @@ class FrontEnd(object):
 
     """
 
-    def __init__(self, idiom_analyzer, debugger):
+    def __init__(self, idiom_analyzer_type, debugger):
         """Perform base front-end instance initialization."""
         self.action_plan = ActionPlan()
 
@@ -88,10 +88,15 @@ class FrontEnd(object):
         # Create a Middle level intermediate representation of the current
         # module that posses the function being decompiled if it wasn't already
         # created and associate a function IR to it.
-        self.mir_module = MiddleIrModule(self.debugger.get_input_file())
+        #
+        # This will return always the same module in case we specify the same
+        # filename on the input file.
+        #
+        self.mir_module = MiddleIrModule.new(self.debugger.get_input_file())
 
         # Set the module in charge of idiom analysis.
-        self.idiom_analyzer = idiom_analyzer
+        self.idiom_analyzer_type = idiom_analyzer_type
+        self.idiom_analyzer = None
                 
         # Setup symbol table for local/global variables refrences, etc..
         global symbol_tables
@@ -133,8 +138,6 @@ class FrontEnd(object):
         #
         function_name = self.debugger.get_current_function_name()
 
-        self.mir_function = MiddleIrFunction(function_name)
-
         # TODO / FIXME: Correctly detect return type.
         # Create basic return types in order to create the function skeleton.
         # At the moment we just create generic (integer) types with the right
@@ -142,20 +145,27 @@ class FrontEnd(object):
         self.return_type = 1
 
         if self.return_type == 0:
-            # Do nothing because the function was initialized with 'void' type.
-            pass
+            return_type = MiddleIrTypeVoid()
         elif self.return_type == 1:
-            ret_type = MiddleIrTypeInt()
+            return_type = MiddleIrTypeInt()
         else:
             raise FrontEndException("Unknown return type (%d)" % \
                 self.return_type)
 
-        self.mir_function.return_type = ret_type
+        self.mir_function = MiddleIrFunction.get(self.mir_module, function_name)
+        if self.mir_function is not None:
+            # Delete the previously created function and create a new one. This
+            # is what the user requested so do it (definition might have
+            # changed, etc.).
+            self.mir_function.delete()
+
+        # Seems like the function doesn't already exists in our store so
+        # we'll create a new one.
+        self.mir_function = MiddleIrFunction.new(self.mir_module, function_name, return_type)
 
         # TODO / FIXME : Determine parameter types.
         #self.mir_function.arguments([MiddleIrTypeInt(), MiddleIrTypeInt()])
 
-        self.mir_module.add_function(self.mir_function)
         # Set the default calling convention.
         #self.mir_function.set_calling_convention(CALL_CONV_C)
 
@@ -441,12 +451,13 @@ class FrontEnd(object):
             self.current_symbol_table = self.symbol_tables.setdefault(self.mir_function, dict())
 
             print "[+] Initializing idioms analyser..."
-            self.idiom_analyzer = self.idiom_analyzer(
-                self.debugger,
-                self.lir_function,
-                self.mir_module,
-                self.mir_function,
-                self.symbol_tables)
+            if self.idiom_analyzer is None:
+                self.idiom_analyzer = self.idiom_analyzer_type(
+                    self.debugger,
+                    self.lir_function,
+                    self.mir_module,
+                    self.mir_function,
+                    self.symbol_tables)
 
             print "[+] Initiating idioms analysis phase 1..."
             self.idiom_analyzer.perform_phase1_analysis()

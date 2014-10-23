@@ -17,6 +17,10 @@ import frontend_arm
 reload(frontend_arm)
 from frontend_arm import FrontEndArm, FrontEndArmException
 
+import frontend_mips
+reload(frontend_mips)
+from frontend_mips import FrontEndMips, FrontEndMipsException
+
 __all__ = ["FrontEndFactory", "FrontEndFactoryException"]
 
 
