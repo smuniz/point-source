@@ -373,7 +373,6 @@ class Disassembler(BaseDebugger):
             op = get_instruction_operand(insn, operand_index)
 
         except Exception, err:
-            #print err
             inslen = decode_insn(address)
             # inslen = decode_insn(lir_inst.ea) # Commented by topo 2013
 
@@ -393,12 +392,14 @@ class Disassembler(BaseDebugger):
         lir_inst.address = instruction.ea
         lir_inst.type = instruction.itype
         lir_inst.mnemonic = self.get_mnemonic(instruction.ea)
+        lir_inst.group = self.get_group(lir_inst.type)
 
         feature_str = ", ".join(
             [f_v for f_k, f_v in self.FEATURES.iteritems() \
                 if f_k & instruction.get_canon_feature() == f_k])
 
-        inst_str = "%3d %+5s aux %-5d seg %-5d insn %-5d flag %-5d %s" % (
+        inst_str = "0x%08X : %-3d %+5s - aux %-5d - seg %-5d - insn %-5d - flag %-5d - fea %s" % (
+            lir_inst.address,
             lir_inst.type,
             lir_inst.mnemonic,
             instruction.auxpref,
@@ -406,7 +407,7 @@ class Disassembler(BaseDebugger):
             instruction.insnpref,
             instruction.flags,
             feature_str)
-        lir_inst.group = self.get_group(lir_inst.type)
+        #print inst_str
 
         # Parse every operand present in the instruction being analyzed
         for operand_index in xrange(UA_MAXOP):
@@ -419,11 +420,12 @@ class Disassembler(BaseDebugger):
             # Create a new operand representation and pass the registers names
             # table so the instance can translate registers numbers to its
             # string representation.
-            lir_op = LowLevelOperand(self.instruction_set.GPR_NAMES, self.instruction_set.SPR_NAMES)
+            lir_op = LowLevelOperand(
+                self.instruction_set.GPR_NAMES, self.instruction_set.SPR_NAMES)
 
-            #print "ea 0x%X has operand idx %d - ty %d val %d/%d" % \
-            #    (instruction.ea, operand_index, inst_operand.type,
-            #    inst_operand.value, inst_operand.n)
+            #print "\tidx %d (n %d) - ty %d val %d" % \
+            #    (operand_index, inst_operand.n,
+            #    inst_operand.type, inst_operand.value)
 
             if not self.set_operand_info(lir_op, inst_operand):
                 break
@@ -482,7 +484,6 @@ class Disassembler(BaseDebugger):
 
     def log(self, message):
         """Display a line of text in the log window."""
-        # TODO / FIXME
         print str(message)
 
     def generate_lir(self, func_address):
