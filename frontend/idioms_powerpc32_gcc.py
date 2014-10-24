@@ -132,7 +132,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     # Mark instruction as already analyzed and as part of the 
                     # standard prologue instruction to avoid output representation.
                     #
-                    self.mark_instruction_analyzed(inst)
+                    inst.analyzed = True
                     self.lir_function.add_prologue_address(inst.address)
 
                     # Add the stack size found.
@@ -199,7 +199,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     # 018000C0 mr      %r31, %sp     ;  this MR instruction.
                     #
                     # TODO: stack pointer definition !!!!!!!!!!!!!
-                    self.mark_instruction_analyzed(inst)
+                    inst.analyzed = True
 
                     for i in bb[index : 0 : -1]:  # walk backwards.
 
@@ -209,7 +209,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                             op0_value in self.lir_function.stack_access_registers:
 
                             # Stack register backup operation found
-                            self.mark_instruction_analyzed(i)
+                            i.analyzed = True
                             self.lir_function.add_prologue_address(i.address)
                     break
 
@@ -240,7 +240,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
 
                 lr_backup_reg = inst[0].value # dest reg for %lr
                 lr_store_found = False              # flag
-                self.mark_instruction_analyzed(inst)
+                inst.analyzed = True
 
                 self.lir_function.add_prologue_address(inst.address)
 
@@ -255,7 +255,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
 
                         # Found LR store operation from previous move
                         self.lir_function.add_prologue_address(inst.address)
-                        self.mark_instruction_analyzed(inst)
+                        inst.analyzed = True
 
                         lr_store_found = True
                         self.lir_function.leaf_procedure = False
@@ -315,10 +315,6 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 # Do not mark the instruction as analyzed because
                 # we'll use it to create the 'return' instruction
                 # when translating to MIR.
-                #self.mark_instruction_analyzed(inst)
-                # TODO : Make sure we don't need this ret instruction as an
-                # epilogue address in the list.
-                #self.lir_function.add_epilogue_address(inst.address)
 
                 self.ret_to_caller = True
                 print "    Function returns to caller."
@@ -344,12 +340,12 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         if inst.type == self.iset.PPC_mtlr:
                             temp_lr_reg = inst[0].value
 
-                            self.mark_instruction_analyzed(inst)
+                            inst.analyzed = True
                             self.lir_function.add_epilogue_address(inst.address)
 
                         if inst.type == self.iset.PPC_lwz and \
                             inst[0].is_reg_n(temp_lr_reg):
-                            self.mark_instruction_analyzed(inst)
+                            inst.analyzed = True
                             self.lir_function.add_epilogue_address(inst.address)
 
                             print "    Link-register restoration found."
@@ -398,7 +394,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                                     (restore_size, self.lir_function.stack_size)
                         
                         for inst in prologue_block:
-                            self.mark_instruction_analyzed(inst)
+                            inst.analyzed = True
                             self.lir_function.add_epilogue_address(inst.address)
                         return  # Don't keep checking
 
@@ -452,7 +448,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
 
                 if restore_stages_found == 3:
                     for inst in prologue_block:
-                        self.mark_instruction_analyzed(inst)
+                        inst.analyzed = True
                         self.lir_function.add_epilogue_address(inst.address)
                     return
 
@@ -507,7 +503,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
 
                 if restore_stages_found == 3:
                     for inst in prologue_block:
-                        self.mark_instruction_analyzed(inst)
+                        inst.analyzed = True
                         self.lir_function.add_epilogue_address(inst.address)
                     return
 
@@ -578,7 +574,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         # TODO / FIXME : This is probably WRONG !!!
                         self.nv_regs = [inst[0].value, self.iset.TOTAL_GPR]
 
-                    self.mark_instruction_analyzed(inst)
+                    inst.analyzing = True
                     print "    Non-volatile registers detected:", self.nv_regs
 
                     #
@@ -600,7 +596,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                             inst[0].is_reg_n(self.nv_regs[0]):
                             print "    Non-volatile registers restoration " \
                                     "found."
-                            self.mark_instruction_analyzed(inst)
+                            inst.analyzed = True
 
         except MiddleIrException, err:
             print format_exc() + '\n'
@@ -736,7 +732,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         self.iset.ARGUMENT_REGISTERS.index(inst[0].value)
 
                     self.param_regs[param_number] = [inst[0].value, ]
-                    self.mark_instruction_analyzed(inst)
+                    inst.analyzed = True
 
                     print "    Parameter register (simple) detected: %s" % \
                             self.iset.GPR_NAMES[inst[0].value]
@@ -778,7 +774,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
 
                     #self.param_regs[inst[1].value] = inst[0].value
                     raise Exception("FIXME : detect_arguments_copy")
-                    self.mark_instruction_analyzed(inst)
+                    inst.analyzed = True
 
                     print "    Function's arguments copy register r%d->r%d detected" % \
                             (inst[1].value, inst[0].value)
@@ -997,8 +993,8 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
 
                 # Mark instructions as analyzed and remove them from
                 # the list of remaining LIR instructions.
-                self.mark_instruction_analyzed(hi_inst)
-                self.mark_instruction_analyzed(lo_inst, remove=False)
+                hi_inst.analyzed = True
+                lo_inst.analyzed = True
 
         return True
 
@@ -1054,8 +1050,8 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     if clrlwi[0].is_reg_n(reg):
                         # Mark instructions as analyzed and remove them from
                         # the IR list.
-                        self.mark_instruction_analyzed(bb[i], remove=False)
-                        self.mark_instruction_analyzed(bb[i+1])
+                        bb[i].analyzed = True
+                        bb[i+1].analyzed = True
 
         except MiddleIrException, err:
             print format_exc() + '\n'

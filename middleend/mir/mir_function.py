@@ -212,7 +212,6 @@ class MiddleIrFunction(MiddleIrFunctionBase):
 
         """
         self.prologue_addresses.add(address)
-        #self.removeStatementByAddress(address)
 
     def add_epilogue_address(self, address):
         """Mark the specified address as part of the function epilogue and
@@ -220,7 +219,6 @@ class MiddleIrFunction(MiddleIrFunctionBase):
 
         """
         self.epilogue_addresses.add(address)
-        #self.removeStatementByAddress(address)
 
     @property
     def _llvm_type(self):
@@ -400,5 +398,4 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         if self._llvm_definition:
             self._llvm_definition.delete()
 
-        #print "DELETING SELF" + ("-" * 30)
         del self

@@ -122,8 +122,6 @@ class IdiomAnalyzer(object):
         """Return the string pointer by the specified address."""
 
         if is_unicode_string:
-            # TODO: fixme
-            #is_unicode(int(address))
             string = self.debugger.get_string(
                 address, None, self.debugger.STRING_TYPE_UNICODE)
         else:
@@ -134,24 +132,6 @@ class IdiomAnalyzer(object):
             return string
         else:
             return None
-
-    def mark_instruction_analyzed(self, lir_inst, analyzed=True, remove=True):
-        """Given a LIR instruction, mark it as 'analyzed' and optionally remove
-        the statement representing that instruction.
-
-        This is done because idioms are a set of architecture specific
-        instructions that can be more easily represented by certain MIR
-        statements than the ones that individually represente each LIR
-        instruction.
-
-        """
-        lir_inst.analyzed = analyzed
-
-        # TODO / FIXME
-        #if remove:
-        #    pass
-            #print "[===] Pending remove MIR at 0x%X" % lir_inst.address
-            #self.mir_module.remove_statement_by_address(lir_inst.address)
 
     def is_compiler_unknown(self):
         """Return a boolean indicating if the compiler used to generate the
