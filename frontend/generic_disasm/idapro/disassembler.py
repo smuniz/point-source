@@ -343,7 +343,7 @@ class Disassembler(BaseDebugger):
         else:
             # TODO : check for architecture specific operands.
             #raise DisassemblerException("Unrecognized operand type %d" % op.type)
-            value = None
+            value = op.value
 
         # Retrieve operand number and type
         lir_op.type = op.type   # FIXME : this just works cause we use IDA Pro

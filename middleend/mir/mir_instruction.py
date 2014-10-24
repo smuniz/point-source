@@ -1216,7 +1216,7 @@ class MiddleIrCallInstruction(MiddleIrInstruction):
         arguments = list()
 
         for idx, argument in enumerate(self.arguments):
-            print "arg idx:%d -> %s" % (idx, argument)
+            #print "arg idx:%d -> %s" % (idx, argument)
             arguments.append(argument.get_readable_inners())
         return arguments
 
