@@ -174,12 +174,12 @@ class LowLevelOperand(object):
         any).
 
         """
-        if self.is_reg or self.is_special:
+        if self.is_reg:
             return self.gpr_names.get(self.value, None)
         elif self.is_displ:
             return self.gpr_names.get(self.value[1], None)
-        #elif self.is_special:
-            #return self.spr_names.get(self.type, None)
+        elif self.is_special:
+            return self.spr_names.get(self.value, None)
         else:
             return None
 
