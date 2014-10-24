@@ -6,10 +6,11 @@
 
 from base import *
 
-try:
-    import immlib
-except ImportError, err:
-    raise BaseDebuggerException("Immunity debugger is not supported.")
+import immlib
+#try:
+#    import immlib
+#except ImportError, err:
+#    raise BaseDebuggerException("Immunity debugger is not supported.")
 
 from immlib import Debugger, Register
 

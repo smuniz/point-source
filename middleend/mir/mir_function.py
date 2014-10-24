@@ -378,7 +378,6 @@ class MiddleIrFunction(MiddleIrFunctionBase):
             module.add_function(new_func)
             return new_func
 
-        print "===> new func : %s" % new_func
         raise MiddleIrFunctionException(
             "Function '%s' already exists in module '%s'" % (
             name, module.name))

@@ -6,7 +6,7 @@
 #
 
 from sys import path as sys_path, exit, stdout
-from os import walk
+from os import walk, sep
 #from os.path import realpath, dirname, sep, exists
 from time import clock
 from traceback import format_exc
@@ -15,14 +15,10 @@ from traceback import print_exc
 
 import os
 
-#print "-----> %s" % os.path
-
 # Add path to system paths.
 current_filename = getfile(currentframe())
 
-#print "-----> %s" % current_filename
 path_to_current_module = os.path.realpath(os.path.dirname(current_filename))
-#print "-----> %s" % path_to_current_module
 
 if path_to_current_module not in sys_path:
     print "[+] Fixing Python modules path..."
@@ -157,9 +153,6 @@ class PointSource(object):
         binary being decompiled.
 
         """
-        import os
-        sep = os.sep #"\\"
-
         global path_to_current_module
         disassemblers_dir =  sep.join(
             [path_to_current_module, "frontend", "generic_disasm"])
@@ -180,29 +173,33 @@ class PointSource(object):
 
                 try:
                     # Add current disassembler path for modules lookup.
-                    #if disassemblers_dir not in sys_path:
-                    #    sys_path.append(disassemblers_dir)
+                    if disassemblers_dir not in sys_path:
+                        sys_path.append(disassemblers_dir)
 
-                    ## Import the specific disassembler.
-                    #module_name = "frontend.generic_disasm.%s.disassembler" % current_dir
-                    #imp_mod = __import__(
-                    #    module_name, globals(), locals(), ["Disassembler"])
+                    # Import the specific disassembler.
+                    module_name = "frontend.generic_disasm.%s.disassembler" % current_dir
+                    imp_mod = __import__(
+                        module_name, globals(), locals(), ["Disassembler"], -1)
 
-                    #self.debugger = imp_mod.Disassembler()
-                    # TODO : FIXME
-                    self.debugger = frontend.generic_disasm.idapro.disassembler.Disassembler()
+                    self.debugger = imp_mod.Disassembler()
 
                     self.debugger.log("[+] Debugger detected: %s" %
                                   self.debugger.debugger_name)
 
                     break
 
+                except ImportError, err:
+                    #print "Import error : %s" % err
+                    # Looks like we've hit an unsupported debugger (this means
+                    # that we're not running inside the disassembler we've just
+                    # tried to initialize).
+                    pass
                 except BaseDebuggerException, err:
-                    print "Debugger Exception : %s" % err
+                    print "--Debugger Exception : %s" % err
 
         # Check if a functional debugger was found. Otherwise abort.
         if not self.debugger:
-            raise PointSourceException("Unknown debugger in use.")
+            raise PointSourceException("Unknown disassembler (if any) in use.")
 
     @property
     def function_address(self):

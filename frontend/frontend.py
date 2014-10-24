@@ -152,18 +152,12 @@ class FrontEnd(object):
             raise FrontEndException("Unknown return type (%d)" % \
                 self.return_type)
 
-        print "SYMBOL TABLES LEN %d" % len(self.symbol_tables)
-        print "CONTENT : %r" % self.symbol_tables
         self.mir_function = MiddleIrFunction.get(self.mir_module, function_name)
-        print "00" * 20
         if self.mir_function is not None:
             # Delete the previously created function and create a new one. This
             # is what the user requested so do it (definition might have
             # changed, etc.).
-            print "AA" * 20
-            print "MIR %r" % self.mir_function
             if self.mir_function in self.symbol_tables:
-                print "XX" * 20
                 del self.symbol_tables[self.mir_function.name]
             self.mir_function.delete()
 
@@ -241,7 +235,7 @@ class FrontEnd(object):
             mir_basic_block.start_address = lir_basic_block.start_address
             mir_basic_block.end_address = lir_basic_block.end_address
 
-    def generate_mir(self):
+    def populate_mir(self):
         """Convert all the function's instructions represented by the LIR to a
         higher IR called MIR (Middle-end Intermediate Representation) as an
         initial step.
@@ -456,10 +450,8 @@ class FrontEnd(object):
             #
             # Invoke the appropriate idiom analyzer for the current architecture.
             #
-            print "=>", str(self.symbol_tables)
             self.current_symbol_table = \
                 self.symbol_tables.setdefault(self.mir_function.name, dict())
-            print "=>", str(self.current_symbol_table)
 
             print "[+] Initializing idioms analyser..."
             if self.idiom_analyzer is None:
@@ -477,11 +469,12 @@ class FrontEnd(object):
             #
             # Step x
             #
-            # Create the middle level IR and then proceed to the idioms analysis
-            # using the newly created IR.
+            # With the middle level IR created proceed to the idioms analysis
+            # using the newly created IR and filling it with all the
+            # appropriate code representation.
             #
-            print "[+] Creating Middle level IR..."
-            self.generate_mir()
+            print "[+] Populating Middle level IR..."
+            self.populate_mir()
 
             #
             # Step x

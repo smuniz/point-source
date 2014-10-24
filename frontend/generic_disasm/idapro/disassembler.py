@@ -323,14 +323,12 @@ class Disassembler(BaseDebugger):
 
         # Retrieve operand value according to it's type
         if op.type == o_void:
-            #print "DBG ===> void operand"
             return False # no operand
 
         elif op.type in [o_mem, o_far, o_near]:
             value = op.addr
 
         elif op.type == o_displ:
-            #print "disp r%d + offset 0x%X" % (op.phrase, op.addr)
             value = [op.phrase, op.addr]
 
         elif op.type == o_reg:
@@ -408,7 +406,6 @@ class Disassembler(BaseDebugger):
             instruction.insnpref,
             instruction.flags,
             feature_str)
-        #print "=> 0x%08X : %s" % (lir_inst.address, inst_str)
         lir_inst.group = self.get_group(lir_inst.type)
 
         # Parse every operand present in the instruction being analyzed
@@ -416,7 +413,6 @@ class Disassembler(BaseDebugger):
             inst_operand = \
                 self.get_instruction_operand(instruction.ea, operand_index)
 
-            #print "%d" % inst_operand.type
             if not inst_operand or inst_operand.type is o_void:
                 break
 

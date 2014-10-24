@@ -67,7 +67,7 @@ class MirTextOutput(TextOutputMedia):
 
     def __init__(self, mir=None):
         """Instance initialization."""
-        super(TextOutputMedia, self).__init__()
+        super(MirTextOutput, self).__init__()
 
         self.mir = mir
 
@@ -205,3 +205,7 @@ class MirTextOutput(TextOutputMedia):
             cur_pos += 1
 
         return (cur_pos, line[x : cur_pos])
+
+    def on_close(self):
+        """Close event."""
+        pass

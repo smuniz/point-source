@@ -5,10 +5,11 @@
 #
 from base import *
 
-try:
-    import bsapi
-except ImportError, err:
-    raise BaseDebuggerException("Binary scope is not supported")
+import bsapi
+#try:
+#    import bsapi
+#except ImportError, err:
+#    raise BaseDebuggerException("Binary scope is not supported")
 
 raise Exception("UNCOMMONT THE FOLLOWING LINES")
 #from frontend.lir.lir_instruction import LowLevelInstruction
