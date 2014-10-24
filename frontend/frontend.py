@@ -283,9 +283,7 @@ class FrontEnd(object):
                 #
                 try:
                     mir_inst = self.transform_to_mir_instruction(lir_inst)
-                except Exception, err:
-                    # TODO : Replace this exception handler with a front-end
-                    # one.
+                except FrontEndException, err:
                     print format_exc()
                     raise FrontEndException(
                         "Unable to transform LIR instruction (%s) : %s" % \

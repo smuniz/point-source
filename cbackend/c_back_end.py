@@ -156,8 +156,6 @@ class CBackEnd(object):
             #
             # Get all the information for the function declaration.
             #
-            # TODO : Enchance this code to get the right representation for all
-            # built-in types and opques, too.
             self.hir.name = mir_function.name
 
             if isinstance(mir_function.return_type, MiddleIrTypeInt):

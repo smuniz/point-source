@@ -262,8 +262,7 @@ class FrontEndPowerPc(FrontEnd):
 
                 mir_inst = self.mir_inst_builder.ret(ret_val)
 
-            else:  # 2 or more.
-                # TODO / FIXME
+            else:  # 2 or more (types bigger than built-ins)
                 raise FrontEndPowerPcException(
                     "Unsupported multiple return values %s" % \
                     self.idiom_analyzer.return_registers)
