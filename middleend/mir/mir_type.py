@@ -170,7 +170,7 @@ class MiddleIrTypePointer(MiddleIrBaseType):
 
     def __init__(self, pointee, addr_space=0):
         """Initialize the instance."""
-        # TODO / FIXME : Raise exception.
+        # TODO : Validate parameter and raise exception.
         #if self.pointee is None:
             #raise MiddleIr
         self.pointee = pointee
