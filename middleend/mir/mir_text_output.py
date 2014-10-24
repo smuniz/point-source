@@ -209,3 +209,7 @@ class MirTextOutput(TextOutputMedia):
     def on_close(self):
         """Close event."""
         pass
+
+    def OnKeydown(self, vkey, shift):
+        """Handle every key pressed in the newly created window."""
+        pass
