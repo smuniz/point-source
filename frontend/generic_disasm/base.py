@@ -19,6 +19,8 @@ ARM_ARCH = 2
 X86_ARCH = 3
 X86_64_ARCH = 4
 
+lir_cache = dict()
+
 
 class BaseDebuggerException(Exception):
     """Debugger exception class."""
@@ -52,6 +54,19 @@ class BaseDebugger(object):
 
         self.__check_attribute("SUPPORTED_ARCHS")
         self.__check_attribute("DEBUGGER_NAME")
+
+        global lir_cache
+        self._lir_cache = lir_cache
+
+    @property
+    def _lir_cache(self):
+        """Return the current LIR cache store."""
+        return self.__lir_cache
+
+    @_lir_cache.setter
+    def _lir_cache(self, _lir_cache):
+        """Store the current LIR cache store."""
+        self.__lir_cache = _lir_cache
 
     def _post_init(self):
         """Additional initializations."""
