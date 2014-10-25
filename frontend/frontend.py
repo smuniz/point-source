@@ -12,6 +12,10 @@ from idioms import IdiomAnalyzerException
 
 from misc.prerequisites import require
 
+##reload(frontend.generic_disasm.base)
+#require("frontend.generic_disasm.base")
+#from frontend.generic_disasm.base import BaseDebuggerException
+
 #reload(middleend.mir_exception)
 require("middleend.mir_exception")
 from middleend.mir_exception import MiddleIrException
@@ -136,7 +140,7 @@ class FrontEnd(object):
         #
         # Initialize internal MIR members for further usage.
         #
-        function_name = self.debugger.get_current_function_name()
+        function_name = self.lir_function.name
 
         # TODO / FIXME: Correctly detect return type.
         # Create basic return types in order to create the function skeleton.
@@ -387,52 +391,26 @@ class FrontEnd(object):
         """Dump the current LIR function to the debugger output."""
         print "[+] LIR representation:\n%s" % self.lir_function
 
-    def generate_lir(self):
-        """
-        Based on the low level instruction previously obtained by the
-        disassembler layer, proceed to create a LIR representation of the
-        current function under analysis.
-
-        This is specific to the disassembler engine where the decompiler is run
-        into.
-        """
-        #
-        # Get every instruction with it's operands and basic blocks
-        # information and generate the Low level IR (aka LIR).
-        #
-        self.lir_function = self.debugger.generate_lir(self.function_address)
-
-        #
-        # Perform a basic check on newly generated LIR function.
-        #
-        if self.lir_function.get_basic_blocks_count() == 0:
-            raise FrontEndException(
-                "No basic blocks found during the analysis.")
-
-        if self.lir_function.instructions_count == 0:
-            raise FrontEndException(
-                "No instructions found during the analysis.")
-
-        print "[+] Generating DU and UD chains for Low level IR..."
-        self.lir_function.generate_chains()
-
-        print "[+] Found %d basic block(s) on function \'%s\' containing %d " \
-            "instruction(s)" % (
-            self.lir_function.get_basic_blocks_count(),
-            self.lir_function.name,
-            self.lir_function.instructions_count)
-
     def analyze(self):
         """Start the analysis phase by gathering information about all the
         instructions contained inside the function being analyzed and also
         store information about call graph for further operations.
 
         """
-        print "[+] Generating Low level IR..."
-        self.generate_lir()
+        try:
+            print "[+] Generating Low level IR..."
+            self.lir_function = self.debugger.generate_lir(self.function_address)
 
-        # Output LIR for debugging purposes.
-        self.__dump_lir()
+            print "[+] Found %d basic block(s) on function \'%s\' containing %d " \
+                "instruction(s)" % (
+                self.lir_function.get_basic_blocks_count(),
+                self.lir_function.name,
+                self.lir_function.instructions_count)
+
+            # Output LIR for debugging purposes.
+            self.__dump_lir()
+        except Exception, err:
+            print "ERROR : %s" % err
 
         try:
             #

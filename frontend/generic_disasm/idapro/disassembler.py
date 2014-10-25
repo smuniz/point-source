@@ -483,7 +483,7 @@ class Disassembler(BaseDebugger):
         """Display a line of text in the log window."""
         print str(message)
 
-    def generate_lir(self, func_address):
+    def _generate_lir(self, func_address):
         """Analyze every instruction and operand and it's references in the
         current function and generate a low level IR equivalent with them.
 
@@ -491,7 +491,6 @@ class Disassembler(BaseDebugger):
         # Check if the cache already has the requested function and return it
         # in cae it does.
         if func_address in self._lir_cache:
-            print "A" * 40
             return self._lir_cache[func_address]
 
         # Obtain function scope if available.

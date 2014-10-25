@@ -19,6 +19,11 @@ ARM_ARCH = 2
 X86_ARCH = 3
 X86_64_ARCH = 4
 
+#
+# Keep track of every LIR function represented in LIR form so when one is
+# requested a local copy will be returned instead of performing the analysis
+# from scratch.
+#
 lir_cache = dict()
 
 
@@ -227,9 +232,41 @@ class BaseDebugger(object):
         return
 
     @abc.abstractmethod
-    def generate_lir(self, func_address):
+    def _generate_lir(self, function_address):
         """Analyze every instruction and operand and it's references in the
         current function and generate a low level IR equivalent with them.
 
+        This is specific to the disassembler engine where the decompiler is run
+        into.
         """
         return
+
+    def generate_lir(self, function_address):
+        """
+        Based on the low level instruction previously obtained by the
+        disassembler layer, proceed to create a LIR representation of the
+        current function under analysis.
+
+        """
+        #
+        # Get every instruction with it's operands and basic blocks
+        # information and generate the Low level IR (aka LIR).
+        #
+        lir_function = self._generate_lir(function_address)
+
+        #
+        # Perform a basic check on newly generated LIR function.
+        #
+        if lir_function.get_basic_blocks_count() == 0:
+            raise BaseDebuggerException(
+                "No basic blocks found during the analysis.")
+
+        if lir_function.instructions_count == 0:
+            raise BaseDebuggerException(
+                "No instructions found during the analysis.")
+
+        #print "[+] Generating DU and UD chains for Low level IR..."
+        lir_function.generate_chains()
+
+        return lir_function
+

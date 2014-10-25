@@ -189,13 +189,12 @@ class PointSource(object):
                     break
 
                 except ImportError, err:
-                    #print "Import error : %s" % err
                     # Looks like we've hit an unsupported debugger (this means
                     # that we're not running inside the disassembler we've just
                     # tried to initialize).
                     pass
                 except BaseDebuggerException, err:
-                    print "--Debugger Exception : %s" % err
+                    print "Debugger Exception : %s" % err
 
         # Check if a functional debugger was found. Otherwise abort.
         if not self.debugger:
