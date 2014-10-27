@@ -18,8 +18,6 @@ class IdiomAnalyzer(object):
         """Initialize idiom analyzer base class."""
         self.debugger = debugger
 
-        #self.init(lir_function, mir_function, symbol_tables)
-
     def init(self, lir_function, mir_function, symbol_tables):
         """Clean any internal state and setup everything for new analysis."""
         self.lir_function = lir_function  # Function low-level representation
