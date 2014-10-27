@@ -431,12 +431,12 @@ class FrontEnd(object):
 
             print "[+] Initializing idioms analyser..."
             if self.idiom_analyzer is None:
-                self.idiom_analyzer = self.idiom_analyzer_type(
-                    self.debugger,
-                    self.lir_function,
-                    self.mir_module,
-                    self.mir_function,
-                    self.symbol_tables)
+                self.idiom_analyzer = self.idiom_analyzer_type(self.debugger)
+
+            # Clean any internal state from previous analysis.
+            self.idiom_analyzer.init(   self.lir_function,
+                                        self.mir_function,
+                                        self.symbol_tables)
 
             print "[+] Initiating idioms analysis phase 1..."
             self.idiom_analyzer.perform_phase1_analysis()

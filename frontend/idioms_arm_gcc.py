@@ -17,16 +17,16 @@ class ArmGccIdiomAnalyzerException(IdiomAnalyzerException):
 
 
 class ArmGccIdiomAnalyzer(IdiomAnalyzer):
-    """
-    Support for arm specific idioms analyzer.
-    """
+    """Support for arm specific idioms analyzer."""
 
-    def __init__(self, debugger, lir_function, mir_module, mir_function):
-        """
-        Initialize idiom analyzer for the ARM architecture.
-        """
-        IdiomAnalyzer.__init__(
-            self, debugger, lir_function, mir_module, mir_function)
+    def __init__(self, debugger):
+        """Initialize idiom analyzer for the ARM architecture."""
+        super(ArmGccIdiomAnalyzer, self).__init__(debugger)
+
+    def init(self, lir_function, mir_function, symbol_tables):
+        """Clean any internal state and setup everything for new analysis."""
+        super(ArmGccIdiomAnalyzer, self).init(
+            lir_function, mir_function, symbol_tables)
 
     def perform_phase1_analysis(self):
         """

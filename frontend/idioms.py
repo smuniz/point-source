@@ -14,12 +14,16 @@ class IdiomAnalyzer(object):
     """Base class to facilitate idioms analysis."""
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, debugger, lir_function, mir_module, mir_function,
-        symbol_tables):
+    def __init__(self, debugger):
         """Initialize idiom analyzer base class."""
         self.debugger = debugger
+
+        #self.init(lir_function, mir_function, symbol_tables)
+
+    def init(self, lir_function, mir_function, symbol_tables):
+        """Clean any internal state and setup everything for new analysis."""
         self.lir_function = lir_function  # Function low-level representation
-        self.mir_module = mir_module    # Current module's IR
+        self.mir_module = mir_function.module    # Current module's IR
         self.mir_function = mir_function
 
         self.nv_regs = list() # Non-volatile registers list

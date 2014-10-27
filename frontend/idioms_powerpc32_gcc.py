@@ -27,12 +27,14 @@ class PowerPc32GccIdiomAnalyzerException(IdiomAnalyzerException):
 class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
     """PowerPC specific idioms analyzer support."""
 
-    def __init__(self, debugger, lir_function, mir_module, mir_function,
-        symbol_tables):
+    def __init__(self, debugger):
         """Initialize idiom analyzer for the PowerPC architecture."""
-        IdiomAnalyzer.__init__(
-            self, debugger, lir_function, mir_module, mir_function,
-            symbol_tables)
+        super(PowerPc32GccIdiomAnalyzer, self).__init__(debugger) 
+
+    def init(self, lir_function, mir_function, symbol_tables):
+        """Clean any internal state and setup everything for new analysis."""
+        super(PowerPc32GccIdiomAnalyzer, self).init(
+            lir_function, mir_function, symbol_tables)
 
         # Set default stack access style for PPC
         lir_function.add_stack_access_register(self.iset.SP)
