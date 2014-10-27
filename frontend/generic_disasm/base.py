@@ -248,11 +248,19 @@ class BaseDebugger(object):
         current function under analysis.
 
         """
+        # Check if the cache already has the requested function and return it
+        # in cae it does.
+        #if function_address in self._lir_cache:
+        #    return self._lir_cache[function_address]
+
         #
         # Get every instruction with it's operands and basic blocks
         # information and generate the Low level IR (aka LIR).
         #
         lir_function = self._generate_lir(function_address)
+
+        # Update the cache with the newly created function.
+        #self._lir_cache[func_address] = lir_function
 
         #
         # Perform a basic check on newly generated LIR function.

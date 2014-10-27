@@ -137,8 +137,8 @@ class MiddleEnd(object):
     def generate_output(self):
         """Generate a debugging output with the UD and DU chains."""
         print "[+] Generating MIR representation..."
-        #print self.mir
-        #return
+        print self.mir
+        return
         # Create an output instance to display the current LLVM IR
         # representation hosted inside the MIR.
         mir_output = MirTextOutput(self.mir)

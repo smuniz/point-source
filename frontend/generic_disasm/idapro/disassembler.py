@@ -488,11 +488,6 @@ class Disassembler(BaseDebugger):
         current function and generate a low level IR equivalent with them.
 
         """
-        # Check if the cache already has the requested function and return it
-        # in cae it does.
-        if func_address in self._lir_cache:
-            return self._lir_cache[func_address]
-
         # Obtain function scope if available.
         func = get_func(func_address)
 
@@ -566,8 +561,5 @@ class Disassembler(BaseDebugger):
                     ea)
 
             current_basic_block.add_instruction(ea, lir_inst)
-
-        # Update the cache with the newly created function.
-        self._lir_cache[func_address] = lir_function
 
         return lir_function

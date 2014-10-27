@@ -339,6 +339,7 @@ class CBackEnd(object):
         # Create an output instance to display the current C code
         # representation hosted inside the HIR.
         print "[+] Creating HIR representation..."
-        #print str(self.hir)
+        print str(self.hir)
+        return
         hir_output = HirTextOutput(self.hir)
         hir_output.generate_output("Decompiled code")

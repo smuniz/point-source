@@ -254,7 +254,8 @@ class LowLevelFunction(object):
         return len(self)
 
     def add_stack_access_register(self, reg):
-        self.sp_regs.append(reg)
+        if reg not in self.sp_regs:
+            self.sp_regs.append(reg)
 
     @property
     def stack_access_registers(self):
