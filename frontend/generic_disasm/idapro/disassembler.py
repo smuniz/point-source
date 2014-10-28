@@ -418,7 +418,7 @@ class Disassembler(BaseDebugger):
             instruction.insnpref,
             instruction.flags,
             feature_str)
-        print inst_str
+        #print inst_str
 
         # Parse every operand present in the instruction being analyzed
         for operand_index in xrange(UA_MAXOP):
@@ -434,9 +434,9 @@ class Disassembler(BaseDebugger):
             lir_op = LowLevelOperand(
                 self.instruction_set.GPR_NAMES, self.instruction_set.SPR_NAMES)
 
-            print "\tidx %d (n %d) - ty %d val %d" % \
-                (operand_index, inst_operand.n,
-                inst_operand.type, inst_operand.value)
+            #print "\tidx %d (n %d) - ty %d val %d" % \
+            #    (operand_index, inst_operand.n,
+            #    inst_operand.type, inst_operand.value)
 
             if not self.set_operand_info(lir_op, inst_operand):
                 break

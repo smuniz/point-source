@@ -641,8 +641,6 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         # and make sure that the return register is indeed located before the
         # blr instruction.
 
-        # TODO / FIXME : We should check the the register is not
-        # used previous to the ret (and after the def).
         ret_regs_list = list(self.iset.RETURN_REGISTERS)
 
         for lir_basic_block in reversed(self.lir_function):
@@ -650,6 +648,16 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 if lir_inst.address in self.lir_function.du_chain:
 
                     for reg in ret_regs_list:
+
+                        # We check that the register is not used previous to the ret (and after
+                        # the def).
+                        if reg in self.lir_function.ud_chain[lir_inst.address]:
+                            # Remove from the list of possible return
+                            # registers but don't consider it as part of the
+                            # return value becuase it's being used for other
+                            # purposes.
+                            ret_regs_list.remove(reg)
+
                         if reg in self.lir_function.du_chain[lir_inst.address]:
                             # Update the list of return registers for further
                             # usage and then update the UD and DU chains of
@@ -870,8 +878,8 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 dest_address = idaapi.get_first_dref_from(hi_inst.address)
                 idiom_type = idaapi.idc_guess_type(dest_address)
 
-                print "    src:0x%X (idx %2d) ---> dest:0x%X - type:%s" % \
-                        (lo_inst.address, hi_inst_idx, dest_address, idiom_type)
+                #print "    src:0x%X (idx %2d) ---> dest:0x%X - type:%s" % \
+                #        (lo_inst.address, hi_inst_idx, dest_address, idiom_type)
 
                 # Check wheater the pointed address contains a string
                 # or it's just a global variable.
