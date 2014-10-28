@@ -880,6 +880,8 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 if (idiom_type is not None and \
                     idiom_type.find("char") == -1) or \
                     data is None:
+                    raise IdiomAnalyzerException(
+                        "Unimplemented idiom type for non char*")
                     # Global variable reference
                     #
                     # TODO: Check if it's just an integer literal

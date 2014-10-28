@@ -35,6 +35,15 @@ class LowLevelInstruction(object):
         self.mnemonic = None
         self.analyzed = False
         self.basic_block = None
+        self._aux = None
+
+    @property
+    def _aux(self):
+        return self.__aux
+
+    @_aux.setter
+    def _aux(self, _aux):
+        self.__aux = _aux
 
     @property
     def basic_block(self):

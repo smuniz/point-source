@@ -14,6 +14,8 @@ import actionplan
 reload(actionplan)
 from actionplan import Action, ActionPlan, ActionPlanException
 
+from frontend.generic_disasm.lir.lir_operand import *
+
 # Import MIR related modules
 #from middleend.mir import *    # Not working anymore. Must import each module
                                 # manually.
@@ -310,9 +312,20 @@ class FrontEndPowerPc(FrontEnd):
         not.
 
         """
-        #if self.debugger.
+        if lir_inst.type == self.debugger.iset.PPC_balways and \
+            lir_inst._aux == 8 and \  # TODO / FIXME : make this right.
+            len(lir_inst) == 1 and \
+            lir_inst[0].type in [O_NEAR, O_FAR]:
+            return True
+
         return False
 
     def _extract_callee_address(self, lir_inst):
         """Return the callee address from a call instruction, if any."""
+        if not self.is_call_instruction(lir_inst):
+            return None
+
+        if len(lir_inst) == 1:
+            return lir_inst[0].value
+
         return None

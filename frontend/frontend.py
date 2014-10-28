@@ -490,8 +490,6 @@ class FrontEnd(object):
         # called functions.
         for lir_basic_block in self.lir_function:
             for lir_inst in lir_basic_block:
-                if not self.is_call_instruction(lir_inst):
-                    continue
 
                 callee_address = self._extract_callee_address(lir_inst)
                 
