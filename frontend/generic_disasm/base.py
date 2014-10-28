@@ -57,9 +57,6 @@ class BaseDebugger(object):
         # functions.
         self.debugger = None
 
-        self.__check_attribute("SUPPORTED_ARCHS")
-        self.__check_attribute("DEBUGGER_NAME")
-
         global lir_cache
         self._lir_cache = lir_cache
 
@@ -110,21 +107,19 @@ class BaseDebugger(object):
         """
         self.__instruction_set = new_set
 
-    def __check_attribute(self, attribute_name):
-        """Perform a check on the specified attribute name and raise an
-        exception in case it's missing."""
-        if not hasattr(self, attribute_name):
-            raise BaseDebuggerException(
-                "Debugger class %s has missing \"%s\" attribute." %
-                (self.__class__.__name__, attribute_name))
+    @abc.abstractmethod
+    def supported_archs(self):
+        """Return a list of the supported architectures by the current
+        debugger.
 
-    @property
+        """
+        return
+
     @abc.abstractmethod
     def screen_address(self):
         """Return the effective memory address under the cursor."""
         return
 
-    @property
     @abc.abstractmethod
     def architecture(self):
         """Return the current architecture in use."""
@@ -139,10 +134,10 @@ class BaseDebugger(object):
             raise BaseDebuggerException(
                 "Current architecture not supported: %s" % err)
 
-    @property
+    @abc.abstractmethod
     def debugger_name(self):
         """Return the name of the debugger application."""
-        return self.DEBUGGER_NAME
+        return
 
     @abc.abstractmethod
     def get_input_file(self):

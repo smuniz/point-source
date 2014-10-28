@@ -3,7 +3,7 @@
 # 
 # This code is part of point source decompiler
 #
-
+import abc
 from traceback import format_exc
 
 from actionplan import Action, ActionPlan, ActionPlanException
@@ -49,6 +49,7 @@ __all__ = ["FrontEnd", "FrontEndException"]
 #
 symbol_tables = dict()
 
+
 class FrontEndException(Exception):
     """Front-end base exception class."""
     pass
@@ -64,6 +65,7 @@ class FrontEnd(object):
     class.
 
     """
+    __metaclass__ = abc.ABCMeta
 
     def __init__(self, idiom_analyzer_type, debugger):
         """Perform base front-end instance initialization."""
@@ -437,7 +439,8 @@ class FrontEnd(object):
             self.idiom_analyzer.init(
                 self.lir_function, self.mir_function, self.symbol_tables)
 
-            self.analyze_called_function
+            self.perform_live_analysis()
+
             print "[+] Initiating idioms analysis phase 1..."
             self.idiom_analyzer.perform_phase1_analysis()
 
@@ -476,6 +479,43 @@ class FrontEnd(object):
         #
         print "[+] Verifying Middle level IR code..."
         self.mir_module.verify()
+
+    def perform_live_analysis(self):
+        """Perform live analysis on variables based on their usage in called
+        functions.
+
+        """
+        # Iterate through every instruction present in the function in order to
+        # get information about the parameters usage and return values of the
+        # called functions.
+        for lir_basic_block in self.lir_function:
+            for lir_inst in lir_basic_block:
+                if not self.is_call_instruction(lir_inst):
+                    continue
+
+                callee_address = self._extract_callee_address(lir_inst)
+                
+                if not callee_address:
+                    # In case that the call instruction didn't use a guessable
+                    # address we just move on.
+                    continue
+
+                # Analyze the called function in order to obtain parameters and
+                # return registers information.
+                self.analyze_callee(callee_address)
+                    
+    @abc.abstractmethod
+    def _extract_callee_address(self, lir_inst):
+        """Return the callee address from a call instruction, if any."""
+        return
+
+    @abc.abstractmethod
+    def is_call_instruction(self, lir_inst):
+        """Determine if the specified instruction is a call instruction or
+        not.
+
+        """
+        return
 
     @property
     def mir(self):

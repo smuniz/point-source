@@ -139,6 +139,19 @@ class Disassembler(BaseDebugger):
         self._post_init()
 
     @property
+    def debugger_name(self):
+        """Return the name of the debugger application."""
+        return self.DEBUGGER_NAME
+
+    @property
+    def supported_archs(self):
+        """Return a list of the supported architectures by the current
+        debugger.
+
+        """
+        return self.SUPPORTED_ARCHS
+
+    @property
     def screen_address(self):
         """Return the effective memory address under the cursor."""
         return get_screen_ea()

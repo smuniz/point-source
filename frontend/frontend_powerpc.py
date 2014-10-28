@@ -304,3 +304,15 @@ class FrontEndPowerPc(FrontEnd):
         #mir_inst.set(str(lir_inst))
 
         return mir_inst
+
+    def is_call_instruction(self, lir_inst):
+        """Determine if the specified instruction is a call instruction or
+        not.
+
+        """
+        #if self.debugger.
+        return False
+
+    def _extract_callee_address(self, lir_inst):
+        """Return the callee address from a call instruction, if any."""
+        return None
