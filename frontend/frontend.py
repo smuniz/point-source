@@ -493,15 +493,21 @@ class FrontEnd(object):
 
                 callee_address = self._extract_callee_address(lir_inst)
                 
-                if not callee_address:
+                if callee_address is None:
                     # In case that the call instruction didn't use a guessable
                     # address we just move on.
                     continue
 
                 # Analyze the called function in order to obtain parameters and
                 # return registers information.
+                print "[+] Analyzing callee at 0x%X" % callee_address
                 self.analyze_callee(callee_address)
-                    
+
+    @abc.abstractmethod
+    def analyze_callee(self, callee_address):
+        """Analyze the callee function by performing a live analysis on it."""
+        return
+
     @abc.abstractmethod
     def _extract_callee_address(self, lir_inst):
         """Return the callee address from a call instruction, if any."""

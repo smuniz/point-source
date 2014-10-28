@@ -14,7 +14,8 @@ import actionplan
 reload(actionplan)
 from actionplan import Action, ActionPlan, ActionPlanException
 
-from frontend.generic_disasm.lir.lir_operand import *
+#from frontend.lir.lir_operand import *
+from lir.lir_operand import *
 
 # Import MIR related modules
 #from middleend.mir import *    # Not working anymore. Must import each module
@@ -312,8 +313,9 @@ class FrontEndPowerPc(FrontEnd):
         not.
 
         """
-        if lir_inst.type == self.debugger.iset.PPC_balways and \
-            lir_inst._aux == 8 and \  # TODO / FIXME : make this right.
+        # TODO / FIXME : make this right.
+        if lir_inst.type == self.iset.PPC_b and \
+            lir_inst._aux == 8 and \
             len(lir_inst) == 1 and \
             lir_inst[0].type in [O_NEAR, O_FAR]:
             return True
@@ -329,3 +331,15 @@ class FrontEndPowerPc(FrontEnd):
             return lir_inst[0].value
 
         return None
+
+    def analyze_callee(self, callee_address):
+        """Analyze the callee function by performing a live analysis on it."""
+        lir_function = self.debugger.generate_lir(callee_address)
+
+        #print "    - Found %d basic block(s) on function \'%s\' containing %d " \
+        #    "instruction(s)" % (
+        #    lir_function.get_basic_blocks_count(),
+        #    lir_function.name,
+        #    lir_function.instructions_count)
+
+        print lir_function
