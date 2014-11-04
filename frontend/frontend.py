@@ -439,7 +439,7 @@ class FrontEnd(object):
             self.idiom_analyzer.init(
                 self.lir_function, self.mir_function, self.symbol_tables)
 
-            self.perform_live_analysis()
+            self.perform_live_variable_analysis()
 
             print "[+] Initiating idioms analysis phase 1..."
             self.idiom_analyzer.perform_phase1_analysis()
@@ -480,7 +480,7 @@ class FrontEnd(object):
         print "[+] Verifying Middle level IR code..."
         self.mir_module.verify()
 
-    def perform_live_analysis(self):
+    def perform_live_variable_analysis(self):
         """Perform live analysis on variables based on their usage in called
         functions.
 
@@ -501,7 +501,14 @@ class FrontEnd(object):
                 # Analyze the called function in order to obtain parameters and
                 # return registers information.
                 print "[+] Analyzing callee at 0x%X" % callee_address
-                self.analyze_callee(callee_address)
+                callee = self.analyze_callee(callee_address)
+
+                #print "    - Found %d basic block(s) on function \'%s\' containing %d " \
+                #    "instruction(s)" % (
+                #    callee.get_basic_blocks_count(),
+                #    callee.name,
+                #    callee.instructions_count)
+
 
     @abc.abstractmethod
     def analyze_callee(self, callee_address):

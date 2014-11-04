@@ -335,11 +335,4 @@ class FrontEndPowerPc(FrontEnd):
     def analyze_callee(self, callee_address):
         """Analyze the callee function by performing a live analysis on it."""
         lir_function = self.debugger.generate_lir(callee_address)
-
-        #print "    - Found %d basic block(s) on function \'%s\' containing %d " \
-        #    "instruction(s)" % (
-        #    lir_function.get_basic_blocks_count(),
-        #    lir_function.name,
-        #    lir_function.instructions_count)
-
-        print lir_function
+        #print lir_function
