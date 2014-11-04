@@ -671,7 +671,9 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
 
                             # Remove from the list of possible return
                             # registers.
-                            ret_regs_list.remove(reg)
+                            print "---> Removing return register : %s" % reg
+                            if reg in ret_regs_list:
+                                ret_regs_list.remove(reg)
 
         print "    Return register(s) found : %s" % \
             ", ".join([self.iset.GPR_NAMES[r] \

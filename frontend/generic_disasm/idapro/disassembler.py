@@ -405,25 +405,26 @@ class Disassembler(BaseDebugger):
         lir_inst.group = self.get_group(lir_inst.type)
         lir_inst._aux = instruction.auxpref
 
-        feature_str = ", ".join(
-            [f_v for f_k, f_v in self.FEATURES.iteritems() \
-                if f_k & instruction.get_canon_feature() == f_k])
+        #feature_str = ", ".join(
+        #    [f_v for f_k, f_v in self.FEATURES.iteritems() \
+        #        if f_k & instruction.get_canon_feature() == f_k])
 
-        inst_str = "0x%08X : %-3d %+5s - aux %-5d - seg %-5d - insn %-5d - flag %-5d - fea %s" % (
-            lir_inst.address,
-            lir_inst.type,
-            lir_inst.mnemonic,
-            instruction.auxpref,
-            instruction.segpref,
-            instruction.insnpref,
-            instruction.flags,
-            feature_str)
+        #inst_str = "0x%08X : %-3d %+5s - aux %-5d - seg %-5d - insn %-5d - flag %-5d - fea %s" % (
+        #    lir_inst.address,
+        #    lir_inst.type,
+        #    lir_inst.mnemonic,
+        #    instruction.auxpref,
+        #    instruction.segpref,
+        #    instruction.insnpref,
+        #    instruction.flags,
+        #    feature_str)
         #print inst_str
 
         # Parse every operand present in the instruction being analyzed
         for operand_index in xrange(UA_MAXOP):
-            inst_operand = \
-                self.get_instruction_operand(instruction.ea, operand_index)
+            #inst_operand = \
+            #    self.get_instruction_operand(instruction.ea, operand_index)
+            inst_operand = instruction.Operands[operand_index]
 
             if not inst_operand or inst_operand.type is o_void:
                 break
@@ -525,6 +526,55 @@ class Disassembler(BaseDebugger):
                 "Could not obtain function information for address 0x%X" %
                 func_address)
 
+        dones = {}
+        for basic_block in FlowChart(func):
+
+            ea = basic_block.startEA
+            current_basic_block = LowLevelBasicBlock(ea)
+
+            lir_function.add_basic_block(current_basic_block)
+
+            for inst_ea in list(Heads(basic_block.startEA, basic_block.endEA)):
+                lir_inst = LowLevelInstruction()
+
+                if not self.set_instruction_info(lir_inst, DecodeInstruction(inst_ea)):
+                    raise DisassemblerException(
+                        "Unable to store information for instruction at 0x%08X" %
+                        ea)
+
+                current_basic_block.add_instruction(inst_ea, lir_inst)
+
+            #for succ_block in basic_block.succs():
+            #    if not dones.has_key(succ_block.id):
+            #        dones[succ_block] = 1
+            #        for inst_ea in list(Heads(succ_block.startEA, succ_block.endEA)):
+            #            print "0x%08X : %s" % (inst_ea, GetMnem(inst_ea))
+
+            #            lir_inst = LowLevelInstruction()
+
+            #            if not self.set_instruction_info(lir_inst, DecodeInstruction(inst_ea)):
+            #                raise DisassemblerException(
+            #                    "Unable to store information for instruction at 0x%08X" %
+            #                    ea)
+
+            #            current_basic_block.add_instruction(inst_ea, lir_inst)
+
+            #for pred_block in basic_block.preds():
+            #    if not dones.has_key(succ_block.id):
+            #        dones[succ_block] = 1
+            #        for inst_ea in list(Heads(succ_block.startEA, succ_block.endEA)):
+            #            print "0x%08X : %s" % (inst_ea, GetMnem(inst_ea))
+
+            #            lir_inst = LowLevelInstruction()
+
+            #            if not self.set_instruction_info(lir_inst, DecodeInstruction(inst_ea)):
+            #                raise DisassemblerException(
+            #                    "Unable to store information for instruction at 0x%08X" %
+            #                    ea)
+
+            #            current_basic_block.add_instruction(inst_ea, lir_inst)
+
+        """
         # We'll create a list of instruction instances and also check for
         # basic blocks boundaries.
         current_basic_block = None
@@ -576,4 +626,5 @@ class Disassembler(BaseDebugger):
 
             current_basic_block.add_instruction(ea, lir_inst)
 
+        """
         return lir_function
