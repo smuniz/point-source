@@ -336,3 +336,4 @@ class FrontEndPowerPc(FrontEnd):
         """Analyze the callee function by performing a live analysis on it."""
         lir_function = self.debugger.generate_lir(callee_address)
         #print lir_function
+        return lir_function

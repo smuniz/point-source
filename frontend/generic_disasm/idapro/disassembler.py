@@ -461,3 +461,11 @@ class Disassembler(BaseDebugger):
                 current_basic_block.add_instruction(inst_ea, lir_inst)
 
         return lir_function
+
+    def display_boxed_message(self, message):
+        """Display a boxed message with a cancel button in it."""
+        show_wait_box(message)
+
+    def hide_boxed_message(self):
+        """Hide a boxed message being displayed."""
+        hide_wait_box()

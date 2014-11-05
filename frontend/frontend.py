@@ -423,6 +423,9 @@ class FrontEnd(object):
             print "[+] Creating Middle level IR skeleton..."
             self.generate_mir_skeleton()
 
+            self.perform_live_variable_analysis(self.lir_function)
+            print "[+] Total functions analyzed : %d" % len(self.cache)
+
             #
             # Step x
             #
@@ -438,8 +441,6 @@ class FrontEnd(object):
             # Clean any internal state from previous analysis.
             self.idiom_analyzer.init(
                 self.lir_function, self.mir_function, self.symbol_tables)
-
-            self.perform_live_variable_analysis()
 
             print "[+] Initiating idioms analysis phase 1..."
             self.idiom_analyzer.perform_phase1_analysis()
@@ -480,7 +481,9 @@ class FrontEnd(object):
         print "[+] Verifying Middle level IR code..."
         self.mir_module.verify()
 
-    def perform_live_variable_analysis(self):
+    cache = dict()
+
+    def perform_live_variable_analysis(self, lir_function):
         """Perform live analysis on variables based on their usage in called
         functions.
 
@@ -488,7 +491,7 @@ class FrontEnd(object):
         # Iterate through every instruction present in the function in order to
         # get information about the parameters usage and return values of the
         # called functions.
-        for lir_basic_block in self.lir_function:
+        for lir_basic_block in lir_function:
             for lir_inst in lir_basic_block:
 
                 callee_address = self._extract_callee_address(lir_inst)
@@ -498,17 +501,24 @@ class FrontEnd(object):
                     # address we just move on.
                     continue
 
+                if callee_address in self.cache:
+                    continue
+
                 # Analyze the called function in order to obtain parameters and
                 # return registers information.
-                #print "[+] Analyzing callee at 0x%X" % callee_address
+                print "[+] Analyzing callee at 0x%X" % callee_address
                 callee = self.analyze_callee(callee_address)
 
-                #print "    - Found %d basic block(s) on function \'%s\' containing %d " \
-                #    "instruction(s)" % (
-                #    callee.get_basic_blocks_count(),
-                #    callee.name,
-                #    callee.instructions_count)
+                if callee:
 
+                    print "    - Found %d basic block(s) on function \'%s\' containing %d " \
+                        "instruction(s)" % (
+                        callee.get_basic_blocks_count(),
+                        callee.name,
+                        callee.instructions_count)
+
+                    self.cache.setdefault(callee_address, callee)
+                    self.perform_live_variable_analysis(callee)
 
     @abc.abstractmethod
     def analyze_callee(self, callee_address):

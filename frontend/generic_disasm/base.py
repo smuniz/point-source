@@ -268,3 +268,12 @@ class BaseDebugger(object):
 
         return lir_function
 
+    @abc.abstractmethod
+    def display_boxed_message(self, message):
+        """Display a boxed message with a cancel button in it."""
+        return
+
+    @abc.abstractmethod
+    def hide_boxed_message(self):
+        """Hide a boxed message being displayed."""
+        return

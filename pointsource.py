@@ -260,6 +260,8 @@ class PointSource(object):
     def decompile(self):
         """Decompile the previously specified function."""
         try:
+            self.debugger.display_boxed_message("Decompiling function...")
+
             # Perform helpers initialization.
             self.init_back_end()
             self.init_middle_end()
@@ -300,6 +302,9 @@ class PointSource(object):
 
             self.__log_separated("End of decompilation process")
 
+        except BaseDebuggerException, err:
+            raise PointSourceException(err)
+
         except FrontEndException, err:
             raise PointSourceException(err)
 
@@ -308,6 +313,14 @@ class PointSource(object):
 
         except CBackEndException, err:
             raise PointSourceException(err)
+
+        except Exception, err:
+            print format_exc()
+            raise PointSourceException("Critical error : %s" % err)
+
+        finally:
+            # Close the boxed message being displayed on the screen.
+            self.debugger.hide_boxed_message()
 
     def __log_separated(self, text):
         """Display a line with the specified text to create a separation in the
@@ -344,15 +357,8 @@ def main():
 
         point_source.decompile()
 
-    except BaseDebuggerException, err:
-        print "[-] Error (disasm) : %s" % err
-
     except PointSourceException, err:
         print "[-] Error : %s" % err
-
-    except Exception, err:
-        print format_exc()
-        print "[-] Critical error : %s" % err
 
     finally:
         if start:
