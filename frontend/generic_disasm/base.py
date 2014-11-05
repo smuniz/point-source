@@ -60,6 +60,8 @@ class BaseDebugger(object):
         global lir_cache
         self._lir_cache = lir_cache
 
+        self._debug = False
+
     @property
     def _lir_cache(self):
         """Return the current LIR cache store."""

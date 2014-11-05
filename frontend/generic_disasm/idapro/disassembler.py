@@ -235,6 +235,7 @@ class Disassembler(BaseDebugger):
         """Return the length of the instruction at the specified address."""
         return decode_insn(address)
 
+    """
     def is_basic_block_start_address(self, ea, index, in_edges, lir_function):
         """..."""
         # Initialize variable to indicate that a new basic block is needed.
@@ -322,6 +323,7 @@ class Disassembler(BaseDebugger):
                 #print "4) 0x%X" % ea
 
         return create_new_basic_block
+    """
 
     def set_operand_info(self, lir_op, op):
         """Store operand information from the operands at the current
@@ -401,7 +403,7 @@ class Disassembler(BaseDebugger):
         #lir_inst.is_macro = False #instruction.is_macro()
         lir_inst.address = instruction.ea
         lir_inst.type = instruction.itype
-        lir_inst.mnemonic = self.get_mnemonic(instruction.ea)
+        lir_inst.mnemonic = self.get_mnemonic(instruction.ea) if self._debug else None
         lir_inst.group = self.get_group(lir_inst.type)
         lir_inst._aux = instruction.auxpref
 
@@ -537,7 +539,7 @@ class Disassembler(BaseDebugger):
             for inst_ea in list(Heads(basic_block.startEA, basic_block.endEA)):
                 lir_inst = LowLevelInstruction()
 
-                if not self.set_instruction_info(lir_inst, DecodeInstruction(inst_ea)):
+                if not self.set_instruction_info(lir_inst, self.get_instruction(inst_ea)):
                     raise DisassemblerException(
                         "Unable to store information for instruction at 0x%08X" %
                         ea)
