@@ -410,7 +410,7 @@ class FrontEnd(object):
                 self.lir_function.instructions_count)
 
             # Output LIR for debugging purposes.
-            self.__dump_lir()
+            #self.__dump_lir()
         except Exception, err:
             print "ERROR : %s" % err
 
@@ -444,7 +444,7 @@ class FrontEnd(object):
             print "[+] Initiating idioms analysis phase 1..."
             self.idiom_analyzer.perform_phase1_analysis()
 
-            #self.__dump_lir()
+            self.__dump_lir()
             #
             # Step x
             #
@@ -500,7 +500,7 @@ class FrontEnd(object):
 
                 # Analyze the called function in order to obtain parameters and
                 # return registers information.
-                print "[+] Analyzing callee at 0x%X" % callee_address
+                #print "[+] Analyzing callee at 0x%X" % callee_address
                 callee = self.analyze_callee(callee_address)
 
                 #print "    - Found %d basic block(s) on function \'%s\' containing %d " \

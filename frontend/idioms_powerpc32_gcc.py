@@ -618,62 +618,77 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         # interprocedural live register analysis has been performed.
         # intraprocedural reaching register definition has been performed.
         #
-        blr = None
+        blr_list = list()
 
         for lir_basic_block in self.lir_function:
-            for lir_inst in lir_basic_block:
-                if self.__is_valid_return(lir_inst):
-                    blr = lir_inst
+            lir_inst = lir_basic_block[-1]  # PowerPC has no delayed branch so
+                                            # blr should be the last
+                                            # instruction.
+            # TODO : Check if basic block is terminator instead of checking
+            # every instruction of the basic block.
+            if self.__is_valid_return(lir_inst):
+                blr_list.append(lir_inst)
 
-        if not blr:
+        if len(blr_list) == 0:
             raise PowerPc32GccIdiomAnalyzerException(
                 "Not return instruction found ")
 
-        #
-        # Add empty UD and DU chains for this instruction given that it doesn't
-        # contain any GPR so chains were never created in it.
-        #
-        self.lir_function.du_chain.setdefault(blr.address, dict())
-        self.lir_function.ud_chain.setdefault(blr.address, dict())
+        # Iterate through every return instruction found to validate the
+        # findings (they all must match).
+        for blr in blr_list:
+            #print "[!] Found BLR at 0x%X" % blr.address
+            #
+            # Add empty UD and DU chains for this instruction given that it doesn't
+            # contain any GPR so chains were never created in it.
+            #
+            self.lir_function.du_chain.setdefault(blr.address, dict())
+            self.lir_function.ud_chain.setdefault(blr.address, dict())
 
-        #
-        # TODO / FIXME : We should perform this check with a call-flow graph
-        # and make sure that the return register is indeed located before the
-        # blr instruction.
+            #
+            # TODO / FIXME : We should perform this check with a call-flow graph
+            # and make sure that the return register is indeed located before the
+            # blr instruction.
 
-        ret_regs_list = list(self.iset.RETURN_REGISTERS)
+            ret_regs_list = list(self.iset.RETURN_REGISTERS)
 
-        for lir_basic_block in reversed(self.lir_function):
-            for lir_inst in reversed(lir_basic_block):
-                if lir_inst.address in self.lir_function.du_chain:
+            for lir_basic_block in reversed(self.lir_function):
+                for lir_inst in reversed(lir_basic_block):
+
+                    if len(ret_regs_list) == 0:
+                        continue
+
+                    current_address = lir_inst.address
+
+                    if current_address not in self.lir_function.du_chain:
+                        continue
 
                     for reg in ret_regs_list:
+                        print "--> reg %s at 0x%X" % (reg, current_address)
 
-                        # We check that the register is not used previous to the ret (and after
-                        # the def).
-                        if reg in self.lir_function.ud_chain[lir_inst.address]:
-                            # Remove from the list of possible return
-                            # registers but don't consider it as part of the
-                            # return value becuase it's being used for other
-                            # purposes.
-                            ret_regs_list.remove(reg)
+                        # We check that the register is not used previous
+                        # to the ret (and after the def).
+                        if reg in \
+                            self.lir_function.ud_chain[current_address]:
+                            # Knowing that when a register is not used the
+                            # ones following cannot be used (i.e. cannotR4
+                            # cannot be return reg is r3 is not in use) we can
+                            # discard the rest of the list.
+                            ret_regs_list = list()
+                            break
 
-                        if reg in self.lir_function.du_chain[lir_inst.address]:
+                        if reg in \
+                            self.lir_function.du_chain[current_address]:
                             # Update the list of return registers for further
                             # usage and then update the UD and DU chains of
                             # both the return instruction and the
                             # instruction(s) using the registers involved.
-                            self.return_registers.append(reg)
+                            if reg not in self.return_registers:
+                                self.return_registers.append(reg)
+                            print "[!] Found return reg R%d at 0x%X" % (reg, current_address)
 
-                            self.lir_function.du_chain[lir_inst.address][reg].append(blr.address)
+                            self.lir_function.du_chain[current_address][reg].append(blr.address)
 
-                            self.lir_function.ud_chain[blr.address][reg] = lir_inst.address
-
-                            # Remove from the list of possible return
-                            # registers.
-                            print "---> Removing return register : %s" % reg
-                            if reg in ret_regs_list:
-                                ret_regs_list.remove(reg)
+                            self.lir_function.ud_chain[blr.address][reg] = current_address
 
         print "    Return register(s) found : %s" % \
             ", ".join([self.iset.GPR_NAMES[r] \
@@ -891,7 +906,8 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     idiom_type.find("char") == -1) or \
                     data is None:
                     raise IdiomAnalyzerException(
-                        "Unimplemented idiom type for non char*")
+                        "Unimplemented idiom type for non char* at 0x%X" % 
+                        lo_inst.address)
                     # Global variable reference
                     #
                     # TODO: Check if it's just an integer literal

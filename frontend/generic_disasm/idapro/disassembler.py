@@ -182,7 +182,13 @@ class Disassembler(BaseDebugger):
 
     def get_current_function_address(self):
         """Return the address of the current function under the cursor."""
-        return get_func(self.screen_address).startEA
+        func = get_func(self.screen_address)
+
+        if not func:
+            raise DisassemblerException(
+                "No function present at 0x%08X" % self.screen_address)
+
+        return func.startEA
 
     def get_function_name(self, address):
         """Get the name of the function at the specified memory address."""
@@ -311,7 +317,7 @@ class Disassembler(BaseDebugger):
         #lir_inst.is_macro = False #instruction.is_macro()
         lir_inst.address = instruction.ea
         lir_inst.type = instruction.itype
-        lir_inst.mnemonic = self.get_mnemonic(instruction.ea) if self.__debug else None
+        lir_inst.mnemonic = self.get_mnemonic(instruction.ea) if self._debug else None
         lir_inst.group = self.get_group(lir_inst.type)
         lir_inst._aux = instruction.auxpref
 

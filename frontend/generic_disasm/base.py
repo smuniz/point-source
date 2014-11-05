@@ -50,7 +50,7 @@ class BaseDebugger(object):
     def __init__(self):
         """Instance initialization."""
         # Generate verbose output when debugging flag is activated.
-        self.__debug = True
+        self._debug = True
 
         # This variable contains the debugger instance in case that the current
         # debugger has to be accessed through class methods instead of
@@ -166,11 +166,6 @@ class BaseDebugger(object):
         This includes addresses from instructions on chunk tails.
 
         """
-        return
-
-    @abc.abstractmethod
-    def is_basic_block_start_address(self, ea, index, in_edges, lir_function):
-        """..."""
         return
 
     @abc.abstractmethod

@@ -344,6 +344,9 @@ def main():
 
         point_source.decompile()
 
+    except BaseDebuggerException, err:
+        print "[-] Error (disasm) : %s" % err
+
     except PointSourceException, err:
         print "[-] Error : %s" % err
 
