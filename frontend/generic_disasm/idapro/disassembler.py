@@ -47,8 +47,6 @@ class Disassembler(BaseDebugger):
 
     DEBUGGER_NAME = "IDA Pro Disassembler"
 
-    # Currently supported architectures by this debugger.
-    SUPPORTED_ARCHS = [PPC_ARCH, MIPS_ARCH, ARM_ARCH, X86_ARCH]
 
     STRING_TYPE_C = ASCSTR_TERMCHR # C-style ASCII string
     STRING_TYPE_PASCAL = ASCSTR_PASCAL  # Pascal-style ASCII string (length byte)
@@ -235,96 +233,6 @@ class Disassembler(BaseDebugger):
         """Return the length of the instruction at the specified address."""
         return decode_insn(address)
 
-    """
-    def is_basic_block_start_address(self, ea, index, in_edges, lir_function):
-        """..."""
-        # Initialize variable to indicate that a new basic block is needed.
-        create_new_basic_block = False
-
-        # Check if current instruction is being referenced from another
-        # part of the program.
-        # This way we know it's the beginning of a basic block.
-        #in_edges = {}
-        xb = xrefblk_t()
-
-        # Check if the first instruction of the function is the one being
-        # processed. In that case always create a basic block and for check
-        # for references because it could happen that the function is not
-        # referenced so we could miss the basic block creation.
-        if index == 0:
-            create_new_basic_block = True
-
-        elif xb.first_to(ea, XREF_ALL):
-
-            # Discard data references, only accept code references.
-            if xb.iscode:
-                # TODO: function arrays and certain switch cases could fail.
-                while True:
-
-                    # Create the key for the ref type if it didn't exist.
-                    # Then add the new reference to the list.
-                    ref_type = xb.type
-
-                    if not ref_type in in_edges:
-                        in_edges[ref_type] = list()
-
-                    in_edges[ref_type].append(xb.frm)
-
-                    #print "[!] 0x%X referenced from 0x%X (type %d %s)" % \
-                    #      (ea, xb.frm, xb.type, XrefTypeName(xb.type))
-
-                    # Continue there are more references available.
-                    if not xb.next_to():
-                        break
-
-            create_new_basic_block = False
-
-            # If we find the initial instruction we don't do further
-            # checks.
-            if ea == lir_function.start_address:
-                create_new_basic_block = True
-                #print "1) 0x%X" % ea
-
-            elif not fl_F in in_edges:  # check if not flow to the next instruction
-                # We've found an instruction exclusively referenced by
-                # a branch... this is definitely a basic block start
-                # address.
-                create_new_basic_block = True
-                #print "2) 0x%X" % ea
-
-            elif len(in_edges) == 1:
-                # Flow xref... check if previous instruction was a branch?
-                xb_prev = xrefblk_t()
-                xrefed_by = in_edges[fl_F][0]
-
-                if xb_prev.first_from(xrefed_by, XREF_ALL):
-                    while True:
-                        # By checking that the reference is inside the
-                        # current function we discard data references and
-                        # calls to other functions.
-
-                        # TODO: functions arrays and special switch cases
-                        # could cause a fail.
-                        if xb_prev.iscode and \
-                                xb_prev.to != ea and xb_prev.type in [fl_JF, fl_JN]:
-                            #print "3) 0x%X - type %d - to 0x%X" % \
-                            #      (xrefed_by, xb_prev.type, xb_prev.to)
-
-                            create_new_basic_block = True
-
-                        # Continue there are more references available.
-                        if not xb_prev.next_from():
-                            break
-
-            else:
-                # Instruction referenced by a flow xref but also from a
-                # branch so this is the start of a basic block.
-                create_new_basic_block = True
-                #print "4) 0x%X" % ea
-
-        return create_new_basic_block
-    """
-
     def set_operand_info(self, lir_op, op):
         """Store operand information from the operands at the current
         instruction.
@@ -403,7 +311,7 @@ class Disassembler(BaseDebugger):
         #lir_inst.is_macro = False #instruction.is_macro()
         lir_inst.address = instruction.ea
         lir_inst.type = instruction.itype
-        lir_inst.mnemonic = self.get_mnemonic(instruction.ea) if self._debug else None
+        lir_inst.mnemonic = self.get_mnemonic(instruction.ea) if self.__debug else None
         lir_inst.group = self.get_group(lir_inst.type)
         lir_inst._aux = instruction.auxpref
 
@@ -546,87 +454,4 @@ class Disassembler(BaseDebugger):
 
                 current_basic_block.add_instruction(inst_ea, lir_inst)
 
-            #for succ_block in basic_block.succs():
-            #    if not dones.has_key(succ_block.id):
-            #        dones[succ_block] = 1
-            #        for inst_ea in list(Heads(succ_block.startEA, succ_block.endEA)):
-            #            print "0x%08X : %s" % (inst_ea, GetMnem(inst_ea))
-
-            #            lir_inst = LowLevelInstruction()
-
-            #            if not self.set_instruction_info(lir_inst, DecodeInstruction(inst_ea)):
-            #                raise DisassemblerException(
-            #                    "Unable to store information for instruction at 0x%08X" %
-            #                    ea)
-
-            #            current_basic_block.add_instruction(inst_ea, lir_inst)
-
-            #for pred_block in basic_block.preds():
-            #    if not dones.has_key(succ_block.id):
-            #        dones[succ_block] = 1
-            #        for inst_ea in list(Heads(succ_block.startEA, succ_block.endEA)):
-            #            print "0x%08X : %s" % (inst_ea, GetMnem(inst_ea))
-
-            #            lir_inst = LowLevelInstruction()
-
-            #            if not self.set_instruction_info(lir_inst, DecodeInstruction(inst_ea)):
-            #                raise DisassemblerException(
-            #                    "Unable to store information for instruction at 0x%08X" %
-            #                    ea)
-
-            #            current_basic_block.add_instruction(inst_ea, lir_inst)
-
-        """
-        # We'll create a list of instruction instances and also check for
-        # basic blocks boundaries.
-        current_basic_block = None
-
-        # Obtain all the instructions that compose the function being analyzed
-        # (including the ones in chunks).
-        instructions = self.get_function_instructions_addresses(func_address)
-
-        for index, ea in enumerate(instructions):
-
-            in_edges = dict()
-
-            if self.is_basic_block_start_address(ea, index, in_edges, lir_function):
-
-                #print "[!] Discovered basic block number %d " \
-                #      "at address 0x%X" % (len(lir_function.basic_blocks), ea)
-
-                current_basic_block = LowLevelBasicBlock(ea)
-
-                lir_function.add_basic_block(current_basic_block)
-
-                # Add every edge found to the list belonging to that basic
-                # block
-                for in_ref_type in in_edges:
-
-                    #print "    0x%X has Ref type %s : %s " % \
-                    #      (ea, XrefTypeName(in_ref_type),
-                    #       [hex(x) for x in in_edges[in_ref_type]])
-
-                    for in_edge in in_edges[in_ref_type]:
-                        current_basic_block.add_in_edge(in_edge)
-
-            # Store the current instruction into a low level intermediate
-            # representation instance along with the basic block information
-            # for the current function being decompiled.
-            inst = DecodeInstruction(ea)
-
-            if not inst:
-                raise DisassemblerException("Empty instruction at 0x%08X" % ea)
-
-            # Analyze the instruction obtained by the debugger and then add the
-            # current instruction to the basic block being processed.
-            lir_inst = LowLevelInstruction()
-
-            if not self.set_instruction_info(lir_inst, inst):
-                raise DisassemblerException(
-                    "Unable to store information for instruction at 0x%08X" %
-                    ea)
-
-            current_basic_block.add_instruction(ea, lir_inst)
-
-        """
         return lir_function
