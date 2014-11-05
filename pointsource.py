@@ -260,7 +260,7 @@ class PointSource(object):
     def decompile(self):
         """Decompile the previously specified function."""
         try:
-            self.debugger.display_boxed_message("Decompiling function...")
+            #self.debugger.display_boxed_message("Decompiling function...")
 
             # Perform helpers initialization.
             self.init_back_end()
@@ -320,7 +320,8 @@ class PointSource(object):
 
         finally:
             # Close the boxed message being displayed on the screen.
-            self.debugger.hide_boxed_message()
+            #self.debugger.hide_boxed_message()
+            pass
 
     def __log_separated(self, text):
         """Display a line with the specified text to create a separation in the

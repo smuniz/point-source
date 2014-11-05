@@ -454,7 +454,7 @@ class Disassembler(BaseDebugger):
                 lir_inst = LowLevelInstruction()
 
                 if not self.set_instruction_info(lir_inst, self.get_instruction(inst_ea)):
-                    raise DisassemblerException(
+                    raise DisassemblerExceptior(
                         "Unable to store information for instruction at 0x%08X" %
                         ea)
 
