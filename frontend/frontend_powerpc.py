@@ -93,7 +93,7 @@ class FrontEndPowerPc(FrontEnd):
                 lir_inst.analyzed = True
 
                 # Add newly created symbol to symbol table.
-                self.current_symbol_table[address] = gep
+                self.current_symbols_table[address] = gep
 
             else:
                 pass
@@ -105,7 +105,7 @@ class FrontEndPowerPc(FrontEnd):
             pass
 
         elif lir_inst.is_type(self.iset.PPC_li):
-            self.current_symbol_table[address] = \
+            self.current_symbols_table[address] = \
                 MiddleIrConstantInt(MiddleIrTypeInt(32), lir_inst[1].value)
 
         elif lir_inst.is_type(self.iset.PPC_lis):
@@ -119,13 +119,13 @@ class FrontEndPowerPc(FrontEnd):
             du_addr = self.lir_function.ud_chain[address].get(reg, None)
 
             if du_addr is not None:
-                src = self.current_symbol_table[du_addr]
+                src = self.current_symbols_table[du_addr]
 
                 # TODO / FIXME : Check if src is another MIR volatile
                 # instruction.
                 vol = MiddleIrVolatileInstruction(src)
 
-                self.current_symbol_table[address] = vol
+                self.current_symbols_table[address] = vol
 
         elif lir_inst.is_type(self.iset.PPC_stb):
             pass
@@ -135,10 +135,10 @@ class FrontEndPowerPc(FrontEnd):
             # TODO / FIXME : Detect GPR3 as the first use of the first
             # argument.
             #arg = 
-            if address not in self.current_symbol_table:
+            if address not in self.current_symbols_table:
                 return None
 
-            stack_alloc = self.current_symbol_table[address]
+            stack_alloc = self.current_symbols_table[address]
             mir_inst = self.mir_inst_builder.store(arg, stack_alloc)
 
         elif lir_inst.is_type(self.iset.PPC_stwu):
@@ -231,7 +231,7 @@ class FrontEndPowerPc(FrontEnd):
                     mir_callee.set_argument_name(0, "arg%s" % arg_index)
 
                 # TODO : Obtain function arguments programatically.
-                mir_callee_args = [self.current_symbol_table[0x40], ]
+                mir_callee_args = [self.current_symbols_table[0x40], ]
 
                 mir_inst = self.mir_inst_builder.call(
                     mir_callee, mir_callee_args)
@@ -251,12 +251,12 @@ class FrontEndPowerPc(FrontEnd):
 
                 op_address = self.lir_function.ud_chain[address][ret_reg]
 
-                if not op_address in self.current_symbol_table:
+                if not op_address in self.current_symbols_table:
                     raise FrontEndPowerPcException(
                         "No symbol found at 0x%X for instruction at 0x%X" % \
                         (op_address, lir_inst.address))
 
-                ret_val = self.current_symbol_table[op_address]
+                ret_val = self.current_symbols_table[op_address]
 
                 # In case we have a volatile instruction then obtain the real
                 # instruction from it and move on.

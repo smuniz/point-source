@@ -12,6 +12,9 @@ from idioms import IdiomAnalyzerException
 
 from misc.prerequisites import require
 
+require("frontend.symbols")
+from symbols import SymbolsManager, SymbolsManagerException
+
 ##reload(frontend.generic_disasm.base)
 #require("frontend.generic_disasm.base")
 #from frontend.generic_disasm.base import BaseDebuggerException
@@ -44,10 +47,10 @@ from middleend.mir.mir_type import *
 __all__ = ["FrontEnd", "FrontEndException"]
 
 #
-# Store the symbol tables that belong to each and every function being
-# analyzed.
+# Only one instance is required to store all the symbolic information
+# pertaining to this binary.
 #
-symbol_tables = dict()
+symbols_tables = SymbolsManager()
 
 
 class FrontEndException(Exception):
@@ -105,8 +108,8 @@ class FrontEnd(object):
         self.idiom_analyzer = None
 
         # Setup symbol table for local/global variables refrences, etc..
-        global symbol_tables
-        self.symbol_tables = symbol_tables
+        global symbols_tables
+        self.symbols_tables = symbols_tables
 
         # Development flags
         self.debug_inst_info = True
@@ -163,8 +166,8 @@ class FrontEnd(object):
             # Delete the previously created function and create a new one. This
             # is what the user requested so do it (definition might have
             # changed, etc.).
-            if self.mir_function in self.symbol_tables:
-                del self.symbol_tables[self.mir_function.name]
+            if self.mir_function in self.symbols_tables:
+                del self.symbols_tables[self.mir_function.name]
             self.mir_function.delete()
 
         # Seems like the function doesn't already exists in our store so
@@ -254,10 +257,12 @@ class FrontEnd(object):
 
         for address in self.lir_function.prologue_addresses:
             self.mir_function.add_prologue_address(address)
+
         self.mir_function.add_address(self.lir_function.start_address)
 
         for address in self.lir_function.epilogue_addresses:
             self.mir_function.add_epilogue_address(address)
+
         self.mir_function.add_address(self.lir_function.start_address)
 
         #
@@ -431,8 +436,8 @@ class FrontEnd(object):
             #
             # Invoke the appropriate idiom analyzer for the current architecture.
             #
-            self.current_symbol_table = \
-                self.symbol_tables.setdefault(self.mir_function.name, dict())
+            self.current_symbols_table = \
+                self.symbols_tables.symbols(self.lir_function.start_address)
 
             print "[+] Initializing idioms analyser..."
             if self.idiom_analyzer is None:
@@ -440,7 +445,7 @@ class FrontEnd(object):
 
             # Clean any internal state from previous analysis.
             self.idiom_analyzer.init(
-                self.lir_function, self.mir_function, self.symbol_tables)
+                self.lir_function, self.mir_function, self.symbols_tables)
 
             print "[+] Initiating idioms analysis phase 1..."
             self.idiom_analyzer.perform_phase1_analysis()

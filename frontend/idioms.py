@@ -18,7 +18,7 @@ class IdiomAnalyzer(object):
         """Initialize idiom analyzer base class."""
         self.debugger = debugger
 
-    def init(self, lir_function, mir_function, symbol_tables):
+    def init(self, lir_function, mir_function, symbols_table):
         """Clean any internal state and setup everything for new analysis."""
         self.lir_function = lir_function  # Function low-level representation
         self.mir_module = mir_function.module    # Current module's IR
@@ -37,24 +37,25 @@ class IdiomAnalyzer(object):
 
         # Store the current MIR function in the symbol tables dict and keep a
         # reference as the current one being used for further analysis.
-        self.symbol_tables = symbol_tables
-        self.current_symbol_table = self.symbol_tables[mir_function.name]
+        self.symbols_table = symbols_table
+        self.current_symbol_table = \
+            self.symbols_table.symbols(lir_function.start_address)
 
         self.return_registers = list()
 
     @property
-    def symbol_tables(self):
+    def symbols_table(self):
         """Get a reference to all the symbol tables analyzed."""
-        return self._symbol_tables
+        return self._symbols_table
 
-    @symbol_tables.setter
-    def symbol_tables(self, _symbol_tables):
-        """Store a reference to all the symbol tables analyzed."""
-        self._symbol_tables = _symbol_tables
+    @symbols_table.setter
+    def symbols_table(self, _symbols_table):
+        """Store a reference to all the symbols tables analyzed."""
+        self._symbols_table = _symbols_table
 
     @property
     def current_symbol_table(self):
-        """Get a reference to the current the symbol table being analyzed."""
+        """Get a reference to the current the symbols tables being analyzed."""
         return self._current_symbol_table
 
     @current_symbol_table.setter
