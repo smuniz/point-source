@@ -8,7 +8,7 @@ from collections import MutableMapping
 __all__ = ["SymbolsManager", "SymbolsManagerException"]
 
 
-class Symbol:
+class Symbol(object):
     __slots__ = ["name", "type", "scope"]
 
     def __init__(self, name, _type, scope):
@@ -17,19 +17,33 @@ class Symbol:
         self.scope = scope
 
 
-class SymbolsTable:
+class SymbolsTable(dict):
+    """Store all the symbols that belong to a specific function."""
 
-    def __init__(self):
-        self.vars = dict()
-
-    def __setitem__(self, key, value):
-        self.vars[key] = value
+    def __init__(self, *args, **kw):
+        super(SymbolsTable,self).__init__(*args, **kw)
+        self.itemlist = super(SymbolsTable,self).keys()
 
     def __getitem__(self, key):
-        try:
-            return self.vars[key]
-        except KeyError, err:
-            return None
+        return super(SymbolsTable, self).__getitem__(key)
+
+    def __setitem__(self, key, value):
+         # TODO: what should happen to the order if
+         #       the key is already in the dict       
+        self.itemlist.append(key)
+        super(SymbolsTable,self).__setitem__(key, value)
+
+    def __iter__(self):
+        return iter(self.itemlist)
+
+    def keys(self):
+        return self.itemlist
+
+    def values(self):
+        return [self[key] for key in self]  
+
+    def itervalues(self):
+        return (self[key] for key in self)
 
 
 class SymbolsManagerException(Exception):
@@ -37,7 +51,7 @@ class SymbolsManagerException(Exception):
     pass
 
 
-class SymbolsManager:
+class SymbolsManager(object):
     """Symbol storage for all the module defined symbols found during the
     analysis and also containing user-defined information.
 
@@ -50,14 +64,14 @@ class SymbolsManager:
         self.global_symbols = dict() # key = address | value = symbol table
 
     @property
-    def globals_symbols(self):
+    def global_symbols(self):
         """Return a dictionary with all the global symbols."""
-        return self._globals_symbols
+        return self._global_symbols
 
-    @globals_symbols.setter
-    def globals_symbols(self, tables):
+    @global_symbols.setter
+    def global_symbols(self, tables):
         """Store a dictionary of all the global symbols."""
-        self._globals_symbols = tables
+        self._global_symbols = tables
 
     @property
     def functions_symbols(self):
@@ -68,9 +82,9 @@ class SymbolsManager:
         return self._functions_symbols
 
     @functions_symbols.setter
-    def functions_symbols(self, tables):
+    def functions_symbols(self, symbols):
         """Store a dictionary of all the symbols tables."""
-        self._functions_symbols = tables
+        self._functions_symbols = symbols
 
     def symbols(self, address):
         """Return the of symbols for the given address."""
@@ -78,4 +92,4 @@ class SymbolsManager:
             raise SymbolsManagerException(
                 "Invalid symbol address specified (%r)" % address)
 
-        return self.functions_symbols.setdefault(address, SymbolsTable())
+        return self._functions_symbols.setdefault(address, SymbolsTable())

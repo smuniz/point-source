@@ -670,8 +670,8 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         if reg in \
                             self.lir_function.ud_chain[current_address]:
                             # Knowing that when a register is not used the
-                            # ones following cannot be used (i.e. cannotR4
-                            # cannot be return reg is r3 is not in use) we can
+                            # ones following cannot be used (i.e. R4
+                            # cannot be return reg if R3 is not in use) we can
                             # discard the rest of the list.
                             ret_regs_list = list()
                             break
@@ -689,6 +689,12 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                             self.lir_function.du_chain[current_address][reg].append(blr.address)
 
                             self.lir_function.ud_chain[blr.address][reg] = current_address
+
+                            # Dont' care about this register anymore on the
+                            # current basic block. Altough it might appear on
+                            # others reaching the final basic block in certain
+                            # cases.
+                            ret_regs_list.remove(reg)
 
         print "    Return register(s) found : %s" % \
             ", ".join([self.iset.GPR_NAMES[r] \
@@ -722,7 +728,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
             mir_inst = mir_inst_builder.alloca(MiddleIrTypeInt(), None, var_name)
 
             # TODO / FIXME : Obtain this address programatically.
-            self.current_symbol_table[0xC] = mir_inst
+            self.current_symbols_table[0xC] = mir_inst
 
         except MiddleIrException, err:
             print format_exc() + '\n'
@@ -955,7 +961,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     #
                     # Add newly created symbol to symbol table.
                     #
-                    self.current_symbol_table[address] = gep
+                    self.current_symbols_table[address] = gep
 
                     #
                     # Set MIR instruction address equivalent to the LIR
@@ -1000,7 +1006,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                                             # be usefull if we want to
                                             # regenerate the binary code.
 
-                    #self.current_symbol_table[lo_inst.address] = gvar_str
+                    #self.current_symbols_table[lo_inst.address] = gvar_str
                     # Add the global variable to the current module.
                     self.mir_module.add_global_variable(gvar_str)
 
@@ -1019,7 +1025,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         "szLoco",
                         True)
 
-                    self.current_symbol_table[lo_inst.address] = gep
+                    self.current_symbols_table[lo_inst.address] = gep
 
                 # Mark instructions as analyzed and remove them from
                 # the list of remaining LIR instructions.

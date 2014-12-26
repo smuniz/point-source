@@ -131,7 +131,7 @@ class Disassembler(BaseDebugger):
             import x86 as current_arch
 
         self.current_arch = current_arch
-        self.instruction_set = current_arch.InstructionSet
+        self.instruction_set = current_arch.InstructionSet()
 
         # Perform additional initializations.
         self._post_init()
@@ -431,16 +431,11 @@ class Disassembler(BaseDebugger):
         # Create a LIR function and start filling it with the basic blocks
         # and its pertaining instructions.
         #
-        lir_function = LowLevelFunction()
-
-        if not lir_function.set_source_function_info(
+        lir_function = LowLevelFunction(
             func.startEA,
             func.endEA,
-            self.get_function_name(func.startEA)):
-
-            raise DisassemblerException(
-                "Could not obtain function information for address 0x%X" %
-                func_address)
+            self.get_function_name(func.startEA),
+            self.instruction_set)
 
         dones = {}
         for basic_block in FlowChart(func):

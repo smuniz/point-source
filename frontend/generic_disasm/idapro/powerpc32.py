@@ -7,7 +7,7 @@
 import idaapi
 
 
-class InstructionSet:
+class InstructionSet(object):
     PPC_add = idaapi.PPC_add        # Add
     PPC_addc = idaapi.PPC_addc          # Add Carrying
     PPC_adde = idaapi.PPC_adde          # Add Extended
@@ -546,6 +546,18 @@ class InstructionSet:
     ARGUMENT_REGISTERS = [GPR3, GPR4, GPR5, GPR6, GPR7, GPR8, GPR9, GPR10]
 
     RETURN_REGISTERS = [GPR3, GPR4]
+
+    #
+    #  Helper methods
+    #
+
+    def is_branch(self, inst_type):
+        """Indicate if the specified instruction is some kind of branch
+        instruction.
+
+        """
+        return inst_type in [
+            CONDITIONAL_BRANCH_TYPES, UNCONDITIONAL_BRANCH_TYPES]
 
 ASSIGNMENT_TYPES = [
     InstructionSet.PPC_add,         # Add

@@ -16,10 +16,15 @@ class LowLevelFunction(object):
 
     """
 
-    def __init__(self):
+    def __init__(self, start_address, end_address, func_name, iset):
         """Instance initialization."""
-        self.start_address = 0
-        self.end_address = 0
+        #Store information about the function being analyzed.
+        self.start_address = start_address
+        self.end_address = end_address
+        self.name = func_name
+
+        self.instruction_set = iset
+
         self.basic_blocks = list()
 
         self.sp_regs = list()  # Registers list to access local variables
@@ -70,13 +75,6 @@ class LowLevelFunction(object):
     def stack_size(self, size):
         """Store the size of bytes of the function stack. """
         self._stack_size = size
-
-    def set_source_function_info(self, start_address, end_address, func_name):
-        """Store information about the function being analyzed."""
-        self.start_address = start_address
-        self.end_address = end_address
-        self.name = func_name
-        return True
 
     @property
     def start_address(self):
@@ -261,6 +259,16 @@ class LowLevelFunction(object):
     def stack_access_registers(self):
         return self.sp_regs
 
+    @property
+    def instruction_set(self):
+        """Return the instruction set for the current architecture."""
+        return self._instruction_set
+
+    @instruction_set.setter
+    def instruction_set(self, i_set):
+        """Store the instruction set to use with the current architecture."""
+        self._instruction_set = i_set
+
     def generate_chains(self):
         """
         Generate def-use and use-def chains for the low level IR so further
@@ -273,6 +281,15 @@ class LowLevelFunction(object):
         for bb_index, lir_bb in enumerate(self):
 
             for lir_inst in lir_bb:
+
+                if self.instruction_set.is_branch(lir_inst.type):
+                    # Let's assume that when a call instruction is found all
+                    # the temporal registers might have been modified inside
+                    # the callee.
+                    print "===>", reg_defs
+                    raise Exception("generate_chains")
+                    #reg_defs[
+                    continue
 
                 for lir_op_idx, lir_op in enumerate(lir_inst.operands):
 

@@ -118,7 +118,7 @@ class FrontEndPowerPc(FrontEnd):
             reg = lir_inst[1].value
             du_addr = self.lir_function.ud_chain[address].get(reg, None)
 
-            if du_addr is not None:
+            if du_addr is not None and du_addr in self.current_symbols_table:
                 src = self.current_symbols_table[du_addr]
 
                 # TODO / FIXME : Check if src is another MIR volatile
@@ -126,6 +126,9 @@ class FrontEndPowerPc(FrontEnd):
                 vol = MiddleIrVolatileInstruction(src)
 
                 self.current_symbols_table[address] = vol
+            else:
+                # TODO / FIXME : contemplate this case
+                pass
 
         elif lir_inst.is_type(self.iset.PPC_stb):
             pass

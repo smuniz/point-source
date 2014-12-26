@@ -301,10 +301,21 @@ class FrontEnd(object):
                         (lir_inst, err))
 
                 if mir_inst is not None:
+
+                    # Set MIR instruction address equal to the LIR instruction
+                    # used to get it,
+                    # Store the instruction address for debugging purposes.
+                    # Some LLVM IR code are not instructions but declarations
+                    # or other stuff that doesn't support add_address method.
+                    mir_inst.add_address(lir_inst.address)
+
                     # Now the newly created instruction is stored in a basic
                     # block, whose purpose is to represent a group of
                     # instructions altogether.
                     mir_basic_block.add_instruction(mir_inst)
+
+                    self.__display_instruction_information(
+                        lir_inst, lir_inst.group_name)
 
                     # Copy all graph information from low-level representation to the
                     # intermediate-level language.
@@ -354,16 +365,6 @@ class FrontEnd(object):
 
         except FrontEndException, err:
             raise FrontEndException(err)
-
-        if mir_inst is not None:
-            # Set MIR instruction address equal to the LIR instruction used
-            # to get it.
-            # Store the instruction address for debugging purposes.
-            # Some LLVM IR code are not instructions but declarations or other
-            # stuff that doesn't support add_address method.
-            mir_inst.add_address(lir_inst.address)
-
-            self.__display_instruction_information(lir_inst, group)
 
         return mir_inst
 
@@ -417,7 +418,8 @@ class FrontEnd(object):
             # Output LIR for debugging purposes.
             #self.__dump_lir()
         except Exception, err:
-            print "ERROR : %s" % err
+            raise FrontEndException(
+                "Unable to generate Low Level IR: %s" % err)
 
         try:
             #
