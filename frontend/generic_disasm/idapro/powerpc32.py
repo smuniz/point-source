@@ -7,7 +7,7 @@
 import idaapi
 
 
-class InstructionSet(object):
+class InstructionSet:
     PPC_add = idaapi.PPC_add        # Add
     PPC_addc = idaapi.PPC_addc          # Add Carrying
     PPC_adde = idaapi.PPC_adde          # Add Extended
@@ -547,6 +547,8 @@ class InstructionSet(object):
 
     RETURN_REGISTERS = [GPR3, GPR4]
 
+    VOLATILE_REGISTERS = ARGUMENT_REGISTERS + [GPR11, GPR12]
+
     #
     #  Helper methods
     #
@@ -556,8 +558,8 @@ class InstructionSet(object):
         instruction.
 
         """
-        return inst_type in [
-            CONDITIONAL_BRANCH_TYPES, UNCONDITIONAL_BRANCH_TYPES]
+        return inst_type in CONDITIONAL_BRANCH_TYPES or \
+            inst_type in UNCONDITIONAL_BRANCH_TYPES
 
 ASSIGNMENT_TYPES = [
     InstructionSet.PPC_add,         # Add

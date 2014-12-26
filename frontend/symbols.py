@@ -88,7 +88,7 @@ class SymbolsManager(object):
 
     def symbols(self, address):
         """Return the of symbols for the given address."""
-        if type(address) is not int:
+        if type(address) not in (int, long):
             raise SymbolsManagerException(
                 "Invalid symbol address specified (%r)" % address)
 

@@ -663,7 +663,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         continue
 
                     for reg in ret_regs_list:
-                        print "--> reg %s at 0x%X" % (reg, current_address)
+                        #print "--> reg %s at 0x%X" % (reg, current_address)
 
                         # We check that the register is not used previous
                         # to the ret (and after the def).

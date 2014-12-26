@@ -117,6 +117,10 @@ class FrontEnd(object):
         # Current architectures instruction set to work with.
         self.iset = self.debugger.instruction_set
 
+        # This dictionary contains all the LIR function analyzed during this
+        # run to avoid wasting resources by analyzing the same function twice.
+        self.lir_functions_cache = dict()
+
     @property
     def name(self):
         """Return the formatted name of the current front-end."""
@@ -430,8 +434,9 @@ class FrontEnd(object):
             print "[+] Creating Middle level IR skeleton..."
             self.generate_mir_skeleton()
 
-            self.perform_live_variable_analysis(self.lir_function)
-            print "[+] Total functions analyzed : %d" % len(self.cache)
+            self.perform_live_variable_analysis(self.lir_function, 1)
+
+            print "[+] Total functions analyzed : %d" % len(self.lir_functions_cache)
 
             #
             # Step x
@@ -488,9 +493,7 @@ class FrontEnd(object):
         print "[+] Verifying Middle level IR code..."
         self.mir_module.verify()
 
-    cache = dict()
-
-    def perform_live_variable_analysis(self, lir_function):
+    def perform_live_variable_analysis(self, lir_function, depth=None):
         """Perform live analysis on variables based on their usage in called
         functions.
 
@@ -508,24 +511,36 @@ class FrontEnd(object):
                     # address we just move on.
                     continue
 
-                if callee_address in self.cache:
+                if callee_address in self.lir_functions_cache:
                     continue
 
                 # Analyze the called function in order to obtain parameters and
                 # return registers information.
                 print "[+] Analyzing callee at 0x%X" % callee_address
-                callee = self.analyze_callee(callee_address)
+                lir_callee = self.analyze_callee(callee_address)
 
-                if callee:
+                if lir_callee:
 
                     print "    - Found %d basic block(s) on function \'%s\' containing %d " \
                         "instruction(s)" % (
-                        callee.get_basic_blocks_count(),
-                        callee.name,
-                        callee.instructions_count)
+                        lir_callee.get_basic_blocks_count(),
+                        lir_callee.name,
+                        lir_callee.instructions_count)
 
-                    self.cache.setdefault(callee_address, callee)
-                    self.perform_live_variable_analysis(callee)
+                    self.lir_functions_cache.setdefault(callee_address, lir_callee)
+
+                    # Recurse into callees until we reach the specified level
+                    # (in case it was specified).
+                    if depth is None:
+                        continue
+                    if depth > 0:
+                        depth -= 1
+                    else:
+                        continue
+
+                    # Analyse the calle function and its callees (if
+                    # appropriate according to the depth level).
+                    self.perform_live_variable_analysis(lir_callee, depth)
 
     @abc.abstractmethod
     def analyze_callee(self, callee_address):

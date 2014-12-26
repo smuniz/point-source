@@ -118,17 +118,27 @@ class FrontEndPowerPc(FrontEnd):
             reg = lir_inst[1].value
             du_addr = self.lir_function.ud_chain[address].get(reg, None)
 
-            if du_addr is not None and du_addr in self.current_symbols_table:
+            if du_addr is None:
+                raise FrontEndPowerPcException(
+                    "DU chain for register %s at 0x%08X does not exists." % \
+                    (self.iset.GPR_NAMES[reg], address))
+
+            if du_addr in self.current_symbols_table:
                 src = self.current_symbols_table[du_addr]
 
                 # TODO / FIXME : Check if src is another MIR volatile
                 # instruction.
+                if isinstance(src, MiddleIrVolatileInstruction):
+                    raise FrontEndPowerPcException(
+                        "Chained MIR volatile instructions chaining is "
+                        "unimplemented.")
                 vol = MiddleIrVolatileInstruction(src)
 
                 self.current_symbols_table[address] = vol
             else:
-                # TODO / FIXME : contemplate this case
-                pass
+                raise FrontEndPowerPcException(
+                    "No symbol found for DU chain address 0x%X at 0x%08X" % (
+                    du_addr, address))
 
         elif lir_inst.is_type(self.iset.PPC_stb):
             pass
@@ -189,6 +199,7 @@ class FrontEndPowerPc(FrontEnd):
             # current function or a call to a another function.
             # Determine that checking the jump destination address against the
             # address range of the current function.
+            # TODO : The right way to do this should be to check if LR is set.
             if self.lir_function.has_address(branch_address):
                 # TODO: Label statement might not have been created so
                 #       we have to do a second pass later when all the
@@ -211,23 +222,6 @@ class FrontEndPowerPc(FrontEnd):
                 mir_callee.arguments = MiddleIrTypePointer(MiddleIrTypeChar()),
 
                 self.mir_module.add_function(mir_callee)
-
-                ########################
-                # TODO : Remove this fake function body.
-                #called_mir_basic_block = MiddleIrBasicBlock()
-                #mir_callee.add_basic_block(called_mir_basic_block)
-
-                #called_mir_builder = MiddleIrInstructionBuilder(called_mir_basic_block)
-
-                #called_mir_basic_block.instruction_builder = called_mir_builder
-                #called_mir_basic_block.start_address = branch_address
-                #called_mir_basic_block.end_address = branch_address + 0x10
-
-                #ret = called_mir_builder.ret()
-                #ret.add_address(branch_address)
-
-                #called_mir_basic_block.add_instruction(ret)
-                ########################
 
                 # Assign a name to each argument of the function being called.
                 for arg_index, arg in enumerate(mir_callee.arguments):
@@ -317,13 +311,11 @@ class FrontEndPowerPc(FrontEnd):
 
         """
         # TODO / FIXME : make this right.
-        if lir_inst.type == self.iset.PPC_b and \
+        return bool(
+            lir_inst.type == self.iset.PPC_b and \
             lir_inst._aux == 8 and \
             len(lir_inst) == 1 and \
-            lir_inst[0].type in [O_NEAR, O_FAR]:
-            return True
-
-        return False
+            lir_inst[0].type in [O_NEAR, O_FAR])
 
     def _extract_callee_address(self, lir_inst):
         """Return the callee address from a call instruction, if any."""

@@ -283,13 +283,22 @@ class LowLevelFunction(object):
             for lir_inst in lir_bb:
 
                 if self.instruction_set.is_branch(lir_inst.type):
+                    # TODO / FIXME : This is a kludge for PPC.
+                    #
                     # Let's assume that when a call instruction is found all
                     # the temporal registers might have been modified inside
                     # the callee.
-                    print "===>", reg_defs
-                    raise Exception("generate_chains")
-                    #reg_defs[
-                    continue
+                    for reg,v in reg_defs.items():
+                        #print "R%d address 0x%08x" % (reg,v)
+
+                        if reg in self.instruction_set.VOLATILE_REGISTERS:
+                           # print "Removing register %s before branch at 0x%X" % (
+                           #     self.instruction_set.GPR_NAMES[reg],
+                           #     lir_inst.address)
+                                del reg_defs[reg]
+
+                else:
+                    pass
 
                 for lir_op_idx, lir_op in enumerate(lir_inst.operands):
 
