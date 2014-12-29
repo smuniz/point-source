@@ -211,11 +211,19 @@ class FrontEndPowerPc(FrontEnd):
                 pass
             else:
                 #
-                # Create a function call expression and add it to the IR
+                # Create a function call expression and add it to the IR.
                 #
-                func_name = self.debugger.get_function_name(branch_address)
+                # Make sure that the've already analyzed the callee function
+                # and we have it in the cache.
+                lir_function = self.lir_functions_cache.get(
+                    branch_address, None)
 
-                mir_callee = MiddleIrFunction(func_name, self.mir_module)
+                if lir_function is None:
+                    return None
+
+                # Using the retrieved LIR function now create a MIR function
+                # with the corresponding information.
+                mir_callee = MiddleIrFunction(lir_function.name, self.mir_module)
 
                 mir_callee.return_type = MiddleIrTypeVoid()
                 #mir_callee.arguments = [MiddleIrTypeChar()] * 15
