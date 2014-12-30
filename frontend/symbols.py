@@ -3,8 +3,6 @@
 # 
 # This code is part of point source decompiler
 #
-from collections import MutableMapping
-
 __all__ = ["SymbolsManager", "SymbolsManagerException"]
 
 

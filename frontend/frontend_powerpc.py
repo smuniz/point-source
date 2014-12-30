@@ -137,8 +137,9 @@ class FrontEndPowerPc(FrontEnd):
                 self.current_symbols_table[address] = vol
             else:
                 raise FrontEndPowerPcException(
-                    "No symbol found for DU chain address 0x%X at 0x%08X" % (
-                    du_addr, address))
+                    "No symbol found for DU chain (reg %s) at address "
+                    "0x%08X referenced by 0x%08X" % (
+                    self.iset.GPR_NAMES[reg], du_addr, address))
 
         elif lir_inst.is_type(self.iset.PPC_stb):
             pass
