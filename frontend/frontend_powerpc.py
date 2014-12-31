@@ -83,17 +83,18 @@ class FrontEndPowerPc(FrontEnd):
 
                 alloca.add_address(address)
 
+                name = "szBuffer_0x%X" % address
                 gep = self.mir_inst_builder.gep(
                     alloca,
-                    [MiddleIrConstantInt32(0), MiddleIrConstantInt32(0)],
-                    "szBuffer_0x%X" % address)
+                    [MiddleIrConstantInt32(0), MiddleIrConstantInt32(0)], name)
 
                 gep.add_address(address)
 
                 lir_inst.analyzed = True
 
                 # Add newly created symbol to symbol table.
-                self.current_symbols_table[address] = gep
+                self.current_symbols_table.add_symbol(
+                    address, name, None, None, gep)
 
             else:
                 pass
@@ -105,8 +106,8 @@ class FrontEndPowerPc(FrontEnd):
             pass
 
         elif lir_inst.is_type(self.iset.PPC_li):
-            self.current_symbols_table[address] = \
-                MiddleIrConstantInt(MiddleIrTypeInt(32), lir_inst[1].value)
+            self.current_symbols_table.add_symbol(
+                address, None, None, None, MiddleIrConstantInt(MiddleIrTypeInt(32), lir_inst[1].value))
 
         elif lir_inst.is_type(self.iset.PPC_lis):
             pass
@@ -123,8 +124,8 @@ class FrontEndPowerPc(FrontEnd):
                     "DU chain for register %s at 0x%08X does not exists." % \
                     (self.iset.GPR_NAMES[reg], address))
 
-            if du_addr in self.current_symbols_table:
-                src = self.current_symbols_table[du_addr]
+            if du_addr in self.current_symbols_table.mapping:
+                src = self.current_symbols_table.mapping[du_addr].item
 
                 # TODO / FIXME : Check if src is another MIR volatile
                 # instruction.
@@ -134,7 +135,8 @@ class FrontEndPowerPc(FrontEnd):
                         "unimplemented.")
                 vol = MiddleIrVolatileInstruction(src)
 
-                self.current_symbols_table[address] = vol
+                self.current_symbols_table.add_symbol(
+                    address, None, None, None, vol)
             else:
                 raise FrontEndPowerPcException(
                     "No symbol found for DU chain (reg %s) at address "
@@ -149,10 +151,10 @@ class FrontEndPowerPc(FrontEnd):
             # TODO / FIXME : Detect GPR3 as the first use of the first
             # argument.
             #arg = 
-            if address not in self.current_symbols_table:
+            if address not in self.current_symbols_table.mapping:
                 return None
 
-            stack_alloc = self.current_symbols_table[address]
+            stack_alloc = self.current_symbols_table.mapping[address].item
             mir_inst = self.mir_inst_builder.store(arg, stack_alloc)
 
         elif lir_inst.is_type(self.iset.PPC_stwu):
@@ -237,7 +239,9 @@ class FrontEndPowerPc(FrontEnd):
                     mir_callee.set_argument_name(0, "arg%s" % arg_index)
 
                 # TODO : Obtain function arguments programatically.
-                mir_callee_args = [self.current_symbols_table[0x40], ]
+                mir_callee_args = [
+                    self.current_symbols_table.mapping[0x40].item,
+                    ]
 
                 mir_inst = self.mir_inst_builder.call(
                     mir_callee, mir_callee_args)
@@ -257,12 +261,12 @@ class FrontEndPowerPc(FrontEnd):
 
                 op_address = self.lir_function.ud_chain[address][ret_reg]
 
-                if not op_address in self.current_symbols_table:
+                if not op_address in self.current_symbols_table.mapping:
                     raise FrontEndPowerPcException(
                         "No symbol found at 0x%X for instruction at 0x%X" % \
                         (op_address, lir_inst.address))
 
-                ret_val = self.current_symbols_table[op_address]
+                ret_val = self.current_symbols_table.mapping[op_address].item
 
                 # In case we have a volatile instruction then obtain the real
                 # instruction from it and move on.

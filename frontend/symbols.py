@@ -7,42 +7,45 @@ __all__ = ["SymbolsManager", "SymbolsManagerException"]
 
 
 class Symbol(object):
-    __slots__ = ["name", "type", "scope"]
+    __slots__ = ["name", "type", "scope", "item"]
 
-    def __init__(self, name, _type, scope):
+    def __init__(self, name, _type, scope, item):
         self.name = name
         self.type = _type
         self.scope = scope
+        self.item = item
 
 
-class SymbolsTable(dict):
+class SymbolsTable(object):
     """Store all the symbols that belong to a specific function."""
 
     def __init__(self, *args, **kw):
-        super(SymbolsTable,self).__init__(*args, **kw)
-        self.itemlist = super(SymbolsTable,self).keys()
+        #super(SymbolsTable,self).__init__(*args, **kw)
+        #self.itemlist = super(SymbolsTable,self).keys()
+        self.mapping = dict()
+        self.variables = dict()
 
-    def __getitem__(self, key):
-        return super(SymbolsTable, self).__getitem__(key)
+    def add_local_variable(self, name, item):
+        """..."""
+        self.variables[var_address] = Symbol(name, None, None, item)
 
-    def __setitem__(self, key, value):
-         # TODO: what should happen to the order if
-         #       the key is already in the dict       
-        self.itemlist.append(key)
-        super(SymbolsTable,self).__setitem__(key, value)
+    def add_symbol(self, address, name, _type, scope, item):
+        """..."""
+        self.mapping[address] = Symbol(name, _type, scope, item)
 
-    def __iter__(self):
-        return iter(self.itemlist)
+    def __str__(self):
+        _str = ["[+] Local variables list:", ]
+        for k, (addr, i) in enumerate(self.variables.iteritems()):
+            _str.append("%02d | %08x | %10s | %10s | %10s | %r" % (
+                k, addr, i.name, i.type, i.scope, i.item))
+            
+        _str.append("[+] Symbols mapping list:")
+        for k, (addr, i) in enumerate(self.mapping.iteritems()):
+            _str.append("%02d | %08x | %10s | %10s | %10s | %r" % (
+                k, addr, i.name, i.type, i.scope, i.item))
 
-    def keys(self):
-        return self.itemlist
-
-    def values(self):
-        return [self[key] for key in self]  
-
-    def itervalues(self):
-        return (self[key] for key in self)
-
+        return "\n".join(_str)
+                
 
 class SymbolsManagerException(Exception):
     """Generic exception class for symbols manager."""

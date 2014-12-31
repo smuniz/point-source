@@ -728,7 +728,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
             mir_inst = mir_inst_builder.alloca(MiddleIrTypeInt(), None, var_name)
 
             # TODO / FIXME : Obtain this address programatically.
-            self.current_symbols_table[0xC] = mir_inst
+            self.current_symbols_table.mapping[0xC] = mir_inst
 
         except MiddleIrException, err:
             print format_exc() + '\n'
@@ -771,19 +771,18 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     #
                     # Add a new local variable to the symbols list.
                     #
-                    address = self.lir_function.start_address
-
+                    func_address = self.lir_function.start_address
                     mir_inst_builder = \
                         self.mir_function.get_instruction_builder_by_address(
-                            address, False)
+                            func_address, False)
 
-                    # TODO / FIXME : Detect the argument type.
-                    var_type_preffix = "i"
+                    address = inst[1].value[1]
+                    var_type_preffix = "i" # TODO / FIXME : Detect the argument type.
                     var_name = "%(var_type_preffix)s_0x%(address)x" % vars()
                     mir_inst = mir_inst_builder.alloca(MiddleIrTypeInt(), None, var_name)
 
-                    # TODO / FIXME : Obtain this address programatically.
-                    self.current_symbols_table[address] = mir_inst
+                    self.current_symbols_table.add_local_variable(
+                        func_address, var_name, scope, mir_inst)
 
                     print "    Parameter register (simple) detected: %s" % \
                             self.iset.GPR_NAMES[inst[0].value]
@@ -979,7 +978,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     #
                     # Add newly created symbol to symbol table.
                     #
-                    self.current_symbols_table[address] = gep
+                    self.current_symbols_table.mapping[address] = gep
 
                     #
                     # Set MIR instruction address equivalent to the LIR
@@ -1043,7 +1042,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         "szLoco",
                         True)
 
-                    self.current_symbols_table[lo_inst.address] = gep
+                    self.current_symbols_table.mapping[lo_inst.address] = gep
 
                 # Mark instructions as analyzed and remove them from
                 # the list of remaining LIR instructions.

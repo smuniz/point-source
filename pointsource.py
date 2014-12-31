@@ -64,6 +64,11 @@ from frontend.generic_disasm.base import BaseDebuggerException
 
 require("frontend.generic_disasm.idapro.disassembler")
 
+#import frontend.symbols
+#reload(frontend.symbols)
+require("frontend.symbols")
+#from frontend.symbols import FrontEndException
+
 #import frontend.frontend
 #reload(frontend.frontend)
 require("frontend.frontend")

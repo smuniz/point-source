@@ -12,7 +12,6 @@ from idioms import IdiomAnalyzerException
 
 from misc.prerequisites import require
 
-require("frontend.symbols")
 from symbols import SymbolsManager, SymbolsManagerException
 
 ##reload(frontend.generic_disasm.base)
@@ -475,6 +474,8 @@ class FrontEnd(object):
             #
             print "[+] Initiating idioms analysis phase 2..."
             self.idiom_analyzer.perform_phase2_analysis()
+
+            print str(self.current_symbols_table)
 
         except IdiomAnalyzerException, err:
             #print format_exc() + '\n'
