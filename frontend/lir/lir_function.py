@@ -308,7 +308,7 @@ class LowLevelFunction(object):
 
                     op = lir_op.value
 
-                    if self.__is_destination_operand(lir_op):
+                    if self.__is_destination_operand(lir_inst, lir_op_idx):
                         reg_defs[op] = lir_inst.address
 
                         defs = self.du_chain.setdefault(lir_inst.address, dict())
@@ -338,11 +338,20 @@ class LowLevelFunction(object):
 
                             uses[op] = def_address
 
-    def __is_destination_operand(self, lir_op):
+    def __is_destination_operand(self, lir_inst, lir_op_idx):
         """Indicate if the specified operand is being treated
         as a destion operand (meaning its content is going to
         change).
 
         """
-        # TODO : Remove IDA-specific code.
-        return 
+        # FIXME : Remove IDA-specific code.
+        from idaapi import CF_CHG1, CF_CHG2, CF_CHG3, CF_CHG4, CF_CHG5, CF_CHG6 
+        changes = {
+            0 : CF_CHG1,
+            1 : CF_CHG2,
+            2 : CF_CHG3,
+            3 : CF_CHG4,
+            4 : CF_CHG5,
+            5 : CF_CHG6,
+        }
+        return changes.get(lir_op_idx, None) in lir_inst.features
