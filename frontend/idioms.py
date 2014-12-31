@@ -37,9 +37,9 @@ class IdiomAnalyzer(object):
 
         # Store the current MIR function in the symbol tables dict and keep a
         # reference as the current one being used for further analysis.
-        self.symbols_table = symbols_table
+        symbols_manager = symbols_table
         self.current_symbols_table = \
-            self.symbols_table.symbols(lir_function.start_address)
+            symbols_manager.symbols(lir_function.start_address)
 
         self.return_registers = list()
 

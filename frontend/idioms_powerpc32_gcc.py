@@ -758,7 +758,6 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     continue
 
                 # Check that destination is the stack.
-                print "===>", self.lir_function.stack_access_registers
                 if inst[0].is_reg_n(self.iset.ARGUMENT_REGISTERS) and \
                     inst[1].is_displ and \
                     inst[1].is_displ_n(self.lir_function.stack_access_registers):
@@ -768,6 +767,23 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
 
                     self.param_regs[param_number] = [inst[0].value, ]
                     inst.analyzed = True
+
+                    #
+                    # Add a new local variable to the symbols list.
+                    #
+                    address = self.lir_function.start_address
+
+                    mir_inst_builder = \
+                        self.mir_function.get_instruction_builder_by_address(
+                            address, False)
+
+                    # TODO / FIXME : Detect the argument type.
+                    var_type_preffix = "i"
+                    var_name = "%(var_type_preffix)s_0x%(address)x" % vars()
+                    mir_inst = mir_inst_builder.alloca(MiddleIrTypeInt(), None, var_name)
+
+                    # TODO / FIXME : Obtain this address programatically.
+                    self.current_symbols_table[address] = mir_inst
 
                     print "    Parameter register (simple) detected: %s" % \
                             self.iset.GPR_NAMES[inst[0].value]

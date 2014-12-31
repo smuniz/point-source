@@ -149,8 +149,7 @@ class LowLevelOperand(object):
                 return True
 
             if type(n) is list:
-                print "xan =>", self.value, n
-                return self.value in n
+                return self.value[0] in n
             else:
                 return self.value == n
 
