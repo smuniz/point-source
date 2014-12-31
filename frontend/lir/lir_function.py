@@ -308,7 +308,7 @@ class LowLevelFunction(object):
 
                     op = lir_op.value
 
-                    if lir_op_idx is 0:
+                    if self.__is_destination_operand(lir_op):
                         reg_defs[op] = lir_inst.address
 
                         defs = self.du_chain.setdefault(lir_inst.address, dict())
@@ -338,10 +338,11 @@ class LowLevelFunction(object):
 
                             uses[op] = def_address
 
-    def is_destination_operand(self, op):
+    def __is_destination_operand(self, lir_op):
         """Indicate if the specified operand is being treated
         as a destion operand (meaning its content is going to
         change).
 
         """
         # TODO : Remove IDA-specific code.
+        return 

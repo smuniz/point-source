@@ -341,13 +341,13 @@ class Disassembler(BaseDebugger):
         lir_inst.group = self.get_group(lir_inst.type)
         lir_inst._aux = instruction.auxpref
         lir_inst.features = [f_v for f_k, f_v in self.FEATURES_TRANSLATION.iteritems() \
-                    if f_k & instruction.get_canon_feature() == f_k])
+                    if f_k & instruction.get_canon_feature() == f_k]
 
         # Display instruction information obtained form IDA internals.
         if True:
             feature_str = ", ".join(
                 [f_v for f_k, f_v in self.FEATURES_STR.iteritems() \
-                    if f_k & instruction.get_canon_feature() == f_k])
+                    if f_k in lir_inst.features])
 
             inst_str = "0x%08X : %-3d %+5s - aux %-5d - seg %-5d - insn %-5d - flag %-5d - fea %s" % (
                 lir_inst.address,
