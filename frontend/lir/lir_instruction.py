@@ -36,6 +36,15 @@ class LowLevelInstruction(object):
         self.analyzed = False
         self.basic_block = None
         self._aux = None
+        self.features = None
+
+    @property
+    def features(self):
+        return self._features
+
+    @features.setter
+    def features(self, features):
+        self._features = features
 
     @property
     def _aux(self):

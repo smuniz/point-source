@@ -306,7 +306,6 @@ class LowLevelFunction(object):
                         # Only work on tempoerary registers.
                         continue
 
-                    # TODO / FIXME : detect destination register(s) right!
                     op = lir_op.value
 
                     if lir_op_idx is 0:
@@ -338,3 +337,11 @@ class LowLevelFunction(object):
                                 self.ud_chain.setdefault(cur_address, dict())
 
                             uses[op] = def_address
+
+    def is_destination_operand(self, op):
+        """Indicate if the specified operand is being treated
+        as a destion operand (meaning its content is going to
+        change).
+
+        """
+        # TODO : Remove IDA-specific code.

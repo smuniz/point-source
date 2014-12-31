@@ -89,7 +89,27 @@ class Disassembler(BaseDebugger):
     #
     # Instruction features supported.
     #
-    FEATURES = {
+    FEATURES_TRANSLATION = {
+        CF_STOP : FEATURE_STOP,
+        CF_CALL : FEATURE_CALL,
+        CF_CHG1 : FEATURE_CHG1,
+        CF_CHG2 : FEATURE_CHG2,
+        CF_CHG3 : FEATURE_CHG3,
+        CF_CHG4 : FEATURE_CHG4,
+        CF_CHG5 : FEATURE_CHG5,
+        CF_CHG6 : FEATURE_CHG6,
+        CF_USE1 : FEATURE_USE1,
+        CF_USE2 : FEATURE_USE2,
+        CF_USE3 : FEATURE_USE3,
+        CF_USE4 : FEATURE_USE4,
+        CF_USE5 : FEATURE_USE5,
+        CF_USE6 : FEATURE_USE6,
+        CF_JUMP : FEATURE_JUMP,
+        CF_SHFT : FEATURE_SHFT,
+        CF_HLL  : FEATURE_HLL 
+        }
+
+    FEATURES_STR = {
         FEATURE_STOP : "CF_STOP",
         FEATURE_CALL : "CF_CALL",
         FEATURE_CHG1 : "CF_CHG1",
@@ -320,21 +340,25 @@ class Disassembler(BaseDebugger):
         lir_inst.mnemonic = self.get_mnemonic(instruction.ea) if self._debug else None
         lir_inst.group = self.get_group(lir_inst.type)
         lir_inst._aux = instruction.auxpref
+        lir_inst.features = [f_v for f_k, f_v in self.FEATURES_TRANSLATION.iteritems() \
+                    if f_k & instruction.get_canon_feature() == f_k])
 
-        #feature_str = ", ".join(
-        #    [f_v for f_k, f_v in self.FEATURES.iteritems() \
-        #        if f_k & instruction.get_canon_feature() == f_k])
+        # Display instruction information obtained form IDA internals.
+        if True:
+            feature_str = ", ".join(
+                [f_v for f_k, f_v in self.FEATURES_STR.iteritems() \
+                    if f_k & instruction.get_canon_feature() == f_k])
 
-        #inst_str = "0x%08X : %-3d %+5s - aux %-5d - seg %-5d - insn %-5d - flag %-5d - fea %s" % (
-        #    lir_inst.address,
-        #    lir_inst.type,
-        #    lir_inst.mnemonic,
-        #    instruction.auxpref,
-        #    instruction.segpref,
-        #    instruction.insnpref,
-        #    instruction.flags,
-        #    feature_str)
-        #print inst_str
+            inst_str = "0x%08X : %-3d %+5s - aux %-5d - seg %-5d - insn %-5d - flag %-5d - fea %s" % (
+                lir_inst.address,
+                lir_inst.type,
+                lir_inst.mnemonic,
+                instruction.auxpref,
+                instruction.segpref,
+                instruction.insnpref,
+                instruction.flags,
+                feature_str)
+            print inst_str
 
         # Parse every operand present in the instruction being analyzed
         for operand_index in xrange(UA_MAXOP):

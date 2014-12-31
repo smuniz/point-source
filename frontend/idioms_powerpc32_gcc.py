@@ -782,7 +782,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     mir_inst = mir_inst_builder.alloca(MiddleIrTypeInt(), None, var_name)
 
                     self.current_symbols_table.add_local_variable(
-                        func_address, var_name, scope, mir_inst)
+                        address, var_name, mir_inst)
 
                     print "    Parameter register (simple) detected: %s" % \
                             self.iset.GPR_NAMES[inst[0].value]

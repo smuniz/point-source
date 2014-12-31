@@ -25,9 +25,9 @@ class SymbolsTable(object):
         self.mapping = dict()
         self.variables = dict()
 
-    def add_local_variable(self, name, item):
+    def add_local_variable(self, address, name, item):
         """..."""
-        self.variables[var_address] = Symbol(name, None, None, item)
+        self.variables[address] = Symbol(name, None, None, item)
 
     def add_symbol(self, address, name, _type, scope, item):
         """..."""
