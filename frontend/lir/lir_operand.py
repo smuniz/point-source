@@ -122,13 +122,15 @@ class LowLevelOperand(object):
         return self.type is O_REG
 
     def is_reg_n(self, n=None):
-        if self.type is O_REG:
+        if self.is_reg:
 
-            if n is not None:
-                if self.value != n:
-                    return False
+            if n is None:
+                return True
 
-            return True
+            if type(n) is list:
+                return self.value in n
+            else:
+                return self.value == n
 
         return False
 
@@ -139,6 +141,20 @@ class LowLevelOperand(object):
     @property
     def is_phrase(self):
         return self.type is O_PHRASE  
+
+    def is_displ_n(self, n=None):
+        if self.is_displ:
+
+            if n is None:
+                return True
+
+            if type(n) is list:
+                print "xan =>", self.value, n
+                return self.value in n
+            else:
+                return self.value == n
+
+        return False
 
     @property
     def is_displ(self):
@@ -177,7 +193,7 @@ class LowLevelOperand(object):
         if self.is_reg:
             return self.gpr_names.get(self.value, None)
         elif self.is_displ:
-            return self.gpr_names.get(self.value[1], None)
+            return self.gpr_names.get(self.value[0], None)
         elif self.is_special:
             return self.spr_names.get(self.value, None)
         else:

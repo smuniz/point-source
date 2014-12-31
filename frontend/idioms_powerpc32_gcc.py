@@ -625,7 +625,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                                             # blr should be the last
                                             # instruction.
             # TODO : Check if basic block is terminator instead of checking
-            # every instruction of the basic block.
+            # every last instruction of the basic blocks list.
             if self.__is_valid_return(lir_inst):
                 blr_list.append(lir_inst)
 
@@ -757,9 +757,11 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 if not inst.type == self.iset.PPC_stw:
                     continue
 
-                # TODO: Do we need to check that destination is the stack?
-                if inst[0].is_reg_n() and \
-                    inst[0].value in self.iset.ARGUMENT_REGISTERS:
+                # Check that destination is the stack.
+                print "===>", self.lir_function.stack_access_registers
+                if inst[0].is_reg_n(self.iset.ARGUMENT_REGISTERS) and \
+                    inst[1].is_displ and \
+                    inst[1].is_displ_n(self.lir_function.stack_access_registers):
 
                     param_number = \
                         self.iset.ARGUMENT_REGISTERS.index(inst[0].value)
