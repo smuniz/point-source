@@ -773,31 +773,31 @@ class InstructionSet:
     MIPS_fork = idaapi.MIPS_fork             # Allocate and Schedule a New Thread
     MIPS_yield = idaapi.MIPS_yield            # Conditionally Deschedule or Deallocate the Current Thread
     MIPS_mftr = idaapi.MIPS_mftr             # Move From Thread Context
-    MIPS_mftc0,
-    MIPS_mftlo,
-    MIPS_mfthi,
-    MIPS_mftacx,
-    MIPS_mftdsp,
-    MIPS_mfthc1,
-    MIPS_mftc1,
-    MIPS_cftc1,
-    MIPS_mfthc2,
-    MIPS_mftc2,
-    MIPS_cftc2,
-    MIPS_mftgpr,
+    MIPS_mftc0 = idaapi.MIPS_mftc0
+    MIPS_mftlo = idaapi.MIPS_mftlo
+    MIPS_mfthi = idaapi.MIPS_mfthi
+    MIPS_mftacx = idaapi.MIPS_mftacx
+    MIPS_mftdsp = idaapi.MIPS_mftdsp
+    MIPS_mfthc1 = idaapi.MIPS_mfthc1
+    MIPS_mftc1 = idaapi.MIPS_mftc1
+    MIPS_cftc1 = idaapi.MIPS_cftc1
+    MIPS_mfthc2 = idaapi.MIPS_mfthc2
+    MIPS_mftc2 = idaapi.MIPS_mftc2
+    MIPS_cftc2 = idaapi.MIPS_cftc2
+    MIPS_mftgpr = idaapi.MIPS_mftgpr
     MIPS_mttr = idaapi.MIPS_mttr             # Move To Thread Context
-    MIPS_mttc0,
-    MIPS_mttlo,
-    MIPS_mtthi,
-    MIPS_mttacx,
-    MIPS_mttdsp,
-    MIPS_mtthc1,
-    MIPS_mttc1,
-    MIPS_cttc1,
-    MIPS_mtthc2,
-    MIPS_mttc2,
-    MIPS_cttc2,
-    MIPS_mttgpr,
+    MIPS_mttc0 = idaapi.MIPS_mttc0
+    MIPS_mttlo = idaapi.MIPS_mttlo
+    MIPS_mtthi = idaapi.MIPS_mtthi
+    MIPS_mttacx = idaapi.MIPS_mttacx
+    MIPS_mttdsp = idaapi.MIPS_mttdsp
+    MIPS_mtthc1 = idaapi.MIPS_mtthc1
+    MIPS_mttc1 = idaapi.MIPS_mttc1
+    MIPS_cttc1 = idaapi.MIPS_cttc1
+    MIPS_mtthc2 = idaapi.MIPS_mtthc2
+    MIPS_mttc2 = idaapi.MIPS_mttc2
+    MIPS_cttc2 = idaapi.MIPS_cttc2
+    MIPS_mttgpr = idaapi.MIPS_mttgpr
 
     # MIPS-3D
     MIPS_faddr = idaapi.MIPS_faddr          # Floating-point Reduction Addition
@@ -830,12 +830,12 @@ class InstructionSet:
     MIPS_frsqrt2 = idaapi.MIPS_frsqrt2        # Floating-point Reduced Precision Reciprocal Square Root (Step 2)
 
     # smartMIPS
-    MIPS_lwxs,
-    MIPS_maddp,
-    MIPS_mflhxu,
-    MIPS_mtlhx,
-    MIPS_multp,
-    MIPS_pperm,
+    MIPS_lwxs = idaapi.MIPS_lwxs
+    MIPS_maddp = idaapi.MIPS_maddp
+    MIPS_mflhxu = idaapi.MIPS_mflhxu
+    MIPS_mtlhx = idaapi.MIPS_mtlhx
+    MIPS_multp = idaapi.MIPS_multp
+    MIPS_pperm = idaapi.MIPS_pperm
 
     # microMIPS
     MIPS_jals = idaapi.MIPS_jals      # Jump and Link, Short Delay Slot
@@ -851,7 +851,7 @@ class InstructionSet:
     MIPS_bltzals = idaapi.MIPS_bltzals   # Branch on Less Than Zero and Link, Short Delay-Slot
     MIPS_beqzc = idaapi.MIPS_beqzc     # Branch on Equal to Zero, Compact
     MIPS_bgezals = idaapi.MIPS_bgezals   # Branch on Greater Than or Equal to Zero and Link, Short Delay-Slot
-    MIPS_jraddiusp, # Jump Register, Adjust Stack Pointer
+    MIPS_jraddiusp = idaapi.MIPS_jraddiusp, # Jump Register, Adjust Stack Pointer
     MIPS_jalrs = idaapi.MIPS_jalrs     # Jump and Link Register, Short Delay Slot
     MIPS_jalrs_hb = idaapi.MIPS_jalrs_hb  # Jump and Link Register with Hazard Barrier, Short Delay-Slot
     MIPS_movep = idaapi.MIPS_movep     # Move a Pair of Registers
@@ -927,7 +927,7 @@ class InstructionSet:
     MIPS_packrl_ph = idaapi.MIPS_packrl_ph        # Pack a Vector of Halfwords from Vector Halfword Sources
     MIPS_precr_sra_ph_w = idaapi.MIPS_precr_sra_ph_w   # Precision Reduce Two Integer Words to Halfwords after a Right Shift
     MIPS_precrqu_s_qb_ph = idaapi.MIPS_precrqu_s_qb_ph  # Precision Reduce Fractional Halfwords to Unsigned Bytes With Saturation
-    MIPS_precr_sra_r_ph_w, # Precision Reduce Two Integer Words to Halfwords after a Right Shift
+    MIPS_precr_sra_r_ph_w = idaapi.MIPS_precr_sra_r_ph_w, # Precision Reduce Two Integer Words to Halfwords after a Right Shif
     MIPS_cmpu_eq_ob = idaapi.MIPS_cmpu_eq_ob       # Compare Vectors of Unsigned Byte Values
     MIPS_cmp_eq_qh = idaapi.MIPS_cmp_eq_qh        # Compare Vectors of Signed Integer Halfword Values
     MIPS_cmp_eq_pw = idaapi.MIPS_cmp_eq_pw        # Compare Vectors of Signed Integer Word Values
@@ -1160,10 +1160,10 @@ class InstructionSet:
     MIPS_qmac_01 = idaapi.MIPS_qmac_01  # Q15 Multiply Accumulate
     MIPS_qmac_02 = idaapi.MIPS_qmac_02  # Q15 Multiply Accumulate
     MIPS_qmac_03 = idaapi.MIPS_qmac_03  # Q15 Multiply Accumulate
-    MIPS_qmacs_00, # Q15 Multiply Accumulate
-    MIPS_qmacs_01, # Q15 Multiply Accumulate
-    MIPS_qmacs_02, # Q15 Multiply Accumulate
-    MIPS_qmacs_03, # Q15 Multiply Accumulate
+    MIPS_qmacs_00 = idaapi.MIPS_qmacs_00, # Q15 Multiply Accumulat
+    MIPS_qmacs_01 = idaapi.MIPS_qmacs_01, # Q15 Multiply Accumulat
+    MIPS_qmacs_02 = idaapi.MIPS_qmacs_02, # Q15 Multiply Accumulat
+    MIPS_qmacs_03 = idaapi.MIPS_qmacs_03, # Q15 Multiply Accumulat
     MIPS_zcb = idaapi.MIPS_zcb      # Zero Cache Block
     MIPS_zcbt = idaapi.MIPS_zcbt     # Zero Cache Block
 
@@ -1386,14 +1386,14 @@ class InstructionSet:
     MIPS_msa_subs_u_h = idaapi.MIPS_msa_subs_u_h   # Vector Unsigned Saturated Subtract of Unsigned Values
     MIPS_msa_subs_u_w = idaapi.MIPS_msa_subs_u_w   # Vector Unsigned Saturated Subtract of Unsigned Values
     MIPS_msa_subs_u_d = idaapi.MIPS_msa_subs_u_d   # Vector Unsigned Saturated Subtract of Unsigned Values
-    MIPS_msa_subsus_u_b, # Vector Unsigned Saturated Subtract of Signed from Unsigned
-    MIPS_msa_subsus_u_h, # Vector Unsigned Saturated Subtract of Signed from Unsigned
-    MIPS_msa_subsus_u_w, # Vector Unsigned Saturated Subtract of Signed from Unsigned
-    MIPS_msa_subsus_u_d, # Vector Unsigned Saturated Subtract of Signed from Unsigned
-    MIPS_msa_subsuu_s_b, # Vector Signed Saturated Subtract of Unsigned Values
-    MIPS_msa_subsuu_s_h, # Vector Signed Saturated Subtract of Unsigned Values
-    MIPS_msa_subsuu_s_w, # Vector Signed Saturated Subtract of Unsigned Values
-    MIPS_msa_subsuu_s_d, # Vector Signed Saturated Subtract of Unsigned Values
+    MIPS_msa_subsus_u_b = idaapi.MIPS_msa_subsus_u_b # Vector Unsigned Saturated Subtract of Signed from Unsigned
+    MIPS_msa_subsus_u_h = idaapi.MIPS_msa_subsus_u_h # Vector Unsigned Saturated Subtract of Signed from Unsigned
+    MIPS_msa_subsus_u_w = idaapi.MIPS_msa_subsus_u_w # Vector Unsigned Saturated Subtract of Signed from Unsigned
+    MIPS_msa_subsus_u_d = idaapi.MIPS_msa_subsus_u_d # Vector Unsigned Saturated Subtract of Signed from Unsigned
+    MIPS_msa_subsuu_s_b = idaapi.MIPS_msa_subsuu_s_b # Vector Signed Saturated Subtract of Unsigned Values
+    MIPS_msa_subsuu_s_h = idaapi.MIPS_msa_subsuu_s_h # Vector Signed Saturated Subtract of Unsigned Values
+    MIPS_msa_subsuu_s_w = idaapi.MIPS_msa_subsuu_s_w # Vector Signed Saturated Subtract of Unsigned Values
+    MIPS_msa_subsuu_s_d = idaapi.MIPS_msa_subsuu_s_d # Vector Signed Saturated Subtract of Unsigned Values
     MIPS_msa_asub_s_b = idaapi.MIPS_msa_asub_s_b   # Vector Absolute Values of Signed Subtract
     MIPS_msa_asub_s_h = idaapi.MIPS_msa_asub_s_h   # Vector Absolute Values of Signed Subtract
     MIPS_msa_asub_s_w = idaapi.MIPS_msa_asub_s_w   # Vector Absolute Values of Signed Subtract
@@ -1667,10 +1667,10 @@ class InstructionSet:
     MIPS_msa_msubr_q_w = idaapi.MIPS_msa_msubr_q_w  # Vector Fixed-Point Multiply and Subtract Rounded
     MIPS_msa_fclass_w = idaapi.MIPS_msa_fclass_w   # Vector Floating-Point Class Mask
     MIPS_msa_fclass_d = idaapi.MIPS_msa_fclass_d   # Vector Floating-Point Class Mask
-    MIPS_msa_ftrunc_s_w, # Vector Floating-Point Truncate and Convert to Signed Integer
-    MIPS_msa_ftrunc_s_d, # Vector Floating-Point Truncate and Convert to Signed Integer
-    MIPS_msa_ftrunc_u_w, # Vector Floating-Point Truncate and Convert to Unsigned Integer
-    MIPS_msa_ftrunc_u_d, # Vector Floating-Point Truncate and Convert to Unsigned Integer
+    MIPS_msa_ftrunc_s_w = idaapi.MIPS_msa_ftrunc_s_w # Vector Floating-Point Truncate and Convert to Signed Integer
+    MIPS_msa_ftrunc_s_d = idaapi.MIPS_msa_ftrunc_s_d # Vector Floating-Point Truncate and Convert to Signed Integer
+    MIPS_msa_ftrunc_u_w = idaapi.MIPS_msa_ftrunc_u_w # Vector Floating-Point Truncate and Convert to Unsigned Integer
+    MIPS_msa_ftrunc_u_d = idaapi.MIPS_msa_ftrunc_u_d # Vector Floating-Point Truncate and Convert to Unsigned Integer
     MIPS_msa_fsqrt_w = idaapi.MIPS_msa_fsqrt_w    # Vector Floating-Point Square Root
     MIPS_msa_fsqrt_d = idaapi.MIPS_msa_fsqrt_d    # Vector Floating-Point Square Root
     MIPS_msa_frsqrt_w = idaapi.MIPS_msa_frsqrt_w   # Vector Approximate Floating-Point Reciprocal of Square Root
@@ -1708,6 +1708,159 @@ class InstructionSet:
 
 
 ASSIGNMENT_TYPES = [
+    MIPS_add,         # Add
+    MIPS_addu,        # Add Unsigned
+    MIPS_and,         # AND
+    MIPS_dadd,        # Doubleword Add
+    MIPS_daddu,       # Doubleword Add Unsigned
+    MIPS_dsub,        # Doubleword Subtract
+    MIPS_dsubu,       # Doubleword Subtract Unsigned
+    MIPS_nor,         # NOR
+    MIPS_or,          # OR
+    MIPS_slt,         # Set on Less Than
+    MIPS_sltu,        # Set on Less Than Unsigned
+    MIPS_sub,         # Subtract
+    MIPS_subu,        # Subtract Unsigned
+    MIPS_xor,         # Exclusive OR
+    MIPS_dsll,        # Doubleword Shift Left Logical
+    MIPS_dsll32,      # Doubleword Shift Left Logical + 32
+    MIPS_dsra,        # Doubleword Shift Right Arithmetic
+    MIPS_dsra32,      # Doubleword Shift Right Arithmetic + 32
+    MIPS_dsrl,        # Doubleword Shift Right Logical
+    MIPS_dsrl32,      # Doubleword Shift Right Logical + 32
+    MIPS_sll,         # Shift Left Logical
+    MIPS_sra,         # Shift Right Arithmetic
+    MIPS_srl,         # Shift Right Logical
+    MIPS_dsllv,       # Doubleword Shift Left Logical Variable
+    MIPS_dsrav,       # Doubleword Shift Right Arithmetic Variable
+    MIPS_dsrlv,       # Doubleword Shift Right Logical Variable
+    MIPS_sllv,        # Shift Left Logical Variable
+    MIPS_srav,        # Shift Right Arithmetic Variable
+    MIPS_srlv,        # Shift Right Logical Variable
+    MIPS_addi,        # Add Immediate
+    MIPS_addiu,       # Add Immediate Unsigned
+    MIPS_daddi,       # Doubleword Add Immediate
+    MIPS_daddiu,      # Doubleword Add Immediate Unsigned
+    MIPS_slti,        # Set on Less Than Immediate
+    MIPS_sltiu,       # Set on Less Than Immediate Unsigned
+    MIPS_andi,        # AND Immediate
+    MIPS_ori,         # OR Immediate
+    MIPS_xori,        # Exclusive OR Immediate
+    MIPS_teq,         # Trap if Equal
+    MIPS_tge,         # Trap if Greater Than or Equal
+    MIPS_tgeu,        # Trap if Greater Than or Equal Unsigned
+    MIPS_tlt,         # Trap if Less Than
+    MIPS_tltu,        # Trap if Less Than Unsigned
+    MIPS_tne,         # Trap if Not Equal
+    MIPS_cfc1,        # Move Control From FPU
+    MIPS_cfc2,        # Move Control From Coprocessor 2
+    MIPS_ctc1,        # Move Control to FPU
+    MIPS_ctc2,        # Move Control to Coprocessor 2
+    MIPS_dmfc0,       # Doubleword Move From CP0
+    MIPS_qmfc2,       # Quadword Move From CP2
+    MIPS_dmtc0,       # Doubleword Move To CP0
+    MIPS_qmtc2,       # Quadword Move To CP2
+    MIPS_mfc0,        # Move from CP0
+    MIPS_mfc1,        # Move from FPU
+    MIPS_mfc2,        # Move from CP2
+    MIPS_mtc0,        # Move to CP0
+    MIPS_mtc1,        # Move to FPU
+    MIPS_mtc2,        # Move to CP2
+    MIPS_teqi,        # Trap if Equal Immediate
+    MIPS_tgei,        # Trap if Greater Than or Equal Immediate
+    MIPS_tgeiu,       # Trap if Greater Than or Equal Immediate Unsigned
+    MIPS_tlti,        # Trap if Less Than Immediate
+    MIPS_tltiu,       # Trap if Less Than Immediate Unsigned
+    MIPS_tnei,        # Trap if Not Equal Immediate
+    MIPS_ddiv,        # Doubleword Divide
+    MIPS_ddivu,       # Doubleword Divide Unsigned
+    MIPS_div,         # Divide
+    MIPS_divu,        # Divide Unsigned
+    MIPS_dmult,       # Doubleword Multiply
+    MIPS_dmultu,      # Doubleword Multiply Unsigned
+    MIPS_mult,        # Multiply
+    MIPS_multu,       # Multiply Unsigned
+    MIPS_mthi,        # Move To HI
+    MIPS_mtlo,        # Move To LO
+    MIPS_mfhi,        # Move From HI
+    MIPS_mflo,        # Move From LO
+    MIPS_cop0,        # Coprocessor 0 Operation
+    MIPS_cop1,        # FPU Operation
+    MIPS_cop2,        # Coprocessor 2 Operation
+    MIPS_break,       # Break
+    MIPS_syscall,     # System Call
+    MIPS_bc0f,        # Branch on Coprocessor 0 False
+    MIPS_bc1f,        # Branch on FPU False
+    MIPS_bc2f,        # Branch on Coprocessor 2 False
+    MIPS_bc3f,        # Branch on Coprocessor 3 False
+    MIPS_bc0fl,       # Branch on Coprocessor 0 False Likely
+    MIPS_bc1fl,       # Branch on FPU False Likely
+    MIPS_bc2fl,       # Branch on Coprocessor 2 False Likely
+    MIPS_bc3fl,       # Branch on Coprocessor 3 False Likely
+    MIPS_bc0t,        # Branch on Coprocessor 0 True
+    MIPS_bc1t,        # Branch on FPU True
+    MIPS_bc2t,        # Branch on Coprocessor 2 True
+    MIPS_bc3t,        # Branch on Coprocessor 3 True
+    MIPS_bc0tl,       # Branch on Coprocessor 0 True Likely
+    MIPS_bc1tl,       # Branch on FPU True Likely
+    MIPS_bc2tl,       # Branch on Coprocessor 2 True Likely
+    MIPS_bc3tl,       # Branch on Coprocessor 3 True Likely
+    MIPS_bgez,        # Branch on Greater Than or Equal to Zero
+    MIPS_bgezal,      # Branch on Greater Than or Equal to Zero And Link
+    MIPS_bgezall,     # Branch on Greater Than or Equal to Zero And Link Likely
+    MIPS_bgezl,       # Branch on Greater Than or Equal to Zero Likely
+    MIPS_bgtz,        # Branch on Greater Than Zero
+    MIPS_bgtzl,       # Branch on Greater Than Zero Likely
+    MIPS_blez,        # Branch on Less Than or Equal to Zero
+    MIPS_blezl,       # Branch on Less Than or Equal to Zero Likely
+    MIPS_bltz,        # Branch on Less Than Zero
+    MIPS_bltzal,      # Branch on Less Than Zero And Link
+    MIPS_bltzall,     # Branch on Less Than Zero And Link Likely
+    MIPS_bltzl,       # Branch on Less Than Zero Likely
+    MIPS_beq,         # Branch on Equal
+    MIPS_beql,        # Branch on Equal Likely
+    MIPS_bne,         # Branch on Not Equal
+    MIPS_bnel,        # Branch on Not Equal Likely
+    MIPS_jalr,        # Jump And Link Register
+    MIPS_j,           # Jump
+    MIPS_jr,          # Jump Register
+    MIPS_jal,         # Jump And Link
+    MIPS_jalx,        # Jump And Link And Exchange
+    MIPS_cache,       # Cache Operation
+    MIPS_lb,          # Load Byte
+    MIPS_lbu,         # Load Byte Unsigned
+    MIPS_ldl,         # Load Doubleword Left
+    MIPS_ldr,         # Load Doubleword Right
+    MIPS_lwl,         # Load Word Left
+    MIPS_lwr,         # Load Word Right
+    MIPS_ld,          # Load Doubleword
+    MIPS_lld,         # Load Linked Doubleword
+    MIPS_ldc1,        # Load Double FPU
+    MIPS_ldc2,        # Load Double Coprocessor 2
+    MIPS_ll,          # Load Linked
+    MIPS_lw,          # Load Word
+    MIPS_lwu,         # Load Word Unsigned
+    MIPS_lh,          # Load Halfword
+    MIPS_lhu,         # Load Halfword Unsigned
+    MIPS_lui,         # Load Upper Immediate
+    MIPS_lwc1,        # Load Word to FPU
+    MIPS_lwc2,        # Load Word to Coprocessor 2
+    MIPS_sb,          # Store Byte
+    MIPS_sdl,         # Store Doubleword Left
+    MIPS_sdr,         # Store Doubleword Right
+    MIPS_swl,         # Store Word Left
+    MIPS_swr,         # Store Word Right
+    MIPS_scd,         # Store Conditional Doubleword
+    MIPS_sd,          # Store Doubleword
+    MIPS_sdc1,        # Store Double FPU
+    MIPS_sdc2,        # Store Double Coprocessor 2
+    MIPS_sc,          # Store Conditional
+    MIPS_sw,          # Store Word
+    MIPS_sh,          # Store Halfword
+    MIPS_swc1,        # Store Word from FPU
+    MIPS_swc2,        # Store Word from Coprocessor 2
+    MIPS_sync,        # Sync
+
 ]
 
 UNCONDITIONAL_BRANCH_TYPES = [
