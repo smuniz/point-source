@@ -8,10 +8,10 @@ C representation.
 
 Supported platforms:
 
-[+] PowerPC
-[-] MIPS
-[-] X86
-[-] X86-64
+[?] PowerPC
+[?] MIPS
+[-] x86
+[-] x86-64
 [-] ARM
-[-] AARCH64
+[-] AArch64
 
