@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2013 Sebastian Muniz
+# Copyright (c) 2014 Sebastian Muniz
 # 
 # This code is part of point source decompiler
 #
@@ -7,7 +7,7 @@
 import idaapi
 
 
-class InstructionSet:
+class InstructionSet(object):
     PPC_add = idaapi.PPC_add        # Add
     PPC_addc = idaapi.PPC_addc          # Add Carrying
     PPC_adde = idaapi.PPC_adde          # Add Extended

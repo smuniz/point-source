@@ -7,7 +7,7 @@
 import idaapi
 
 
-class InstructionSet:
+class InstructionSet(object):
     MIPS_add = idaapi.MIPS_add         # Add
     MIPS_addu = idaapi.MIPS_addu        # Add Unsigned
     MIPS_and = idaapi.MIPS_and         # AND
