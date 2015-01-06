@@ -433,10 +433,6 @@ class FrontEnd(object):
             print "[+] Creating Middle level IR skeleton..."
             self.generate_mir_skeleton()
 
-            self.perform_live_variable_analysis(self.lir_function, 1)
-
-            print "[+] Total functions analyzed : %d" % len(self.lir_functions_cache)
-
             #
             # Step x
             #
@@ -452,6 +448,14 @@ class FrontEnd(object):
             # Clean any internal state from previous analysis.
             self.idiom_analyzer.init(
                 self.lir_function, self.mir_function, self.symbols_tables)
+
+            #
+            # Perform live analysis
+            #
+            self.perform_live_variable_analysis(self.lir_function, 1)
+
+            print "[+] Total functions analyzed : %d" % len(self.lir_functions_cache)
+
 
             print "[+] Initiating idioms analysis phase 1..."
             self.idiom_analyzer.perform_phase1_analysis()
@@ -551,14 +555,6 @@ class FrontEnd(object):
     @abc.abstractmethod
     def _extract_callee_address(self, lir_inst):
         """Return the callee address from a call instruction, if any."""
-        return
-
-    @abc.abstractmethod
-    def is_call_instruction(self, lir_inst):
-        """Determine if the specified instruction is a call instruction or
-        not.
-
-        """
         return
 
     @property

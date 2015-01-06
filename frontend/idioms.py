@@ -180,3 +180,11 @@ class IdiomAnalyzer(object):
     def guess_compiler_type(self):
         """Determine the compiler for the current binary."""
         return
+
+    @abc.abstractmethod
+    def is_call_instruction(self, lir_inst):
+        """Determine if the specified instruction is a call instruction or
+        not.
+
+        """
+        return

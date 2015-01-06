@@ -318,21 +318,9 @@ class FrontEndPowerPc(FrontEnd):
 
         return mir_inst
 
-    def is_call_instruction(self, lir_inst):
-        """Determine if the specified instruction is a call instruction or
-        not.
-
-        """
-        # TODO / FIXME : make this right.
-        return bool(
-            lir_inst.type == self.iset.PPC_b and \
-            lir_inst._aux == 8 and \
-            len(lir_inst) == 1 and \
-            lir_inst[0].type in [O_NEAR, O_FAR])
-
     def _extract_callee_address(self, lir_inst):
         """Return the callee address from a call instruction, if any."""
-        if not self.is_call_instruction(lir_inst):
+        if not self.idiom_analyzer.is_call_instruction(lir_inst):
             return None
 
         if len(lir_inst) == 1:

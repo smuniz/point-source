@@ -8,6 +8,9 @@ from traceback import format_exc
 
 from idioms import IdiomAnalyzer, IdiomAnalyzerException
 
+#from frontend.lir.lir_operand import *
+from lir.lir_operand import *
+
 # Import MIR related modules
 #from middleend.mir import *    # Not working anymore. Must import each module
                                 # manually.
@@ -657,6 +660,12 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     if len(ret_regs_list) == 0:
                         continue
 
+                    if self.is_call_instruction(lir_inst):
+                        # Don't keep looking for return registers if we hit a
+                        # call instruction cause they're used in the parameters
+                        # passing.
+                        break
+
                     current_address = lir_inst.address
 
                     if current_address not in self.lir_function.du_chain:
@@ -1123,3 +1132,16 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
             return True
 
         return False
+
+    def is_call_instruction(self, lir_inst):
+        """Determine if the specified instruction is a call instruction or
+        not.
+
+        """
+        # TODO / FIXME : make this right.
+        return bool(
+            lir_inst.type == self.iset.PPC_b and \
+            lir_inst._aux == 8 and \
+            len(lir_inst) == 1 and \
+            lir_inst[0].type in [O_NEAR, O_FAR])
+

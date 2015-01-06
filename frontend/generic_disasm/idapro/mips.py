@@ -1795,6 +1795,14 @@ class InstructionSet(object):
         #DCR       : "DCR",
     }
 
+    ARGUMENT_REGISTERS = [A0, A1, A2, A3]
+
+    RETURN_REGISTERS = [V0, V1]
+
+    VOLATILE_REGISTERS = ARGUMENT_REGISTERS + RETURN_REGISTERS + [
+        T0, T1, T2, T3, T4, T5, T6, T7, T8, T9]
+
+
     #
     #  Helper methods
     #
