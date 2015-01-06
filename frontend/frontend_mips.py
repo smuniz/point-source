@@ -26,7 +26,7 @@ class FrontEndMips(FrontEnd):
 
     def __init__(self, debugger):
         """Perform MIPS front-end instance initialization."""
-        FrontEnd.__init__(self, MipsGccIdiomAnalyzer, debugger)
+        super(FrontEndMips, self).__init__(MipsGccIdiomAnalyzer, debugger)
 
     def on_assignment(self, lir_inst):
         """Handle Low level IR assignment instructions."""
@@ -51,10 +51,11 @@ class FrontEndMips(FrontEnd):
         """
         # TODO / FIXME : make this right.
         return bool(
-            lir_inst.type == self.iset.PPC_b and \
-            lir_inst._aux == 8 and \
-            len(lir_inst) == 1 and \
-            lir_inst[0].type in [O_NEAR, O_FAR])
+            lir_inst.type in (self.iset.MIPS_jal, self.iset.MIPS_jalx) # and \
+            #lir_inst._aux == 8 and \
+            #len(lir_inst) == 1 and \
+            #lir_inst[0].type in [O_NEAR, O_FAR])
+            )
 
     def _extract_callee_address(self, lir_inst):
         """Return the callee address from a call instruction, if any."""

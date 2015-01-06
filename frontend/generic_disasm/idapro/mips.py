@@ -1705,168 +1705,382 @@ class InstructionSet(object):
     MIPS_lsa = idaapi.MIPS_lsa            # Left Shift Add
     MIPS_dlsa = idaapi.MIPS_dlsa           # Doubleword Left Shift Add
 
+    ZERO = 0
+    AT = 1
+    V0 = 2
+    V1 = 3
+    A0 = 4
+    A1 = 5
+    A2 = 6
+    A3 = 7
+    T0 = 8
+    T1 = 9
+    T2 = 10
+    T3 = 11
+    T4 = 12 
+    T5 = 13
+    T6 = 14
+    T7 = 15
+    S0 = 16
+    S1 = 17
+    S2 = 18
+    S3 = 19
+    S4 = 20
+    S5 = 21
+    S6 = 22
+    S7 = 23
+    T8 = 24
+    T9 = 25
+    #GPR26 = 26
+    #GPR27 = 27
+    GP = 28
+    SP = 29
+    FP = 30
+    RA = 31
 
+    TOTAL_GPR = 32      # Number of general purpose registers.
+
+    GPR_NAMES = {
+        ZERO : "$zero",
+        AT : "$at",
+        V0 : "$v0",
+        V1 : "$v1",
+        A0 : "$a0",
+        A1 : "$a1",
+        A2 : "$a2",
+        A3 : "$a3",
+        T0 : "$t0",
+        T1 : "$t1",
+        T2 : "$t2",
+        T3 : "$t3",
+        T4 : "$t4",
+        T5 : "$t5",
+        T6 : "$t6",
+        T7 : "$t7",
+        S0 : "$s0",
+        S1 : "$s1",
+        S2 : "$s2",
+        S3 : "$s3",
+        S4 : "$s4",
+        S5 : "$s5",
+        S6 : "$s6",
+        S7 : "$s7",
+        T8 : "$t8",
+        T9 : "$t9",
+        #GPR
+        #GPR
+        GP : "$gp",
+        SP : "$sp",
+        FP : "$fp",
+        RA : "$ra",
+        }
+
+
+    #
+    # Special purpose registers in PowerPC
+    #
+    #SPR       = idaapi.o_idpspec0     # Special purpose register
+    #TWOFPR    = idaapi.o_idpspec1     # Two FPPR_s
+    #SHMBME    = idaapi.o_idpspec2     # SH & MB & ME
+    #CRF       = idaapi.o_idpspec3     # crfield      x.reg
+    #CRB       = idaapi.o_idpspec4     # crbit        x.reg
+    #DCR       = idaapi.o_idpspec5     # Device control register
+
+    SPR_NAMES = {
+        #SPR       : "SPR",
+        #TWOFPR    : "TWOFPR",
+        #SHMBME    : "SHMBME",
+        #CRF       : "CRF",
+        #CRB       : "CRB",
+        #DCR       : "DCR",
+    }
+
+    #
+    #  Helper methods
+    #
+
+    def is_branch(self, inst_type):
+        """Indicate if the specified instruction is some kind of branch
+        instruction.
+
+        """
+        return inst_type in CONDITIONAL_BRANCH_TYPES or \
+            inst_type in UNCONDITIONAL_BRANCH_TYPES
+
+
+"""
+MIPS labels registers in two different ways. Integer registers are labelled from $r0 to $r31.
+However, for the purposes of writing functions, it's often easier to label registers with mnemonics.
+
+In particular, MIPS uses the following alternate names.
+
+$zero This is hardwired 0 register. It's value is always zero no matter what you do with it.
+$a0, $a1, $a2, $a3 There are the argument registers, and are used for passing up to four arguments to a function.
+Additional arguments use the stack. In addition, if the argument isn't 32 bits (a structure, for example), it must be passed on the stack.
+
+$t0, $t1, ..., $t9 These are temporary registers. When you make a subroutine call (i.e., jal), the callee does not need to save these registers if it wants to use these registers. However, if the caller wants to use the temporary registers after a jal call, it must push the temporary registers on the stack, just so the callee doesn't overwrite those registers.
+$s0, $s1, ..., $s7 These are saved registers. If a callee wants to use these registers, it must first push the register value onto the stack. Once it's done using the register, it must pop it from the stack and restore the value of the saved register.
+This is a convention only, meaning that assembly language programmers and compilers should observe these conventions, so code will work properly. However, the saving of these registers is not done automatically by the hardware.
+
+$v0, $v1 These are return value registers. Usually only $v0 is use for the return value. However, if there's a need for 64 bits of result, there's a second register.
+$sp The stack pointer points to the top of the stack. Stacks grow to smaller addresses, and the stack pointer contains the address of valid data (thus, $sp - 1 is an address of garbage data). It's assumed addresses smaller than $sp contain garbage data. However, it is possible for the stack to overflow, i.e., to have an address that becomes invalid.
+$fp The frame pointer is a secondary pointer for function/subroutine calls. Usually, once jal occurs, you set $fp to $sp. Then, you adjust $sp for local variables. Once done, you can assign $sp back to $fp to quickly "pop" off everything from the stack used by a function.
+$gp The global pointer is used to reference global variables. In general, we won't use it much in the course.
+$ra Stores return address for jal calls.
+Chart of Corresponding Registers
+
+All of the registers listed in the previous section correspond to some register labelled $r0 up to $r31.
+Here's a chart. It's the same as the one on page 140 of Patterson and Hennessy.
+
+Name	Register Number	Usage	Preserved by callee
+$zero	0	hardwired 0	N/A
+$v0-$v1	2-3	return value and expression evaluation	no
+$a0-$a3	4-7	arguments	no
+$t0-$t7	8-15	temporary values	no
+$s0-$s7	16-23	saved values	YES
+$t8-$t9	24-25	more temporary values	no
+$gp	28	global pointer	YES
+$sp	29	stack pointer	YES
+$fp	30	frame pointer	YES
+$ra	31	return address	YES
+There are a few registers not listed. $at, which is register 1, is used by the assembler. $k0-$k1 which is registers 26-27 is used by the operating system.
+
+"""
 
 ASSIGNMENT_TYPES = [
-    MIPS_add,         # Add
-    MIPS_addu,        # Add Unsigned
-    MIPS_and,         # AND
-    MIPS_dadd,        # Doubleword Add
-    MIPS_daddu,       # Doubleword Add Unsigned
-    MIPS_dsub,        # Doubleword Subtract
-    MIPS_dsubu,       # Doubleword Subtract Unsigned
-    MIPS_nor,         # NOR
-    MIPS_or,          # OR
-    MIPS_slt,         # Set on Less Than
-    MIPS_sltu,        # Set on Less Than Unsigned
-    MIPS_sub,         # Subtract
-    MIPS_subu,        # Subtract Unsigned
-    MIPS_xor,         # Exclusive OR
-    MIPS_dsll,        # Doubleword Shift Left Logical
-    MIPS_dsll32,      # Doubleword Shift Left Logical + 32
-    MIPS_dsra,        # Doubleword Shift Right Arithmetic
-    MIPS_dsra32,      # Doubleword Shift Right Arithmetic + 32
-    MIPS_dsrl,        # Doubleword Shift Right Logical
-    MIPS_dsrl32,      # Doubleword Shift Right Logical + 32
-    MIPS_sll,         # Shift Left Logical
-    MIPS_sra,         # Shift Right Arithmetic
-    MIPS_srl,         # Shift Right Logical
-    MIPS_dsllv,       # Doubleword Shift Left Logical Variable
-    MIPS_dsrav,       # Doubleword Shift Right Arithmetic Variable
-    MIPS_dsrlv,       # Doubleword Shift Right Logical Variable
-    MIPS_sllv,        # Shift Left Logical Variable
-    MIPS_srav,        # Shift Right Arithmetic Variable
-    MIPS_srlv,        # Shift Right Logical Variable
-    MIPS_addi,        # Add Immediate
-    MIPS_addiu,       # Add Immediate Unsigned
-    MIPS_daddi,       # Doubleword Add Immediate
-    MIPS_daddiu,      # Doubleword Add Immediate Unsigned
-    MIPS_slti,        # Set on Less Than Immediate
-    MIPS_sltiu,       # Set on Less Than Immediate Unsigned
-    MIPS_andi,        # AND Immediate
-    MIPS_ori,         # OR Immediate
-    MIPS_xori,        # Exclusive OR Immediate
-    MIPS_teq,         # Trap if Equal
-    MIPS_tge,         # Trap if Greater Than or Equal
-    MIPS_tgeu,        # Trap if Greater Than or Equal Unsigned
-    MIPS_tlt,         # Trap if Less Than
-    MIPS_tltu,        # Trap if Less Than Unsigned
-    MIPS_tne,         # Trap if Not Equal
-    MIPS_cfc1,        # Move Control From FPU
-    MIPS_cfc2,        # Move Control From Coprocessor 2
-    MIPS_ctc1,        # Move Control to FPU
-    MIPS_ctc2,        # Move Control to Coprocessor 2
-    MIPS_dmfc0,       # Doubleword Move From CP0
-    MIPS_qmfc2,       # Quadword Move From CP2
-    MIPS_dmtc0,       # Doubleword Move To CP0
-    MIPS_qmtc2,       # Quadword Move To CP2
-    MIPS_mfc0,        # Move from CP0
-    MIPS_mfc1,        # Move from FPU
-    MIPS_mfc2,        # Move from CP2
-    MIPS_mtc0,        # Move to CP0
-    MIPS_mtc1,        # Move to FPU
-    MIPS_mtc2,        # Move to CP2
-    MIPS_teqi,        # Trap if Equal Immediate
-    MIPS_tgei,        # Trap if Greater Than or Equal Immediate
-    MIPS_tgeiu,       # Trap if Greater Than or Equal Immediate Unsigned
-    MIPS_tlti,        # Trap if Less Than Immediate
-    MIPS_tltiu,       # Trap if Less Than Immediate Unsigned
-    MIPS_tnei,        # Trap if Not Equal Immediate
-    MIPS_ddiv,        # Doubleword Divide
-    MIPS_ddivu,       # Doubleword Divide Unsigned
-    MIPS_div,         # Divide
-    MIPS_divu,        # Divide Unsigned
-    MIPS_dmult,       # Doubleword Multiply
-    MIPS_dmultu,      # Doubleword Multiply Unsigned
-    MIPS_mult,        # Multiply
-    MIPS_multu,       # Multiply Unsigned
-    MIPS_mthi,        # Move To HI
-    MIPS_mtlo,        # Move To LO
-    MIPS_mfhi,        # Move From HI
-    MIPS_mflo,        # Move From LO
-    MIPS_cop0,        # Coprocessor 0 Operation
-    MIPS_cop1,        # FPU Operation
-    MIPS_cop2,        # Coprocessor 2 Operation
-    MIPS_break,       # Break
-    MIPS_syscall,     # System Call
-    MIPS_bc0f,        # Branch on Coprocessor 0 False
-    MIPS_bc1f,        # Branch on FPU False
-    MIPS_bc2f,        # Branch on Coprocessor 2 False
-    MIPS_bc3f,        # Branch on Coprocessor 3 False
-    MIPS_bc0fl,       # Branch on Coprocessor 0 False Likely
-    MIPS_bc1fl,       # Branch on FPU False Likely
-    MIPS_bc2fl,       # Branch on Coprocessor 2 False Likely
-    MIPS_bc3fl,       # Branch on Coprocessor 3 False Likely
-    MIPS_bc0t,        # Branch on Coprocessor 0 True
-    MIPS_bc1t,        # Branch on FPU True
-    MIPS_bc2t,        # Branch on Coprocessor 2 True
-    MIPS_bc3t,        # Branch on Coprocessor 3 True
-    MIPS_bc0tl,       # Branch on Coprocessor 0 True Likely
-    MIPS_bc1tl,       # Branch on FPU True Likely
-    MIPS_bc2tl,       # Branch on Coprocessor 2 True Likely
-    MIPS_bc3tl,       # Branch on Coprocessor 3 True Likely
-    MIPS_bgez,        # Branch on Greater Than or Equal to Zero
-    MIPS_bgezal,      # Branch on Greater Than or Equal to Zero And Link
-    MIPS_bgezall,     # Branch on Greater Than or Equal to Zero And Link Likely
-    MIPS_bgezl,       # Branch on Greater Than or Equal to Zero Likely
-    MIPS_bgtz,        # Branch on Greater Than Zero
-    MIPS_bgtzl,       # Branch on Greater Than Zero Likely
-    MIPS_blez,        # Branch on Less Than or Equal to Zero
-    MIPS_blezl,       # Branch on Less Than or Equal to Zero Likely
-    MIPS_bltz,        # Branch on Less Than Zero
-    MIPS_bltzal,      # Branch on Less Than Zero And Link
-    MIPS_bltzall,     # Branch on Less Than Zero And Link Likely
-    MIPS_bltzl,       # Branch on Less Than Zero Likely
-    MIPS_beq,         # Branch on Equal
-    MIPS_beql,        # Branch on Equal Likely
-    MIPS_bne,         # Branch on Not Equal
-    MIPS_bnel,        # Branch on Not Equal Likely
-    MIPS_jalr,        # Jump And Link Register
-    MIPS_j,           # Jump
-    MIPS_jr,          # Jump Register
-    MIPS_jal,         # Jump And Link
-    MIPS_jalx,        # Jump And Link And Exchange
-    MIPS_cache,       # Cache Operation
-    MIPS_lb,          # Load Byte
-    MIPS_lbu,         # Load Byte Unsigned
-    MIPS_ldl,         # Load Doubleword Left
-    MIPS_ldr,         # Load Doubleword Right
-    MIPS_lwl,         # Load Word Left
-    MIPS_lwr,         # Load Word Right
-    MIPS_ld,          # Load Doubleword
-    MIPS_lld,         # Load Linked Doubleword
-    MIPS_ldc1,        # Load Double FPU
-    MIPS_ldc2,        # Load Double Coprocessor 2
-    MIPS_ll,          # Load Linked
-    MIPS_lw,          # Load Word
-    MIPS_lwu,         # Load Word Unsigned
-    MIPS_lh,          # Load Halfword
-    MIPS_lhu,         # Load Halfword Unsigned
-    MIPS_lui,         # Load Upper Immediate
-    MIPS_lwc1,        # Load Word to FPU
-    MIPS_lwc2,        # Load Word to Coprocessor 2
-    MIPS_sb,          # Store Byte
-    MIPS_sdl,         # Store Doubleword Left
-    MIPS_sdr,         # Store Doubleword Right
-    MIPS_swl,         # Store Word Left
-    MIPS_swr,         # Store Word Right
-    MIPS_scd,         # Store Conditional Doubleword
-    MIPS_sd,          # Store Doubleword
-    MIPS_sdc1,        # Store Double FPU
-    MIPS_sdc2,        # Store Double Coprocessor 2
-    MIPS_sc,          # Store Conditional
-    MIPS_sw,          # Store Word
-    MIPS_sh,          # Store Halfword
-    MIPS_swc1,        # Store Word from FPU
-    MIPS_swc2,        # Store Word from Coprocessor 2
-    MIPS_sync,        # Sync
+    InstructionSet.MIPS_add,         # Add
+    InstructionSet.MIPS_addu,        # Add Unsigned
+    InstructionSet.MIPS_and,         # AND
+    InstructionSet.MIPS_dadd,        # Doubleword Add
+    InstructionSet.MIPS_daddu,       # Doubleword Add Unsigned
+    InstructionSet.MIPS_dsub,        # Doubleword Subtract
+    InstructionSet.MIPS_dsubu,       # Doubleword Subtract Unsigned
+    InstructionSet.MIPS_nor,         # NOR
+    InstructionSet.MIPS_or,          # OR
+    InstructionSet.MIPS_slt,         # Set on Less Than
+    InstructionSet.MIPS_sltu,        # Set on Less Than Unsigned
+    InstructionSet.MIPS_sub,         # Subtract
+    InstructionSet.MIPS_subu,        # Subtract Unsigned
+    InstructionSet.MIPS_xor,         # Exclusive OR
+    InstructionSet.MIPS_dsll,        # Doubleword Shift Left Logical
+    InstructionSet.MIPS_dsll32,      # Doubleword Shift Left Logical + 32
+    InstructionSet.MIPS_dsra,        # Doubleword Shift Right Arithmetic
+    InstructionSet.MIPS_dsra32,      # Doubleword Shift Right Arithmetic + 32
+    InstructionSet.MIPS_dsrl,        # Doubleword Shift Right Logical
+    InstructionSet.MIPS_dsrl32,      # Doubleword Shift Right Logical + 32
+    InstructionSet.MIPS_sll,         # Shift Left Logical
+    InstructionSet.MIPS_sra,         # Shift Right Arithmetic
+    InstructionSet.MIPS_srl,         # Shift Right Logical
+    InstructionSet.MIPS_dsllv,       # Doubleword Shift Left Logical Variable
+    InstructionSet.MIPS_dsrav,       # Doubleword Shift Right Arithmetic Variable
+    InstructionSet.MIPS_dsrlv,       # Doubleword Shift Right Logical Variable
+    InstructionSet.MIPS_sllv,        # Shift Left Logical Variable
+    InstructionSet.MIPS_srav,        # Shift Right Arithmetic Variable
+    InstructionSet.MIPS_srlv,        # Shift Right Logical Variable
+    InstructionSet.MIPS_addi,        # Add Immediate
+    InstructionSet.MIPS_addiu,       # Add Immediate Unsigned
+    InstructionSet.MIPS_daddi,       # Doubleword Add Immediate
+    InstructionSet.MIPS_daddiu,      # Doubleword Add Immediate Unsigned
+    InstructionSet.MIPS_slti,        # Set on Less Than Immediate
+    InstructionSet.MIPS_sltiu,       # Set on Less Than Immediate Unsigned
+    InstructionSet.MIPS_andi,        # AND Immediate
+    InstructionSet.MIPS_ori,         # OR Immediate
+    InstructionSet.MIPS_xori,        # Exclusive OR Immediate
+    #...
+    InstructionSet.MIPS_cfc1,        # Move Control From FPU
+    InstructionSet.MIPS_cfc2,        # Move Control From Coprocessor 2
+    InstructionSet.MIPS_ctc1,        # Move Control to FPU
+    InstructionSet.MIPS_ctc2,        # Move Control to Coprocessor 2
+    InstructionSet.MIPS_dmfc0,       # Doubleword Move From CP0
+    InstructionSet.MIPS_qmfc2,       # Quadword Move From CP2
+    InstructionSet.MIPS_dmtc0,       # Doubleword Move To CP0
+    InstructionSet.MIPS_qmtc2,       # Quadword Move To CP2
+    InstructionSet.MIPS_mfc0,        # Move from CP0
+    InstructionSet.MIPS_mfc1,        # Move from FPU
+    InstructionSet.MIPS_mfc2,        # Move from CP2
+    InstructionSet.MIPS_mtc0,        # Move to CP0
+    InstructionSet.MIPS_mtc1,        # Move to FPU
+    InstructionSet.MIPS_mtc2,        # Move to CP2
+    InstructionSet.MIPS_teqi,        # Trap if Equal Immediate
+    InstructionSet.MIPS_tgei,        # Trap if Greater Than or Equal Immediate
+    InstructionSet.MIPS_tgeiu,       # Trap if Greater Than or Equal Immediate Unsigned
+    InstructionSet.MIPS_tlti,        # Trap if Less Than Immediate
+    InstructionSet.MIPS_tltiu,       # Trap if Less Than Immediate Unsigned
+    InstructionSet.MIPS_tnei,        # Trap if Not Equal Immediate
+    InstructionSet.MIPS_ddiv,        # Doubleword Divide
+    InstructionSet.MIPS_ddivu,       # Doubleword Divide Unsigned
+    InstructionSet.MIPS_div,         # Divide
+    InstructionSet.MIPS_divu,        # Divide Unsigned
+    InstructionSet.MIPS_dmult,       # Doubleword Multiply
+    InstructionSet.MIPS_dmultu,      # Doubleword Multiply Unsigned
+    InstructionSet.MIPS_mult,        # Multiply
+    InstructionSet.MIPS_multu,       # Multiply Unsigned
+    InstructionSet.MIPS_mthi,        # Move To HI
+    InstructionSet.MIPS_mtlo,        # Move To LO
+    InstructionSet.MIPS_mfhi,        # Move From HI
+    InstructionSet.MIPS_mflo,        # Move From LO
+    InstructionSet.MIPS_cop0,        # Coprocessor 0 Operation
+    InstructionSet.MIPS_cop1,        # FPU Operation
+    InstructionSet.MIPS_cop2,        # Coprocessor 2 Operation
+    # ...
+    InstructionSet.MIPS_cache,       # Cache Operation
+    InstructionSet.MIPS_lb,          # Load Byte
+    InstructionSet.MIPS_lbu,         # Load Byte Unsigned
+    InstructionSet.MIPS_ldl,         # Load Doubleword Left
+    InstructionSet.MIPS_ldr,         # Load Doubleword Right
+    InstructionSet.MIPS_lwl,         # Load Word Left
+    InstructionSet.MIPS_lwr,         # Load Word Right
+    InstructionSet.MIPS_ld,          # Load Doubleword
+    InstructionSet.MIPS_lld,         # Load Linked Doubleword
+    InstructionSet.MIPS_ldc1,        # Load Double FPU
+    InstructionSet.MIPS_ldc2,        # Load Double Coprocessor 2
+    InstructionSet.MIPS_ll,          # Load Linked
+    InstructionSet.MIPS_lw,          # Load Word
+    InstructionSet.MIPS_lwu,         # Load Word Unsigned
+    InstructionSet.MIPS_lh,          # Load Halfword
+    InstructionSet.MIPS_lhu,         # Load Halfword Unsigned
+    InstructionSet.MIPS_lui,         # Load Upper Immediate
+    InstructionSet.MIPS_lwc1,        # Load Word to FPU
+    InstructionSet.MIPS_lwc2,        # Load Word to Coprocessor 2
+    InstructionSet.MIPS_sb,          # Store Byte
+    InstructionSet.MIPS_sdl,         # Store Doubleword Left
+    InstructionSet.MIPS_sdr,         # Store Doubleword Right
+    InstructionSet.MIPS_swl,         # Store Word Left
+    InstructionSet.MIPS_swr,         # Store Word Right
+    InstructionSet.MIPS_scd,         # Store Conditional Doubleword
+    InstructionSet.MIPS_sd,          # Store Doubleword
+    InstructionSet.MIPS_sdc1,        # Store Double FPU
+    InstructionSet.MIPS_sdc2,        # Store Double Coprocessor 2
+    InstructionSet.MIPS_sc,          # Store Conditional
+    InstructionSet.MIPS_sw,          # Store Word
+    InstructionSet.MIPS_sh,          # Store Halfword
+    InstructionSet.MIPS_swc1,        # Store Word from FPU
+    InstructionSet.MIPS_swc2,        # Store Word from Coprocessor 2
+    InstructionSet.MIPS_sync,        # Sync
+
+    # Coprocessor 0 instructions
+
+    InstructionSet.MIPS_tlbp,        # Probe TLB for Matching Entry
+    InstructionSet.MIPS_tlbr,        # Read Indexed TLB Entry
+    InstructionSet.MIPS_tlbwi,       # Write Indexed TLB Entry
+    InstructionSet.MIPS_tlbwr,       # Write Random TLB Entry
+
+
+    # Coprocessor 1 (FPU) instructions
+
+    InstructionSet.MIPS_fadd,        # Floating-point Add
+    InstructionSet.MIPS_fsub,        # Floating-point Subtract
+    InstructionSet.MIPS_fmul,        # Floating-point Multiply
+    InstructionSet.MIPS_fdiv,        # Floating-point Divide
+    InstructionSet.MIPS_fabs,        # Floating-point Absolute Value
+    InstructionSet.MIPS_fcvt_s,      # Floating-point Convert to Single Fixed-Point Format
+    InstructionSet.MIPS_fcvt_d,      # Floating-point Convert to Double Floating-Point Format
+    InstructionSet.MIPS_fcvt_w,      # Floating-point Convert to Fixed-Point Format
+    InstructionSet.MIPS_fcvt_l,      # Floating-point Convert to Long Fixed-Point Format
+    InstructionSet.MIPS_fround_l,    # Floating-point Round to Long Fixed-Point Format
+    InstructionSet.MIPS_ftrunc_l,    # Floating-point Truncate to Long Fixed-Point Format
+    InstructionSet.MIPS_fceil_l,     # Floating-point Ceiling to Long Fixed-Point Format
+    InstructionSet.MIPS_ffloor_l,    # Floating-point Floor to Long Fixed-Point Format
+    InstructionSet.MIPS_fround_w,    # Floating-point Round to Single Fixed-Point Format
+    InstructionSet.MIPS_ftrunc_w,    # Floating-point Truncate to Single Fixed-Point Format
+    InstructionSet.MIPS_fceil_w,     # Floating-point Ceiling to Single Fixed-Point Format
+    InstructionSet.MIPS_ffloor_w,    # Floating-point Floor to Single Fixed-Point Format
+    InstructionSet.MIPS_fmov,        # Floating-point Move
+    InstructionSet.MIPS_fneg,        # Floating-point Negate
+    InstructionSet.MIPS_fsqrt,       # Floating-point Square Root
+    InstructionSet.MIPS_fc_f,        # Floating-point Compare
+    InstructionSet.MIPS_fc_un,       # Floating-point Compare
+    InstructionSet.MIPS_fc_eq,       # Floating-point Compare
+    InstructionSet.MIPS_fc_ueq,      # Floating-point Compare
+    InstructionSet.MIPS_fc_olt,      # Floating-point Compare
+    InstructionSet.MIPS_fc_ult,      # Floating-point Compare
+    InstructionSet.MIPS_fc_ole,      # Floating-point Compare
+    InstructionSet.MIPS_fc_ule,      # Floating-point Compare
+    InstructionSet.MIPS_fc_sf,       # Floating-point Compare
+    InstructionSet.MIPS_fc_ngle,     # Floating-point Compare
+    InstructionSet.MIPS_fc_seq,      # Floating-point Compare
+    InstructionSet.MIPS_fc_ngl,      # Floating-point Compare
+    InstructionSet.MIPS_fc_lt,       # Floating-point Compare
+    InstructionSet.MIPS_fc_nge,      # Floating-point Compare
+    InstructionSet.MIPS_fc_le,       # Floating-point Compare
+    InstructionSet.MIPS_fc_ngt,      # Floating-point Compare
+
+    # Pseudo instructions
+
+    InstructionSet.MIPS_nop,         # No operation
+    InstructionSet.MIPS_mov,         # Move register
+    InstructionSet.MIPS_neg,         # Negate
+    InstructionSet.MIPS_negu,        # Negate Unsigned
+
+    InstructionSet.MIPS_li,          # Load Immediate
+    InstructionSet.MIPS_la,          # Load Address
 
 ]
 
 UNCONDITIONAL_BRANCH_TYPES = [
+    InstructionSet.MIPS_teq,         # Trap if Equal
+    InstructionSet.MIPS_tge,         # Trap if Greater Than or Equal
+    InstructionSet.MIPS_tgeu,        # Trap if Greater Than or Equal Unsigned
+    InstructionSet.MIPS_tlt,         # Trap if Less Than
+    InstructionSet.MIPS_tltu,        # Trap if Less Than Unsigned
+    InstructionSet.MIPS_tne,         # Trap if Not Equal
+
+    InstructionSet.MIPS_break,       # Break
+    InstructionSet.MIPS_syscall,     # System Call
+
+    InstructionSet.MIPS_jalr,        # Jump And Link Register
+    InstructionSet.MIPS_j,           # Jump
+    InstructionSet.MIPS_jr,          # Jump Register
+    InstructionSet.MIPS_jal,         # Jump And Link
+    InstructionSet.MIPS_jalx,        # Jump And Link And Exchange
+
+    # Coprocessor 0 instructions
+
+    InstructionSet.MIPS_eret,        # Exception Return
+
+    # Pseudo instructions
+    InstructionSet.MIPS_b,           # Branch Always
+    InstructionSet.MIPS_bal,         # Branch Always and Link
 ]
 
 CONDITIONAL_BRANCH_TYPES = [
+    InstructionSet.MIPS_bc0f,        # Branch on Coprocessor 0 False
+    InstructionSet.MIPS_bc1f,        # Branch on FPU False
+    InstructionSet.MIPS_bc2f,        # Branch on Coprocessor 2 False
+    InstructionSet.MIPS_bc3f,        # Branch on Coprocessor 3 False
+    InstructionSet.MIPS_bc0fl,       # Branch on Coprocessor 0 False Likely
+    InstructionSet.MIPS_bc1fl,       # Branch on FPU False Likely
+    InstructionSet.MIPS_bc2fl,       # Branch on Coprocessor 2 False Likely
+    InstructionSet.MIPS_bc3fl,       # Branch on Coprocessor 3 False Likely
+    InstructionSet.MIPS_bc0t,        # Branch on Coprocessor 0 True
+    InstructionSet.MIPS_bc1t,        # Branch on FPU True
+    InstructionSet.MIPS_bc2t,        # Branch on Coprocessor 2 True
+    InstructionSet.MIPS_bc3t,        # Branch on Coprocessor 3 True
+    InstructionSet.MIPS_bc0tl,       # Branch on Coprocessor 0 True Likely
+    InstructionSet.MIPS_bc1tl,       # Branch on FPU True Likely
+    InstructionSet.MIPS_bc2tl,       # Branch on Coprocessor 2 True Likely
+    InstructionSet.MIPS_bc3tl,       # Branch on Coprocessor 3 True Likely
+    InstructionSet.MIPS_bgez,        # Branch on Greater Than or Equal to Zero
+    InstructionSet.MIPS_bgezal,      # Branch on Greater Than or Equal to Zero And Link
+    InstructionSet.MIPS_bgezall,     # Branch on Greater Than or Equal to Zero And Link Likely
+    InstructionSet.MIPS_bgezl,       # Branch on Greater Than or Equal to Zero Likely
+    InstructionSet.MIPS_bgtz,        # Branch on Greater Than Zero
+    InstructionSet.MIPS_bgtzl,       # Branch on Greater Than Zero Likely
+    InstructionSet.MIPS_blez,        # Branch on Less Than or Equal to Zero
+    InstructionSet.MIPS_blezl,       # Branch on Less Than or Equal to Zero Likely
+    InstructionSet.MIPS_bltz,        # Branch on Less Than Zero
+    InstructionSet.MIPS_bltzal,      # Branch on Less Than Zero And Link
+    InstructionSet.MIPS_bltzall,     # Branch on Less Than Zero And Link Likely
+    InstructionSet.MIPS_bltzl,       # Branch on Less Than Zero Likely
+    InstructionSet.MIPS_beq,         # Branch on Equal
+    InstructionSet.MIPS_beql,        # Branch on Equal Likely
+    InstructionSet.MIPS_bne,         # Branch on Not Equal
+    InstructionSet.MIPS_bnel,        # Branch on Not Equal Likely
+
+    InstructionSet.MIPS_bnez,        # Branch on Not Zero
+    InstructionSet.MIPS_bnezl,       # Branch on Not Zero Likely
+    InstructionSet.MIPS_beqz,        # Branch on Zero
+    InstructionSet.MIPS_beqzl,       # Branch on Zero Likely
 ]
 
 UNIMPLEMENTED_TYPES = [

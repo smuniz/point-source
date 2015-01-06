@@ -3,6 +3,7 @@
 gvim -O2 ./*.py \
     frontend/*.py \
     frontend/lir/*.py \
+    frontend/generic_disasm/idapro/*.py \
     middleend/mir/*.py \
     middleend/*.py \
     cbackend/*.py \

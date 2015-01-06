@@ -344,7 +344,7 @@ class Disassembler(BaseDebugger):
                     if f_k & instruction.get_canon_feature() == f_k]
 
         # Display instruction information obtained form IDA internals.
-        if False:
+        if True:
             feature_str = ", ".join(
                 [f_v for f_k, f_v in self.FEATURES_STR.iteritems() \
                     if f_k in lir_inst.features])
