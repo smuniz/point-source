@@ -23,7 +23,7 @@ class LowLevelFunction(object):
         self.end_address = end_address
         self.name = func_name
 
-        self.instruction_set = iset
+        self.iset = iset
 
         self.basic_blocks = list()
 
@@ -283,20 +283,21 @@ class LowLevelFunction(object):
 
             for lir_inst in lir_bb:
 
-                if self.instruction_set.is_branch(lir_inst.type):
+                if self.iset.is_branch(lir_inst.type):
                     # TODO / FIXME : This is a kludge for PPC.
                     #
                     # Let's assume that when a call instruction is found all
                     # the temporal registers might have been modified inside
                     # the callee.
                     for reg,v in reg_defs.items():
-                        #print "R%d address 0x%08x" % (reg,v)
+                        #print "Reg %s at address 0x%08x" % (
+                        #    self.iset.GPR_NAMES[reg],v)
 
-                        if reg in self.instruction_set.VOLATILE_REGISTERS:
-                           # print "Removing register %s before branch at 0x%X" % (
-                           #     self.instruction_set.GPR_NAMES[reg],
-                           #     lir_inst.address)
-                                del reg_defs[reg]
+                        if reg in self.iset.VOLATILE_REGISTERS:
+                            # print "Removing volatile register %s before branch at 0x%X" % (
+                            #     self.iset.GPR_NAMES[reg],
+                            #     lir_inst.address)
+                            del reg_defs[reg]
 
                 else:
                     pass
@@ -312,7 +313,6 @@ class LowLevelFunction(object):
 
                     op = lir_op.value
 
-                    print "--->", prev_reg_def
                     if self.__is_destination_operand(lir_inst, lir_op_idx):
                         if op in reg_defs:
                             prev_reg_def[op] = reg_defs[op]

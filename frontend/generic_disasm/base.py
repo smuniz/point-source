@@ -265,10 +265,10 @@ class BaseDebugger(object):
                 "No instructions found during the analysis.")
 
         try:
-            print "[+] Generating DU and UD chains for Low level IR..."
+            #print "[+] Generating DU and UD chains for Low level IR..."
             lir_function.generate_chains()
         except Exception, err:
-            print format_exc()
+            #print format_exc()
             raise BaseDebuggerException(err)
 
         return lir_function

@@ -22,16 +22,20 @@ class SymbolsTable(object):
     def __init__(self, *args, **kw):
         #super(SymbolsTable,self).__init__(*args, **kw)
         #self.itemlist = super(SymbolsTable,self).keys()
-        self.mapping = dict()
+        self.symbols = dict()
         self.variables = dict()
 
     def add_local_variable(self, address, name, item):
-        """..."""
+        """Add a new loscal variable to the symbols table."""
         self.variables[address] = Symbol(name, None, None, item)
 
     def add_symbol(self, address, name, _type, scope, item):
-        """..."""
-        self.mapping[address] = Symbol(name, _type, scope, item)
+        """Add a regular symbol with its corresponding information to the
+        symbols table.
+        
+        """
+        print "Adding symbol 0x%08X = %s %s %s %s" % (address, name, _type, scope, item)
+        self.symbols[address] = Symbol(name, _type, scope, item)
 
     def __str__(self):
         _str = ["[+] Local variables list:", ]
@@ -40,7 +44,7 @@ class SymbolsTable(object):
                 k, addr, i.name, i.type, i.scope, i.item))
             
         _str.append("[+] Symbols mapping list:")
-        for k, (addr, i) in enumerate(self.mapping.iteritems()):
+        for k, (addr, i) in enumerate(self.symbols.iteritems()):
             _str.append("%02d | %08x | %10s | %10s | %10s | %r" % (
                 k, addr, i.name, i.type, i.scope, i.item))
 
