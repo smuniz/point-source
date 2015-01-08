@@ -452,15 +452,15 @@ class FrontEnd(object):
             #
             # Perform live analysis
             #
-            self.perform_live_variable_analysis(self.lir_function, 1)
+            self.perform_live_variable_analysis(self.lir_function, 0)
 
             print "[+] Total functions analyzed : %d" % len(self.lir_functions_cache)
 
+            self.__dump_lir()
 
             print "[+] Initiating idioms analysis phase 1..."
             self.idiom_analyzer.perform_phase1_analysis()
 
-            self.__dump_lir()
             #
             # Step x
             #
@@ -482,7 +482,7 @@ class FrontEnd(object):
             print str(self.current_symbols_table)
 
         except IdiomAnalyzerException, err:
-            #print format_exc() + '\n'
+            print format_exc() + '\n'
             raise FrontEndException("Idioms analysis failed (%s)" % err)
 
         except MiddleIrException, err:
@@ -519,6 +519,15 @@ class FrontEnd(object):
                 if callee_address in self.lir_functions_cache:
                     continue
 
+                # Recurse into callees until we reach the specified level
+                # (in case it was specified).
+                if depth is None:
+                    continue
+                if depth > 0:
+                    depth -= 1
+                else:
+                    continue
+
                 # Analyze the called function in order to obtain parameters and
                 # return registers information.
                 print "[+] Analyzing callee at 0x%X" % callee_address
@@ -533,15 +542,6 @@ class FrontEnd(object):
                         lir_callee.instructions_count)
 
                     self.lir_functions_cache.setdefault(callee_address, lir_callee)
-
-                    # Recurse into callees until we reach the specified level
-                    # (in case it was specified).
-                    if depth is None:
-                        continue
-                    if depth > 0:
-                        depth -= 1
-                    else:
-                        continue
 
                     # Analyse the calle function and its callees (if
                     # appropriate according to the depth level).

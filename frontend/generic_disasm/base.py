@@ -4,6 +4,7 @@
 # This code is part of point source decompiler
 #
 import abc
+from traceback import format_exc
 
 __all__ = ["BaseDebugger",
            "BaseDebuggerException",
@@ -263,8 +264,12 @@ class BaseDebugger(object):
             raise BaseDebuggerException(
                 "No instructions found during the analysis.")
 
-        #print "[+] Generating DU and UD chains for Low level IR..."
-        lir_function.generate_chains()
+        try:
+            print "[+] Generating DU and UD chains for Low level IR..."
+            lir_function.generate_chains()
+        except Exception, err:
+            print format_exc()
+            raise BaseDebuggerException(err)
 
         return lir_function
 

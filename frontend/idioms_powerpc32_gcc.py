@@ -874,7 +874,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
 
                         if not hi_inst_idx:
                             raise PowerPc32GccIdiomAnalyzerException(
-                                "[-] Couldn't locate index for 0x%X:%s" \
+                                "Couldn't locate index for 0x%X:%s" \
                                 % (hi_inst.address, hi_inst))
 
                         # TODO / FIXME : Use DU and UD chains instead of just

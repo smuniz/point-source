@@ -277,6 +277,7 @@ class LowLevelFunction(object):
 
         """
         reg_defs = dict()
+        prev_reg_def = dict()
 
         for bb_index, lir_bb in enumerate(self):
 
@@ -300,6 +301,9 @@ class LowLevelFunction(object):
                 else:
                     pass
 
+                prev_reg_def.clear() # Only valid during the current
+                                        # instruction being analyzed.
+
                 for lir_op_idx, lir_op in enumerate(lir_inst.operands):
 
                     if not lir_op.is_reg:
@@ -308,7 +312,10 @@ class LowLevelFunction(object):
 
                     op = lir_op.value
 
+                    print "--->", prev_reg_def
                     if self.__is_destination_operand(lir_inst, lir_op_idx):
+                        if op in reg_defs:
+                            prev_reg_def[op] = reg_defs[op]
                         reg_defs[op] = lir_inst.address
 
                         defs = self.du_chain.setdefault(lir_inst.address, dict())
@@ -316,7 +323,12 @@ class LowLevelFunction(object):
 
                         self.ud_chain.setdefault(lir_inst.address, dict())
                     else:
-                        def_address = reg_defs.get(op, None)
+                        # Make use of original definition in cases where the
+                        # same register is both source and destination operand.
+                        def_address = prev_reg_def.get(op, None)
+
+                        if def_address is None:
+                            def_address = reg_defs.get(op, None)
 
                         if def_address is not None:
                             cur_address = lir_inst.address
