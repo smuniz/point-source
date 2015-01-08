@@ -53,9 +53,6 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         #print "Locating epilogue."
         self.detect_epilogue()
 
-        #print "Detecting arguments register."
-        self.detect_argument_registers()
-
         #print "Detecting simple arguments register."
         self.detect_simple_argument_registers()
 
@@ -709,18 +706,6 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
             ", ".join([self.iset.GPR_NAMES[r] \
                 for r in self.return_registers])
 
-    def detect_argument_registers(self):
-        """Detect registers used for argument passing to the current function.
-
-        """
-        # TODO / FIXME : Add this analysis.
-        #self.param_regs[0] = self.iset.GPR3
-
-        if len(self.param_regs) > 0:
-            print "    Parameter register(s) found : %s" % \
-                ", ".join([self.iset.GPR_NAMES[r] \
-                    for r in self.param_regs.values()])
-
     def __create_local_variables_for_arguments(self):
         """..."""
         return # TODO / FIXME : remove this
@@ -742,6 +727,41 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         except MiddleIrException, err:
             print format_exc() + '\n'
             raise PowerPc32GccIdiomAnalyzerException(err)
+
+    def detect_simple_argument_registers(self):
+        """..."""
+        try:
+            # Iterate through every instruction in the first basic block
+            for inst in self.lir_function[0]:
+
+                # Avoid the instruction if it's part of a previously
+                # detected idiom
+                if inst.analyzed:
+                    continue
+
+                if inst.
+
+        except MiddleIrException, err:
+            print format_exc() + '\n'
+            raise PowerPc32GccIdiomAnalyzerException(err)
+
+    def __is_destination_operand(self, lir_inst, lir_op_idx):
+        """Indicate if the specified operand is being treated
+        as a destion operand (meaning its content is going to
+        change).
+
+        """
+        # FIXME : Remove IDA-specific code.
+        from idaapi import CF_CHG1, CF_CHG2, CF_CHG3, CF_CHG4, CF_CHG5, CF_CHG6 
+        changes = {
+            0 : CF_CHG1,
+            1 : CF_CHG2,
+            2 : CF_CHG3,
+            3 : CF_CHG4,
+            4 : CF_CHG5,
+            5 : CF_CHG6,
+        }
+        return changes.get(lir_op_idx, None) in lir_inst.features
 
     def detect_simple_argument_registers(self):
         """Detect registers used for argument passing to the current function.
@@ -977,17 +997,19 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         self.mir_function.get_instruction_builder_by_address(
                             address, True)
 
+                    name = "psz%s" % data.capitalize()
                     gep = mir_inst_builder.gep(
                         gvar_str,
                         [MiddleIrConstantInt32(0)] * 2,
-                        "psz%s" % data.capitalize())
+                        name)
 
                     gep.add_address(address)
 
                     #
                     # Add newly created symbol to symbol table.
                     #
-                    self.current_symbols_table.symbols[address] = gep
+                    self.current_symbols_table.add_symbol(
+                        address, name, None, None, gep)
 
                     #
                     # Set MIR instruction address equivalent to the LIR
@@ -1044,14 +1066,16 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         self.mir_function.get_instruction_builder_by_address(
                             lo_inst.address, True)
 
+                    name = "szLoco"
                     gep = mir_inst_builder.gep(
                         gvar_str,
                         #[MiddleIrTypePointer(MiddleIrTypeArray(MiddleIrTypeChar(), len(data)))],
                         [MiddleIrConstantInt(MiddleIrTypeInt(32), 0)] * 2,
-                        "szLoco",
+                        name,
                         True)
 
-                    self.current_symbols_table.symbols[lo_inst.address] = gep
+                    self.current_symbols_table.add_symbol(
+                        lo_inst.address, name, None, None, gep)
 
                 # Mark instructions as analyzed and remove them from
                 # the list of remaining LIR instructions.

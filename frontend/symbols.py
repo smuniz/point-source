@@ -34,7 +34,6 @@ class SymbolsTable(object):
         symbols table.
         
         """
-        print "Adding symbol 0x%08X = %s %s %s %s" % (address, name, _type, scope, item)
         self.symbols[address] = Symbol(name, _type, scope, item)
 
     def __str__(self):
