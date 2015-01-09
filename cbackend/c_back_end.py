@@ -139,8 +139,8 @@ class CBackEnd(object):
         try:
             # Obtain the current being decompiled to start the final
             # decompilation process.
-            address = self.function_address
-            mir_function = self.mir.get_function_by_address(address)
+            mir_function = self.mir.get_function_by_address(
+                self.function_address) 
 
             # self.hir must contain a global scope and the newly created
             # function in it.

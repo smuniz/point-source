@@ -83,8 +83,6 @@ class FrontEnd(object):
         self.unconditional_branch_types = debugger.unconditional_branch_types
         self.assignment_types = debugger.assignment_types
 
-        self.function_address = None
-
         # Low-level IR of the current function being decompiled. This is an
         # abstraction from the debugger structures to represent the
         # disassembled code.
@@ -388,29 +386,24 @@ class FrontEnd(object):
 
                 self.mir_function[bb_index].add_in_edge(bblock_index)
 
-    @property
-    def function_address(self):
-        """Return the address of the function being decompiled."""
-        return self._function_address
-
-    @function_address.setter
-    def function_address(self, address):
-        """Store the address of the function being decompiled."""
-        self._function_address = address
-
     def __dump_lir(self):
         """Dump the current LIR function to the debugger output."""
         print "[+] LIR representation:\n%s" % self.lir_function
 
-    def analyze(self):
+    def analyze(self, func_address, depth=0):
         """Start the analysis phase by gathering information about all the
         instructions contained inside the function being analyzed and also
         store information about call graph for further operations.
 
+        @func_address : The address of the function to analyze.
         """
+        print "Current depth is %d" % depth
         try:
             print "[+] Generating Low level IR..."
-            self.lir_function = self.debugger.generate_lir(self.function_address)
+            self.lir_function = self.debugger.generate_lir(func_address)
+
+            # Add this function to the cache list for further usage.
+            self.lir_functions_cache.setdefault(func_address, self.lir_function)
 
             print "[+] Found %d basic block(s) on function \'%s\' containing %d " \
                 "instruction(s)" % (
@@ -418,11 +411,16 @@ class FrontEnd(object):
                 self.lir_function.name,
                 self.lir_function.instructions_count)
 
-            # Output LIR for debugging purposes.
-            #self.__dump_lir()
         except Exception, err:
             raise FrontEndException(
                 "Unable to generate Low Level IR: %s" % err)
+
+        #
+        # This is the first milestone on the analysis (depth 1)
+        #
+        if depth == 1:
+            print "A" * 30
+            return
 
         try:
             #
@@ -452,11 +450,14 @@ class FrontEnd(object):
             #
             # Perform live analysis
             #
-            self.perform_live_variable_analysis(self.lir_function, 0)
+            old_total = len(self.lir_functions_cache)
+            self.perform_live_variable_analysis(self.lir_function, 1)
 
-            print "[+] Total functions analyzed : %d" % len(self.lir_functions_cache)
+            print "[+] Total functions added : %d" % (
+                len(self.lir_functions_cache) - old_total)
 
-            self.__dump_lir()
+            # Output LIR for debugging purposes.
+            #self.__dump_lir()
 
             print "[+] Initiating idioms analysis phase 1..."
             self.idiom_analyzer.perform_phase1_analysis()
@@ -528,21 +529,19 @@ class FrontEnd(object):
                 else:
                     continue
 
+                # Save the context for further usage.
+                cur_lir = self.lir_function 
+
                 # Analyze the called function in order to obtain parameters and
                 # return registers information.
-                print "[+] Analyzing callee at 0x%X" % callee_address
-                lir_callee = self.analyze_callee(callee_address)
+                self.analyze(callee_address, 1)
+
+                # Restore the context of the main function being analyzed.
+                self.lir_function = cur_lir
+
+                lir_callee = self.lir_functions_cache.get(callee_address, None)
 
                 if lir_callee:
-
-                    print "    - Found %d basic block(s) on function \'%s\' containing %d " \
-                        "instruction(s)" % (
-                        lir_callee.get_basic_blocks_count(),
-                        lir_callee.name,
-                        lir_callee.instructions_count)
-
-                    self.lir_functions_cache.setdefault(callee_address, lir_callee)
-
                     # Analyse the calle function and its callees (if
                     # appropriate according to the depth level).
                     self.perform_live_variable_analysis(lir_callee, depth)

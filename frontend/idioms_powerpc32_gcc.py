@@ -784,9 +784,13 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     # ducplicate to the list).
                     if lir_op.value not in params:
                         params.append(lir_op.value)
-                        self._handle_store_argument_registers(lir_inst)
-                        print "    Parameter register (simple) detected: %s" % \
-                                self.iset.GPR_NAMES[lir_op.value]
+                        
+                        if self._handle_store_argument_registers(lir_inst): 
+
+                            print "    Parameter register (simple) detected: %s" % \
+                                self.iset.reg_name(lir_op.value)
+                        else:
+                            print "    No parameter detected via 'simple' method."
 
         except MiddleIrException, err:
             print format_exc() + '\n'
@@ -811,7 +815,10 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         return changes.get(lir_op_idx, None) in lir_inst.features
 
     def _handle_store_argument_registers(self, lir_inst):
-        """..."""
+        """Detect store operations using ragister parameters in the
+        functions prologue.
+        
+        """
         try:
             # Look in the first basic block for an instruction
             # sequence like the following:
@@ -819,7 +826,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
             # .text:018000C4 stw     %r3, 8(%r31)
             # .text:018000C8 stw     %r4, 0xC(%r31)
             #
-            if not lir_inst.type == self.iset.PPC_stw:
+            if lir_inst.type != self.iset.PPC_stw:
                 return False
 
             # Check that destination is the stack.
@@ -855,6 +862,8 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         except MiddleIrException, err:
             print format_exc() + '\n'
             raise PowerPc32GccIdiomAnalyzerException(err)
+
+        return False
 
     def detect_arguments_copy(self):
         """Check non-volatile registers used as a temporal function

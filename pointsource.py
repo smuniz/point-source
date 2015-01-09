@@ -277,8 +277,7 @@ class PointSource(object):
             #
             self.__log_separated("Front-end Phase")
 
-            self.front_end.function_address = self.function_address
-            self.front_end.analyze()
+            self.front_end.analyze(self.function_address)
 
             #
             # Middle-end phase

@@ -524,6 +524,10 @@ class InstructionSet(object):
         GPR31 : "r31",
     }
 
+    def reg_name(self, reg):
+        """Return the name of the specified register."""
+        return self.GPR_NAMES.get(reg, None)
+
     #
     # Special purpose registers in PowerPC
     #
