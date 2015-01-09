@@ -691,8 +691,11 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                             if reg not in self.return_registers:
                                 self.return_registers.append(reg)
 
-                            print "[!] Found return reg R%d at 0x%X" % (reg, current_address)
+                            #print "[!] Found return reg R%d at 0x%X" % (reg, current_address)
 
+                            # Update DU chains for the ret instruction to
+                            # reflect the use of the registers in use for this
+                            # operation.
                             self.lir_function.du_chain[current_address][reg].append(blr.address)
 
                             self.lir_function.ud_chain[blr.address][reg] = current_address
@@ -760,24 +763,19 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         continue
 
                     if self.__is_destination_operand(lir_inst, lir_op_idx):
-                        print "found clash... %s at 0x%X (now %r)" % (
-                            self.iset.GPR_NAMES[lir_op.value],
-                            lir_inst.address, candidates)
+                        #print "found clash... %s at 0x%X (now %r)" % (
+                        #    self.iset.GPR_NAMES[lir_op.value],
+                        #    lir_inst.address, candidates)
                         if lir_op.value in candidates:
                             idx = candidates.index(lir_op.value)
                             [candidates.pop() for x in range(len(candidates[idx : ]))]
-                            #candidates = candidates[
-                            #    candidates.index(lir_op.value) -1 : : -1]
-                            #candidates.reverse()
-                            print "Remaining candidates", candidates
+                            #print "Remaining candidates", candidates
 
                             continue
 
-                    #if lir_function.
-
-                    print "Got %s at 0x%08X (idx %d)" % (
-                        self.iset.GPR_NAMES[lir_op.value], lir_inst.address,
-                        lir_op_idx)
+                    #print "Got %s at 0x%08X (idx %d)" % (
+                    #    self.iset.GPR_NAMES[lir_op.value], lir_inst.address,
+                    #    lir_op_idx)
 
                     # We've found a new parameter register so we add it to the
                     # final list in case it didn't exist yet (this is not the
@@ -786,8 +784,9 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     # ducplicate to the list).
                     if lir_op.value not in params:
                         params.append(lir_op.value)
-
-            print "params = %r" % params
+                        self._handle_store_argument_registers(lir_inst)
+                        print "    Parameter register (simple) detected: %s" % \
+                                self.iset.GPR_NAMES[lir_op.value]
 
         except MiddleIrException, err:
             print format_exc() + '\n'
@@ -824,34 +823,34 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 return False
 
             # Check that destination is the stack.
-            if lir_inst[0].is_reg_n(self.iset.ARGUMENT_REGISTERS) and \
-                inst[1].is_displ and inst[1].is_displ_n(
-                    self.lir_function.stack_access_registers):
+            if not (lir_inst[0].is_reg_n(self.iset.ARGUMENT_REGISTERS) and \
+                lir_inst[1].is_displ and lir_inst[1].is_displ_n(
+                    self.lir_function.stack_access_registers)):
+                return False
 
-                param_number = \
-                    self.iset.ARGUMENT_REGISTERS.index(inst[0].value)
+            param_number = \
+                self.iset.ARGUMENT_REGISTERS.index(lir_inst[0].value)
 
-                self.param_regs[param_number] = [inst[0].value, ]
-                inst.analyzed = True
+            self.param_regs[param_number] = [lir_inst[0].value, ]
+            lir_inst.analyzed = True
 
-                #
-                # Add a new local variable to the symbols list.
-                #
-                func_address = self.lir_function.start_address
-                mir_inst_builder = \
-                    self.mir_function.get_instruction_builder_by_address(
-                        func_address, False)
+            #
+            # Add a new local variable to the symbols list.
+            #
+            func_address = self.lir_function.start_address
+            mir_inst_builder = \
+                self.mir_function.get_instruction_builder_by_address(
+                    func_address, False)
 
-                address = inst[1].value[1]
-                var_type_preffix = "i" # TODO / FIXME : Detect the argument type.
-                var_name = "%(var_type_preffix)s_0x%(address)x" % vars()
-                mir_inst = mir_inst_builder.alloca(MiddleIrTypeInt(), None, var_name)
+            address = lir_inst[1].value[1]
+            var_type_preffix = "i" # TODO / FIXME : Detect the argument type.
+            var_name = "%(var_type_preffix)s_0x%(address)x" % vars()
+            mir_inst = mir_inst_builder.alloca(MiddleIrTypeInt(), None, var_name)
 
-                self.current_symbols_table.add_local_variable(
-                    address, var_name, mir_inst)
+            self.current_symbols_table.add_local_variable(
+                address, var_name, mir_inst)
 
-                print "    Parameter register (simple) detected: %s" % \
-                        self.iset.GPR_NAMES[inst[0].value]
+            return True
 
         except MiddleIrException, err:
             print format_exc() + '\n'
