@@ -101,8 +101,9 @@ class FrontEnd(object):
         self.mir_module = MiddleIrModule.new(self.debugger.get_input_file())
 
         # Set the module in charge of idiom analysis.
-        self.idiom_analyzer_type = idiom_analyzer_type
-        self.idiom_analyzer = None
+        # Invoke the appropriate idiom analyzer for the current architecture.
+        #
+        self.idiom_analyzer = idiom_analyzer_type(self.debugger)
 
         # Setup symbol table for local/global variables refrences, etc..
         global symbols_tables
@@ -398,8 +399,10 @@ class FrontEnd(object):
         @func_address : The address of the function to analyze.
         """
         print "Current depth is %d" % depth
+
         try:
-            print "[+] Generating Low level IR..."
+            print "[+] Generating Low level IR for function '%s'" % \
+                self.debugger.get_function_name(func_address)
             self.lir_function = self.debugger.generate_lir(func_address)
 
             # Add this function to the cache list for further usage.
@@ -415,14 +418,25 @@ class FrontEnd(object):
             raise FrontEndException(
                 "Unable to generate Low Level IR: %s" % err)
 
-        #
-        # This is the first milestone on the analysis (depth 1)
-        #
-        if depth == 1:
-            print "A" * 30
-            return
-
         try:
+            print "[+] Initializing idioms analyser..."
+            self.idiom_analyzer.init(
+                self.lir_function, None, self.symbols_tables)
+
+            #
+            # Step x
+            #
+            # Invoke the appropriate idiom analyzer for the current architecture.
+            print "[+] Initiating idioms analysis phase 0..."
+            self.idiom_analyzer.perform_phase0_analysis()
+
+            #
+            # This is the first milestone on the analysis (depth 1)
+            #
+            if depth == 1:
+                print "A" * 30
+                return
+
             #
             # Step x
             #
@@ -434,18 +448,17 @@ class FrontEnd(object):
             #
             # Step x
             #
-            # Invoke the appropriate idiom analyzer for the current architecture.
+            # Clean any internal state from previous analysis.
             #
+            print "[+] Initializing idioms analyser..."
+            self.idiom_analyzer.mir_function = self.mir_function
+            #self.idiom_analyzer.mir_module = self.mir_function.module
+            #self.idiom_analyzer.init(
+            #    self.lir_function, self.mir_function, self.symbols_tables)
+
+            # Store the current symbol table to use.
             self.current_symbols_table = \
                 self.symbols_tables.symbols(self.lir_function.start_address)
-
-            print "[+] Initializing idioms analyser..."
-            if self.idiom_analyzer is None:
-                self.idiom_analyzer = self.idiom_analyzer_type(self.debugger)
-
-            # Clean any internal state from previous analysis.
-            self.idiom_analyzer.init(
-                self.lir_function, self.mir_function, self.symbols_tables)
 
             #
             # Perform live analysis
@@ -459,6 +472,10 @@ class FrontEnd(object):
             # Output LIR for debugging purposes.
             #self.__dump_lir()
 
+            #
+            # Step x
+            #
+            # Invoke the appropriate idiom analyzer for the current architecture.
             print "[+] Initiating idioms analysis phase 1..."
             self.idiom_analyzer.perform_phase1_analysis()
 
@@ -533,7 +550,9 @@ class FrontEnd(object):
                 cur_lir = self.lir_function 
 
                 # Analyze the called function in order to obtain parameters and
-                # return registers information.
+                # return registers information. This will procude a new LIR
+                # function and basic function information becuase of the
+                # execution of phase 0 analysis.
                 self.analyze(callee_address, 1)
 
                 # Restore the context of the main function being analyzed.

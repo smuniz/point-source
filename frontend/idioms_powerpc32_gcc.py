@@ -42,20 +42,25 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         # Set default stack access style for PPC
         lir_function.add_stack_access_register(self.iset.SP)
 
-    def perform_phase1_analysis(self):
+    def _perform_phase0_analysis(self):
+        """Execute the most basic idiom analysis on current function previous
+        to every other major analysis.
+
+        """
+        #print "Locating prologue (phase 0)"
+        self.detect_prologue()
+
+        #print "Locating epilogue (phase 0)"
+        self.detect_epilogue()
+
+        #print "Detecting simple arguments register (phase 0)"
+        self.detect_simple_argument_registers()
+
+    def _perform_phase1_analysis(self):
         """Execute the basic idiom analysis on current function previous to MIR
         generation.
 
         """
-        #print "Locating prologue."
-        self.detect_prologue()
-
-        #print "Locating epilogue."
-        self.detect_epilogue()
-
-        #print "Detecting simple arguments register."
-        self.detect_simple_argument_registers()
-
         #print "Creating terporary local variables holding arguments."
         self.__create_local_variables_for_arguments()
 
@@ -81,7 +86,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
 
                 #mir_inst_builder.
 
-    def perform_phase2_analysis(self):
+    def _perform_phase2_analysis(self):
         """Execute the basic idiom analysis on current function after to MIR
         generation.
 
@@ -785,12 +790,14 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     if lir_op.value not in params:
                         params.append(lir_op.value)
                         
-                        if self._handle_store_argument_registers(lir_inst): 
+                        print "    Parameter register (simple) detected: %s" % \
+                            self.iset.reg_name(lir_op.value)
+                        #if self._handle_store_argument_registers(lir_inst): 
 
-                            print "    Parameter register (simple) detected: %s" % \
-                                self.iset.reg_name(lir_op.value)
-                        else:
-                            print "    No parameter detected via 'simple' method."
+                        #    print "    Parameter register (simple) detected: %s" % \
+                        #        self.iset.reg_name(lir_op.value)
+                        #else:
+                        #    print "    No parameter detected via 'simple' method."
 
         except MiddleIrException, err:
             print format_exc() + '\n'

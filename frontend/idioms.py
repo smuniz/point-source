@@ -21,7 +21,7 @@ class IdiomAnalyzer(object):
     def init(self, lir_function, mir_function, symbols_table):
         """Clean any internal state and setup everything for new analysis."""
         self.lir_function = lir_function  # Function low-level representation
-        self.mir_module = mir_function.module    # Current module's IR
+        self.mir_module = None #mir_function.module    # Current module's IR
         self.mir_function = mir_function
 
         self.nv_regs = list() # Non-volatile registers list
@@ -67,32 +67,38 @@ class IdiomAnalyzer(object):
         """..."""
         return (value + 2**31) % 2**32 - 2**31 # WTF?
 
-    @abc.abstractmethod
+    def perform_phase0_analysis(self):
+        """Execute the basic idiom analysis on current function previous to MIR
+        generation.
+
+        """
+        # Add any prior action.
+        self._perform_phase0_analysis()
+        # Add any post action.
+
     def perform_phase1_analysis(self):
         """Execute the basic idiom analysis on current function previous to MIR
         generation.
 
         """
-        # Perform a series of analysis which will try locate regular
-        # instructions inserted by the compilerer and/or the optimizer.
-        #
-        # Along the execution of these steps, we'll start recovering
-        # information about the compiled code which will facilitate the
-        # reconstruction of the source code.
-        #
-        # To do that, we'll process the assembly instructions and it's
-        # references and store them in a high-level intermediate
-        # representation to easy further analysis and final reconstruction.
-        #
-        return
+        # This is used when a function is being analyzed to determine minimal
+        # information about it but no detailed information or analysis are
+        # necessary.
 
-    @abc.abstractmethod
+        # Add any prior action.
+        self.mir_module = self.mir_function.module    # Current module's IR
+
+        self._perform_phase1_analysis()
+        # Add any post action.
+
     def perform_phase2_analysis(self):
         """Execute the basic idiom analysis on current function after to MIR
         generation procedure.
 
         """
-        return
+        # Add any prior action.
+        self._perform_phase2_analysis()
+        # Add any post action.
 
     @abc.abstractmethod
     def detect_prologue(self):
