@@ -690,6 +690,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                             # instruction(s) using the registers involved.
                             if reg not in self.return_registers:
                                 self.return_registers.append(reg)
+
                             print "[!] Found return reg R%d at 0x%X" % (reg, current_address)
 
                             self.lir_function.du_chain[current_address][reg].append(blr.address)
@@ -729,17 +730,64 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
             raise PowerPc32GccIdiomAnalyzerException(err)
 
     def detect_simple_argument_registers(self):
-        """..."""
+        """Detect registers used for argument passing to the current function.
+        This is a most simple (to say the least) version possile.
+
+        """
         try:
+
+            candidates = list(self.iset.ARGUMENT_REGISTERS) # copy the list
+            params = list()
+
             # Iterate through every instruction in the first basic block
-            for inst in self.lir_function[0]:
+            for lir_inst in self.lir_function[0]:
 
                 # Avoid the instruction if it's part of a previously
                 # detected idiom
-                if inst.analyzed:
+                if lir_inst.analyzed:
                     continue
 
-                if inst.
+                # Iterate until we run into a branch instruction becuase the
+                # registers in PowerPC used to pass parameters are reused on
+                # inner calls (not like Sparc or Xtensa which support registers
+                # window).
+                if self.is_call_instruction(lir_inst):
+                    break
+
+                for lir_op_idx, lir_op in enumerate(lir_inst.operands):
+
+                    if not lir_op.is_reg_n(candidates):
+                        continue
+
+                    if self.__is_destination_operand(lir_inst, lir_op_idx):
+                        print "found clash... %s at 0x%X (now %r)" % (
+                            self.iset.GPR_NAMES[lir_op.value],
+                            lir_inst.address, candidates)
+                        if lir_op.value in candidates:
+                            idx = candidates.index(lir_op.value)
+                            [candidates.pop() for x in range(len(candidates[idx : ]))]
+                            #candidates = candidates[
+                            #    candidates.index(lir_op.value) -1 : : -1]
+                            #candidates.reverse()
+                            print "Remaining candidates", candidates
+
+                            continue
+
+                    #if lir_function.
+
+                    print "Got %s at 0x%08X (idx %d)" % (
+                        self.iset.GPR_NAMES[lir_op.value], lir_inst.address,
+                        lir_op_idx)
+
+                    # We've found a new parameter register so we add it to the
+                    # final list in case it didn't exist yet (this is not the
+                    # usual case but a custom made code could use, i.e. r3
+                    # twice and the second time we find it could add a
+                    # ducplicate to the list).
+                    if lir_op.value not in params:
+                        params.append(lir_op.value)
+
+            print "params = %r" % params
 
         except MiddleIrException, err:
             print format_exc() + '\n'
@@ -763,58 +811,47 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         }
         return changes.get(lir_op_idx, None) in lir_inst.features
 
-    def detect_simple_argument_registers(self):
-        """Detect registers used for argument passing to the current function.
-        This is a simple (to say the least) version possile.
-
-        """
+    def _handle_store_argument_registers(self, lir_inst):
+        """..."""
         try:
-            # Iterate through every instruction in the first basic block
-            for inst in self.lir_function[0]:
+            # Look in the first basic block for an instruction
+            # sequence like the following:
+            #
+            # .text:018000C4 stw     %r3, 8(%r31)
+            # .text:018000C8 stw     %r4, 0xC(%r31)
+            #
+            if not lir_inst.type == self.iset.PPC_stw:
+                return False
 
-                # Avoid the instruction if it's part of a previously
-                # detected idiom
-                if inst.analyzed:
-                    continue
+            # Check that destination is the stack.
+            if lir_inst[0].is_reg_n(self.iset.ARGUMENT_REGISTERS) and \
+                inst[1].is_displ and inst[1].is_displ_n(
+                    self.lir_function.stack_access_registers):
 
-                # Look in the first basic block for an instruction
-                # sequence like the following:
+                param_number = \
+                    self.iset.ARGUMENT_REGISTERS.index(inst[0].value)
+
+                self.param_regs[param_number] = [inst[0].value, ]
+                inst.analyzed = True
+
                 #
-                # .text:018000C4 stw     %r3, 8(%r31)
-                # .text:018000C8 stw     %r4, 0xC(%r31)
+                # Add a new local variable to the symbols list.
                 #
-                if not inst.type == self.iset.PPC_stw:
-                    continue
+                func_address = self.lir_function.start_address
+                mir_inst_builder = \
+                    self.mir_function.get_instruction_builder_by_address(
+                        func_address, False)
 
-                # Check that destination is the stack.
-                if inst[0].is_reg_n(self.iset.ARGUMENT_REGISTERS) and \
-                    inst[1].is_displ and \
-                    inst[1].is_displ_n(self.lir_function.stack_access_registers):
+                address = inst[1].value[1]
+                var_type_preffix = "i" # TODO / FIXME : Detect the argument type.
+                var_name = "%(var_type_preffix)s_0x%(address)x" % vars()
+                mir_inst = mir_inst_builder.alloca(MiddleIrTypeInt(), None, var_name)
 
-                    param_number = \
-                        self.iset.ARGUMENT_REGISTERS.index(inst[0].value)
+                self.current_symbols_table.add_local_variable(
+                    address, var_name, mir_inst)
 
-                    self.param_regs[param_number] = [inst[0].value, ]
-                    inst.analyzed = True
-
-                    #
-                    # Add a new local variable to the symbols list.
-                    #
-                    func_address = self.lir_function.start_address
-                    mir_inst_builder = \
-                        self.mir_function.get_instruction_builder_by_address(
-                            func_address, False)
-
-                    address = inst[1].value[1]
-                    var_type_preffix = "i" # TODO / FIXME : Detect the argument type.
-                    var_name = "%(var_type_preffix)s_0x%(address)x" % vars()
-                    mir_inst = mir_inst_builder.alloca(MiddleIrTypeInt(), None, var_name)
-
-                    self.current_symbols_table.add_local_variable(
-                        address, var_name, mir_inst)
-
-                    print "    Parameter register (simple) detected: %s" % \
-                            self.iset.GPR_NAMES[inst[0].value]
+                print "    Parameter register (simple) detected: %s" % \
+                        self.iset.GPR_NAMES[inst[0].value]
 
         except MiddleIrException, err:
             print format_exc() + '\n'
