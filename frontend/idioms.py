@@ -42,14 +42,12 @@ class IdiomAnalyzer(object):
     @property
     def mir_function(self):
         """Get a reference to all the symbol tables analyzed."""
-        print "---> asking for", self._mir_function
         return self._mir_function
 
     @mir_function.setter
     def mir_function(self, _mir_function):
         """Store a reference to all the symbols tables analyzed."""
         self._mir_function = _mir_function
-        print "---> just got", self._mir_function
 
     @property
     def symbols_table(self):

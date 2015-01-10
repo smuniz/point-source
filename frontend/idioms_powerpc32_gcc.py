@@ -56,6 +56,9 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         #print "Detecting simple arguments register (phase 0)"
         self.detect_simple_argument_registers()
 
+        #print "Detecting return registers."
+        self.detect_return_registers()
+
     def _perform_phase1_analysis(self):
         """Execute the basic idiom analysis on current function previous to MIR
         generation.
@@ -64,27 +67,11 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         #print "Creating terporary local variables holding arguments."
         self.__create_local_variables_for_arguments()
 
-        #print "Detecting return registers."
-        self.detect_return_registers()
-
         #print "Detecting arguments copy."
         self.detect_arguments_copy()
 
         #print "Detecting 4 bytes load idioms."
         self.detect_load_word()
-
-        #self.create_local_symbols()
-
-    def create_local_symbols(self):
-        """..."""
-        for lir_basic_block in self.lir_function:
-            for lir_instruction in lir_basic_block:
-
-                mir_inst_builder = \
-                    self.mir_function.get_instruction_builder_by_address(
-                        lir_instruction.address, True)
-
-                #mir_inst_builder.
 
     def _perform_phase2_analysis(self):
         """Execute the basic idiom analysis on current function after to MIR
@@ -702,7 +689,6 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                             # reflect the use of the registers in use for this
                             # operation.
                             self.lir_function.du_chain[current_address][reg].append(blr.address)
-
                             self.lir_function.ud_chain[blr.address][reg] = current_address
 
                             # Dont' care about this register anymore on the
@@ -711,9 +697,16 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                             # cases.
                             ret_regs_list.remove(reg)
 
-        print "    Return register(s) found : %s" % \
-            ", ".join([self.iset.GPR_NAMES[r] \
-                for r in self.lir_function.return_registers])
+                            # TODO / FIXME : Correctly detect type for return.
+                            self.lir_function.return_type = 1
+
+        if len(ret_regs_list) > 0:
+            print "    Return register(s) found : %s (type %d)" % (
+                ", ".join([self.iset.GPR_NAMES[r] \
+                    for r in self.lir_function.return_registers]),
+                    self.lir_function.return_type)
+        else:
+            print "    Return register(s) could not be detected."
 
     def __create_local_variables_for_arguments(self):
         """..."""
@@ -788,16 +781,30 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     # twice and the second time we find it could add a
                     # ducplicate to the list).
                     if lir_op.value not in params:
-                        params.append(lir_op.value)
+                        reg = lir_op.value
+
+                        params.append(reg)
                         
                         print "    Parameter register (simple) detected: %s" % \
-                            self.iset.reg_name(lir_op.value)
+                            self.iset.reg_name(reg)
+                        # TODO / FIXME : Determine parameter types.
                         #if self._handle_store_argument_registers(lir_inst): 
 
                         #    print "    Parameter register (simple) detected: %s" % \
                         #        self.iset.reg_name(lir_op.value)
                         #else:
                         #    print "    No parameter detected via 'simple' method."
+
+                        #
+                        # Add empty UD and DU chains for this instruction given that it doesn't
+                        # contain any GPR so chains were never created in it.
+                        #
+                        du = self.lir_function.du_chain[self.lir_function.start_address].setdefault(reg, list())
+                        ## Update DU chains for the ret instruction to
+                        ## reflect the use of the registers in use for this
+                        ## operation.
+                        du.append(lir_inst.address)
+                        ud = self.lir_function.ud_chain[lir_inst.address].setdefault(reg, self.lir_function.start_address)
 
         except MiddleIrException, err:
             print format_exc() + '\n'

@@ -147,23 +147,16 @@ class FrontEnd(object):
         #
         # Initialize internal MIR members for further usage.
         #
-        function_name = self.lir_function.name
-
-        # TODO / FIXME: Correctly detect return type.
-        # Create basic return types in order to create the function skeleton.
-        # At the moment we just create generic (integer) types with the right
-        # amount of return values.
-        self.return_type = 1
-
-        if self.return_type == 0:
+        if self.lir_function.return_type == 0:
             return_type = MiddleIrTypeVoid()
-        elif self.return_type == 1:
+        elif self.lir_function.return_type == 1:
             return_type = MiddleIrTypeInt()
         else:
-            raise FrontEndException("Unknown return type (%d)" % \
-                self.return_type)
+            raise FrontEndException("Unknown return type (%r)" % \
+                self.lir_function.return_type)
 
-        self.mir_function = MiddleIrFunction.get(self.mir_module, function_name)
+        self.mir_function = MiddleIrFunction.get(self.mir_module, self.lir_function.name)
+
         if self.mir_function is not None:
             # Delete the previously created function and create a new one. This
             # is what the user requested so do it (definition might have
@@ -174,10 +167,12 @@ class FrontEnd(object):
 
         # Seems like the function doesn't already exists in our store so
         # we'll create a new one.
-        self.mir_function = MiddleIrFunction.new(self.mir_module, function_name, return_type)
+        param_regs = list()
+        for param_reg in self.lir_function.param_regs:
+            param_regs.append(MiddleIrTypeInt())
 
-        # TODO / FIXME : Determine parameter types.
-        #self.mir_function.arguments([MiddleIrTypeInt(), MiddleIrTypeInt()])
+        self.mir_function = MiddleIrFunction.new(
+            self.mir_module, self.lir_function.name, return_type, param_regs)
 
         # Set the default calling convention.
         #self.mir_function.set_calling_convention(CALL_CONV_C)
@@ -237,9 +232,9 @@ class FrontEnd(object):
 
             # TODO/FIXME: This is a horrible kludge!
             #
-            # We set this here because the phase 1 idiom analysis need to know
-            # basic block boundaries in order to obtain the instruction builder
-            # for specific instruction addresses.
+            # We set this here because the phase 0/1 idiom analysis need to
+            # know basic block boundaries in order to obtain the instruction
+            # builder for specific instruction addresses.
             #
             # Normally the basic block boundaries should be set according to
             # its instruction addresses.
@@ -431,19 +426,18 @@ class FrontEnd(object):
             self.idiom_analyzer.perform_phase0_analysis()
 
             #
-            # This is the first milestone on the analysis (depth 1)
-            #
-            if depth == 1:
-                print "A" * 30
-                return
-
-            #
             # Step x
             #
             # Initialize internal MIR members for further usage.
             #
             print "[+] Creating Middle level IR skeleton..."
             self.generate_mir_skeleton()
+
+            #
+            # This is the first milestone on the analysis (depth 1)
+            #
+            if depth == 1:
+                return
 
             #
             # Perform live analysis
@@ -470,7 +464,7 @@ class FrontEnd(object):
                 self.symbols_tables.symbols(self.lir_function.start_address)
 
             # Output LIR for debugging purposes.
-            #self.__dump_lir()
+            self.__dump_lir()
 
             #
             # Step x
@@ -548,6 +542,7 @@ class FrontEnd(object):
 
                 # Save the context for further usage.
                 cur_lir = self.lir_function 
+                cur_mir = self.mir_function
 
                 # Analyze the called function in order to obtain parameters and
                 # return registers information. This will procude a new LIR
@@ -557,6 +552,7 @@ class FrontEnd(object):
 
                 # Restore the context of the main function being analyzed.
                 self.lir_function = cur_lir
+                self.mir_function = cur_mir
 
                 lir_callee = self.lir_functions_cache.get(callee_address, None)
 

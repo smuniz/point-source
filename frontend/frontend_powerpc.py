@@ -230,6 +230,7 @@ class FrontEndPowerPc(FrontEnd):
 
                 # Using the retrieved LIR function now create a MIR function
                 # with the corresponding information.
+                """
                 mir_callee = MiddleIrFunction(lir_function.name, self.mir_module)
 
                 mir_callee.return_type = MiddleIrTypeVoid()
@@ -249,6 +250,7 @@ class FrontEndPowerPc(FrontEnd):
 
                 mir_inst = self.mir_inst_builder.call(
                     mir_callee, mir_callee_args)
+                """
 
         elif lir_inst.is_type(self.iset.PPC_balways):
             #

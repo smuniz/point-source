@@ -55,6 +55,10 @@ class LowLevelFunction(object):
 
         self.compiler_type = None #self.debugger.COMPILER_UNK
 
+        # Create basic return types in order to create the function skeleton.
+        # At the moment we just create generic (integer) types with the right
+        # amount of return values.
+        self.return_type = None
         self.return_registers = list()
 
     def add_prologue_address(self, address):
@@ -298,6 +302,9 @@ class LowLevelFunction(object):
 
             for lir_inst in lir_bb:
 
+                self.du_chain.setdefault(lir_inst.address, dict())
+                self.ud_chain.setdefault(lir_inst.address, dict())
+
                 if self.iset.is_branch(lir_inst.type):
                     # TODO / FIXME : This is a kludge for PPC.
                     #
@@ -333,10 +340,15 @@ class LowLevelFunction(object):
                             prev_reg_def[op] = reg_defs[op]
                         reg_defs[op] = lir_inst.address
 
-                        defs = self.du_chain.setdefault(lir_inst.address, dict())
+                        defs = self.du_chain.get(lir_inst.address, None)
+
+                        if defs is None:
+                            raise Exception(
+                                "Invalid DU chain detected for 0x%08X" % \
+                                lir_inst.address)
+
                         defs.setdefault(op, list())
 
-                        self.ud_chain.setdefault(lir_inst.address, dict())
                     else:
                         # Make use of original definition in cases where the
                         # same register is both source and destination operand.
@@ -360,9 +372,12 @@ class LowLevelFunction(object):
                             #
                             # Update use-def chain.
                             #
-                            uses = \
-                                self.ud_chain.setdefault(cur_address, dict())
+                            uses = self.ud_chain.get(cur_address, None)
 
+                            if uses is None:
+                                raise Exception(
+                                    "Invalid UD chain detected for 0x%08X" % \
+                                    cur_address)
                             uses[op] = def_address
 
     def __is_destination_operand(self, lir_inst, lir_op_idx):
