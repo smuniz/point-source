@@ -446,21 +446,6 @@ class FrontEnd(object):
             self.generate_mir_skeleton()
 
             #
-            # Step x
-            #
-            # Clean any internal state from previous analysis.
-            #
-            print "[+] Initializing idioms analyser..."
-            self.idiom_analyzer.mir_function = self.mir_function
-            #self.idiom_analyzer.mir_module = self.mir_function.module
-            #self.idiom_analyzer.init(
-            #    self.lir_function, self.mir_function, self.symbols_tables)
-
-            # Store the current symbol table to use.
-            self.current_symbols_table = \
-                self.symbols_tables.symbols(self.lir_function.start_address)
-
-            #
             # Perform live analysis
             #
             old_total = len(self.lir_functions_cache)
@@ -468,6 +453,21 @@ class FrontEnd(object):
 
             print "[+] Total functions added : %d" % (
                 len(self.lir_functions_cache) - old_total)
+
+            #
+            # Step x
+            #
+            # Clean any internal state from previous analysis.
+            #
+            print "[+] Initializing idioms analyser..."
+            #self.idiom_analyzer.mir_function = self.mir_function
+            #self.idiom_analyzer.mir_module = self.mir_function.module
+            self.idiom_analyzer.init(
+                self.lir_function, self.mir_function, self.symbols_tables)
+
+            # Store the current symbol table to use.
+            self.current_symbols_table = \
+                self.symbols_tables.symbols(self.lir_function.start_address)
 
             # Output LIR for debugging purposes.
             #self.__dump_lir()

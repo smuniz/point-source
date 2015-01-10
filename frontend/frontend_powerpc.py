@@ -254,14 +254,14 @@ class FrontEndPowerPc(FrontEnd):
             #
             # Instruction : blr
             #
-            if len(self.idiom_analyzer.return_registers) == 0:
+            if len(self.lir_function.return_registers) == 0:
                 # Function does not return any value (prototype void).
                 mir_inst = self.mir_inst_builder.ret(None)
 
-            elif len(self.idiom_analyzer.return_registers) == 1:
+            elif len(self.lir_function.return_registers) == 1:
                 # Function returns a value (prototype of basic type).
                 # Obtain return registers.
-                ret_reg = self.idiom_analyzer.return_registers[0]
+                ret_reg = self.lir_function.return_registers[0]
 
                 op_address = self.lir_function.ud_chain[address][ret_reg]
 
@@ -282,7 +282,7 @@ class FrontEndPowerPc(FrontEnd):
             else:  # 2 or more (types bigger than built-ins)
                 raise FrontEndPowerPcException(
                     "Unsupported multiple return values %s" % \
-                    self.idiom_analyzer.return_registers)
+                    self.lir_function.return_registers)
 
         else:
             raise FrontEndPowerPcException(

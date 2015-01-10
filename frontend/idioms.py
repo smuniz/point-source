@@ -21,8 +21,14 @@ class IdiomAnalyzer(object):
     def init(self, lir_function, mir_function, symbols_table):
         """Clean any internal state and setup everything for new analysis."""
         self.lir_function = lir_function  # Function low-level representation
-        self.mir_module = None #mir_function.module    # Current module's IR
+
         self.mir_function = mir_function
+
+        # Current module's IR
+        if self.mir_function is not None:
+            self.mir_module = mir_function.module
+        else:
+            self.mir_module = None
 
         # Current architectures instruction set to work with.
         self.iset = self.debugger.instruction_set
