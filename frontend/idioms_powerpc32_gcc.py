@@ -805,7 +805,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         ## operation.
                         du.append(lir_inst.address)
                         ud = self.lir_function.ud_chain[lir_inst.address].setdefault(reg, self.lir_function.start_address)
-                        #print "A" * 40, self.lir_function
+                        print "A" * 40, self.lir_function
 
         except MiddleIrException, err:
             print format_exc() + '\n'

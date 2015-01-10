@@ -244,7 +244,8 @@ class FrontEndPowerPc(FrontEnd):
                     mir_callee.set_argument_name(0, "arg%s" % arg_index)
                 """
                 du_chain_regs = lir_callee.du_chain[lir_callee.start_address].keys()
-                self.lir_function.update_chains(du_chain_regs, lir_inst.address)
+                self.lir_function.update_chains(
+                    du_chain_regs, lir_inst.address, forward=False)
 
                 mir_callee_args = list()
 

@@ -288,30 +288,44 @@ class LowLevelFunction(object):
         """Store the instruction set to use with the current architecture."""
         self._instruction_set = i_set
 
-    def update_chains(self, lir_ops_values, address):
+    def __iterate_instructions(self, forward=True):
+        if forward:
+            iterable_bb = self
+        else:
+            iterable_bb = reversed(self)
+
+        for lir_basic_block in iterable_bb:
+            if forward:
+                iterable_inst = lir_basic_block
+            else:
+                iterable_inst = reversed(lir_basic_block)
+
+            for lir_inst in iterable_inst:
+                yield lir_inst
+
+    def update_chains(self, lir_ops_values, address, forward=True):
         """Update both DU and UD chains for a given operand prior to the
         specified address.
         
         """
 
-        for lir_basic_block in reversed(self):
-            for lir_inst in reversed(lir_basic_block):
-                if lir_inst.address >= address:
-                    continue
+        for lir_inst in self.__iterate_instructions():
+            if lir_inst.address >= address:
+                continue
 
-                for lir_op_idx, lir_op in enumerate(lir_inst):
-                    if lir_op.is_reg_n(lir_ops_values):
-                        #if self.__is_destination_operand(lir_inst, lir_op_idx):
-                        reg = lir_op.value
-                        #print "Found reg %d match at 0x%08X -> 0x%08X" % (
-                        #    reg, lir_inst.address, address)
-                        
-                        # Proceed to update DU chain.
-                        du = self.du_chain[lir_inst.address].setdefault(reg, list())
-                        du.append(address)
+            for lir_op_idx, lir_op in enumerate(lir_inst):
+                if lir_op.is_reg_n(lir_ops_values):
+                    #if self.__is_destination_operand(lir_inst, lir_op_idx):
+                    reg = lir_op.value
+                    #print "Found reg %d match at 0x%08X -> 0x%08X" % (
+                    #    reg, lir_inst.address, address)
+                    
+                    # Proceed to update DU chain.
+                    du = self.du_chain[lir_inst.address].setdefault(reg, list())
+                    du.append(address)
 
-                        ud = self.ud_chain[address].setdefault(reg, lir_inst.address)
-                        return
+                    ud = self.ud_chain[address].setdefault(reg, lir_inst.address)
+                    return
 
     def generate_chains(self):
         """
