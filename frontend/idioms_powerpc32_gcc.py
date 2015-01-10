@@ -323,7 +323,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 # we'll use it to create the 'return' instruction
                 # when translating to MIR.
 
-                self.ret_to_caller = True
+                self.lir_function.ret_to_caller = True
                 print "    Function returns to caller."
 
                 temp_lr_reg = -1
@@ -336,7 +336,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 # lwz     %r0, 4(%r11)
                 # ...
                 # mtlr    %r0
-                if not self.lir_function.leaf_procedure and self.ret_to_caller:
+                if not self.lir_function.leaf_procedure and self.lir_function.ret_to_caller:
 
                     # Check the last basic block except blr (last instruction).
                     # TODO / FIXME : Check all the ending basic blocks, not
@@ -362,7 +362,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
             else:
                 # Indicate that the current function doesn't perform the common
                 # return-to-caller operation.
-                self.ret_to_caller = False
+                self.lir_function.ret_to_caller = False
                 print "    Warning: Function does NOT return to caller."
 
             # STEP 2
@@ -390,7 +390,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         prologue_block.append(inst)
 
                         print "    Stack restoration style: IOS" 
-                        self.stack_restore = "IOS"
+                        self.lir_function.stack_restore = "IOS"
                         
                         # Additional verification
                         if len(inst) == 3:
@@ -439,7 +439,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                             prologue_block.append(inst)
 
                             restore_stages_found    += 1
-                            self.stack_restore       = "Linux"
+                            self.lir_function.stack_restore       = "Linux"
 
                             print "    Stack restoration style: linux"
 
@@ -494,7 +494,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                             prologue_block.append(inst)
 
                             restore_stages_found    += 1
-                            self.stack_restore       = "Linux"
+                            self.lir_function.stack_restore       = "Linux"
 
                             print "    Stack restoration style: GCC PowerPC-ELF"
 
@@ -576,13 +576,13 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
 
                     # Store the registers numbers used as non-volatile.
                     if multiple_nv_reg is False:
-                        self.nv_regs = range(inst[0].value, inst[0].value + 1)
+                        self.lir_function.nv_regs = range(inst[0].value, inst[0].value + 1)
                     else:
                         # TODO / FIXME : This is probably WRONG !!!
-                        self.nv_regs = [inst[0].value, self.iset.TOTAL_GPR]
+                        self.lir_function.nv_regs = [inst[0].value, self.iset.TOTAL_GPR]
 
                     inst.analyzing = True
-                    print "    Non-volatile registers detected:", self.nv_regs
+                    print "    Non-volatile registers detected:", self.lir_function.nv_regs
 
                     #
                     # Now that non-volatile registers are known, find their
@@ -600,7 +600,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                             restore_inst = self.iset.PPC_lwz
 
                         if inst.type == restore_inst and \
-                            inst[0].is_reg_n(self.nv_regs[0]):
+                            inst[0].is_reg_n(self.lir_function.nv_regs[0]):
                             print "    Non-volatile registers restoration " \
                                     "found."
                             inst.analyzed = True
@@ -613,7 +613,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         """Detect registers used as retun values of the current function.
 
         """
-        if not self.ret_to_caller:
+        if not self.lir_function.ret_to_caller:
             print "    Return registers not found : Function does not return"
             return
 
@@ -693,8 +693,8 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                             # usage and then update the UD and DU chains of
                             # both the return instruction and the
                             # instruction(s) using the registers involved.
-                            if reg not in self.return_registers:
-                                self.return_registers.append(reg)
+                            if reg not in self.lir_function.return_registers:
+                                self.lir_function.return_registers.append(reg)
 
                             #print "[!] Found return reg R%d at 0x%X" % (reg, current_address)
 
@@ -713,7 +713,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
 
         print "    Return register(s) found : %s" % \
             ", ".join([self.iset.GPR_NAMES[r] \
-                for r in self.return_registers])
+                for r in self.lir_function.return_registers])
 
     def __create_local_variables_for_arguments(self):
         """..."""
@@ -845,7 +845,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
             param_number = \
                 self.iset.ARGUMENT_REGISTERS.index(lir_inst[0].value)
 
-            self.param_regs[param_number] = [lir_inst[0].value, ]
+            self.lir_function.param_regs[param_number] = [lir_inst[0].value, ]
             lir_inst.analyzed = True
 
             #
@@ -894,7 +894,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 #
                 if inst.type == self.iset.PPC_mr and \
                     inst[0].is_reg and \
-                    inst[0].value in self.nv_regs and \
+                    inst[0].value in self.lir_function.nv_regs and \
                     inst[1].is_reg and \
                     inst[1].value >= self.iset.GPR3 and \
                     inst[1].value <= self.iset.GPR10:
@@ -903,7 +903,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     #       any of those param registers is used immediately
                     #       before the function call... Just to make sure.
 
-                    #self.param_regs[inst[1].value] = inst[0].value
+                    #self.lir_function.param_regs[inst[1].value] = inst[0].value
                     raise Exception("FIXME : detect_arguments_copy")
                     inst.analyzed = True
 
@@ -1200,7 +1200,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         # TODO / FIXME: Improve this "analisys".
         print "    Guessing compiler...",
 
-        if self.stack_restore in ["IOS", "Linux"]:
+        if self.lir_function.stack_restore in ["IOS", "Linux"]:
 
             compiler_type = self.debugger.COMPILER_GNU
             self.set_compiler_type(compiler_type)

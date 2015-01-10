@@ -42,6 +42,21 @@ class LowLevelFunction(object):
         self.prologue_addresses = list()
         self.epilogue_addresses = list()
 
+        # Non-volatile registers list.
+        self.nv_regs = list()
+
+        # Regsiters used as functions arguments.
+        self.param_regs = dict()
+
+        # Indicate wheather the function returns to its caller or not.
+        self.ret_to_caller = False
+
+        self.stack_restore = "Unknown"
+
+        self.compiler_type = None #self.debugger.COMPILER_UNK
+
+        self.return_registers = list()
+
     def add_prologue_address(self, address):
         """Mark the specified address as part of the function prologue and
         remove it from the list of statements to analyze.

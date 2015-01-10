@@ -24,14 +24,6 @@ class IdiomAnalyzer(object):
         self.mir_module = None #mir_function.module    # Current module's IR
         self.mir_function = mir_function
 
-        self.nv_regs = list() # Non-volatile registers list
-        self.param_regs = dict() # Regsiters used as functions arguments
-        self.ret_to_caller = False
-        self.stack_size = 0
-        self.stack_restore = "Unknown"
-
-        self.compiler_type = self.debugger.COMPILER_UNK
-
         # Current architectures instruction set to work with.
         self.iset = self.debugger.instruction_set
 
@@ -41,7 +33,17 @@ class IdiomAnalyzer(object):
         self.current_symbols_table = \
             symbols_manager.symbols(lir_function.start_address)
 
-        self.return_registers = list()
+    @property
+    def mir_function(self):
+        """Get a reference to all the symbol tables analyzed."""
+        print "---> asking for", self._mir_function
+        return self._mir_function
+
+    @mir_function.setter
+    def mir_function(self, _mir_function):
+        """Store a reference to all the symbols tables analyzed."""
+        self._mir_function = _mir_function
+        print "---> just got", self._mir_function
 
     @property
     def symbols_table(self):
@@ -147,7 +149,7 @@ class IdiomAnalyzer(object):
         current binary code is unknown or not.
 
         """
-        return self.compiler_type == self.debugger.COMPILER_UNK
+        return self.lir_function.compiler_type == self.debugger.COMPILER_UNK
 
     def detect_compiler(self):
         """Obtain the name and type of the compiler used to generate the code
@@ -158,17 +160,17 @@ class IdiomAnalyzer(object):
         """
         # Let the debugger try first and check if the compiler was successfully
         # detected.
-        self.compiler_type = self.debugger.get_default_compiler()
+        self.lir_function.compiler_type = self.debugger.get_default_compiler()
 
         if self.is_compiler_unknown():
             # Try to guess the compiler
             if not self.guess_compiler_type():
                 print "Unsupported %s compiler" % \
-                    self.debugger.get_compiler_name(self.compiler_type)
+                    self.debugger.get_compiler_name(self.lir_function.compiler_type)
                 return False
 
         print "    Compiler detected: %s" % \
-            self.debugger.get_compiler_name(self.compiler_type)
+            self.debugger.get_compiler_name(self.lir_function.compiler_type)
 
         return True
 
