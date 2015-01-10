@@ -190,6 +190,7 @@ class FrontEndPowerPc(FrontEnd):
 
         address = lir_inst.address
 
+        print "lir inst b = %s" % lir_inst
         if lir_inst.is_type(self.iset.PPC_b):
             #
             # Instruction : b
@@ -215,7 +216,7 @@ class FrontEndPowerPc(FrontEnd):
 
                 # Get local label statement
                 #mir_inst.set(branch_address)
-                pass
+                raise FrontEndPowerPcException("GOTO statements unimplemented")
             else:
                 #
                 # Create a function call expression and add it to the IR.
@@ -250,11 +251,11 @@ class FrontEndPowerPc(FrontEnd):
                 mir_callee_args = list()
 
                 # TODO : Enhance this code when sober and/or awake.
-                print self.lir_function
+                #print self.lir_function
                 for arg_idx, (reg_arg, reg_arg_address) in \
                     enumerate(self.lir_function.ud_chain[address].iteritems()):
-                    print "arg %d (0x%08X) reg %d" % (
-                        arg_idx, reg_arg_address, reg_arg)
+                    #print "arg %d (0x%08X) reg %d" % (
+                    #    arg_idx, reg_arg_address, reg_arg)
                     mir_callee_args.append(
                         self.current_symbols_table.symbols[reg_arg_address].item
                         )
@@ -273,6 +274,8 @@ class FrontEndPowerPc(FrontEnd):
             #
             # Instruction : blr
             #
+            print "A" * 50
+            print "=--==-=-=->>>> blr %d" % len(self.lir_function.return_registers)
             if len(self.lir_function.return_registers) == 0:
                 # Function does not return any value (prototype void).
                 mir_inst = self.mir_inst_builder.ret(None)
@@ -309,6 +312,7 @@ class FrontEndPowerPc(FrontEnd):
                 "on '%s' group." % (
                     lir_inst, lir_inst.address, lir_inst.group_name))
 
+        print " OUT" * 10
         return mir_inst
 
     def on_conditional_branch(self, lir_inst):

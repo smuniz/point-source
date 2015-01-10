@@ -309,23 +309,35 @@ class LowLevelFunction(object):
         
         """
 
-        for lir_inst in self.__iterate_instructions():
-            if lir_inst.address >= address:
-                continue
+        #for lir_inst in self.__iterate_instructions():
+        if forward:
+            iterable_bb = self
+        else:
+            iterable_bb = reversed(self)
 
-            for lir_op_idx, lir_op in enumerate(lir_inst):
-                if lir_op.is_reg_n(lir_ops_values):
-                    #if self.__is_destination_operand(lir_inst, lir_op_idx):
-                    reg = lir_op.value
-                    #print "Found reg %d match at 0x%08X -> 0x%08X" % (
-                    #    reg, lir_inst.address, address)
-                    
-                    # Proceed to update DU chain.
-                    du = self.du_chain[lir_inst.address].setdefault(reg, list())
-                    du.append(address)
+        for lir_basic_block in iterable_bb:
+            if forward:
+                iterable_inst = lir_basic_block
+            else:
+                iterable_inst = reversed(lir_basic_block)
 
-                    ud = self.ud_chain[address].setdefault(reg, lir_inst.address)
-                    return
+            for lir_inst in iterable_inst:
+                if lir_inst.address >= address:
+                    continue
+
+                for lir_op_idx, lir_op in enumerate(lir_inst):
+                    if lir_op.is_reg_n(lir_ops_values):
+                        #if self.__is_destination_operand(lir_inst, lir_op_idx):
+                        reg = lir_op.value
+                        #print "Found reg %d match at 0x%08X -> 0x%08X" % (
+                        #    reg, lir_inst.address, address)
+                        
+                        # Proceed to update DU chain.
+                        du = self.du_chain[lir_inst.address].setdefault(reg, list())
+                        du.append(address)
+
+                        ud = self.ud_chain[address].setdefault(reg, lir_inst.address)
+                        return
 
     def generate_chains(self):
         """

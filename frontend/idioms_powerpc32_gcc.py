@@ -288,6 +288,9 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         try:
             # Check the last basic block for the prescense of the epilogue.
             # TODO / FIXME : Check all the ending basic blocks, not just 1.
+            # This is wrong cause the blr could be inside a loop and the last
+            # basic block in the function could be the loop's restart instead
+            # of the blr.
             bb = self.lir_function[-1]
 
             # STEP 1.A
@@ -311,7 +314,8 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 # when translating to MIR.
 
                 self.lir_function.ret_to_caller = True
-                print "    Function returns to caller."
+                print "    Function returns to caller (return at 0x%08X)." % \
+                    inst.address
 
                 temp_lr_reg = -1
 
@@ -623,7 +627,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
 
         if len(blr_list) == 0:
             raise PowerPc32GccIdiomAnalyzerException(
-                "Not return instruction found ")
+                "Not return instruction found " + ("A" * 40))
 
         # Iterate through every return instruction found to validate the
         # findings (they all must match).
@@ -706,6 +710,8 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     for r in self.lir_function.return_registers]),
                     self.lir_function.return_type)
         else:
+            # Set no return type.
+            self.lir_function.return_type = 0
             print "    Return register(s) could not be detected."
 
     def __create_local_variables_for_arguments(self):
@@ -805,7 +811,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         ## operation.
                         du.append(lir_inst.address)
                         ud = self.lir_function.ud_chain[lir_inst.address].setdefault(reg, self.lir_function.start_address)
-                        print "A" * 40, self.lir_function
+                        #print "[+] Callee LIR dump ------------------\n%s" % self.lir_function
 
         except MiddleIrException, err:
             print format_exc() + '\n'

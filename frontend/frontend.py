@@ -280,9 +280,12 @@ class FrontEnd(object):
                 # Avoid already detected instructions in idioms and other
                 # analysis.
                 if lir_inst.analyzed:
-                    #print "---> inst at 0x%X was already analyzed..." \
-                    #    "skipping" % lir_inst.address
+                    print "---> inst at 0x%X was already analyzed..." \
+                        "skipping" % lir_inst.address
                     continue
+                else:
+                    print "---> inst at 0x%X being analyzed." % \
+                        lir_inst.address
 
                 #
                 # This step is very important. This is where most of the LIR 
