@@ -288,6 +288,31 @@ class LowLevelFunction(object):
         """Store the instruction set to use with the current architecture."""
         self._instruction_set = i_set
 
+    def update_chains(self, lir_ops_values, address):
+        """Update both DU and UD chains for a given operand prior to the
+        specified address.
+        
+        """
+
+        for lir_basic_block in reversed(self):
+            for lir_inst in reversed(lir_basic_block):
+                if lir_inst.address >= address:
+                    continue
+
+                for lir_op_idx, lir_op in enumerate(lir_inst):
+                    if lir_op.is_reg_n(lir_ops_values):
+                        #if self.__is_destination_operand(lir_inst, lir_op_idx):
+                        reg = lir_op.value
+                        #print "Found reg %d match at 0x%08X -> 0x%08X" % (
+                        #    reg, lir_inst.address, address)
+                        
+                        # Proceed to update DU chain.
+                        du = self.du_chain[lir_inst.address].setdefault(reg, list())
+                        du.append(address)
+
+                        ud = self.ud_chain[address].setdefault(reg, lir_inst.address)
+                        return
+
     def generate_chains(self):
         """
         Generate def-use and use-def chains for the low level IR so further

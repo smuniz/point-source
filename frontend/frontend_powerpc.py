@@ -222,16 +222,16 @@ class FrontEndPowerPc(FrontEnd):
                 #
                 # Make sure that the've already analyzed the callee function
                 # and we have it in the cache.
-                lir_function = self.lir_functions_cache.get(
+                lir_callee = self.lir_functions_cache.get(
                     branch_address, None)
 
-                if lir_function is None:
+                if lir_callee is None:
                     return None
 
+                """
                 # Using the retrieved LIR function now create a MIR function
                 # with the corresponding information.
-                """
-                mir_callee = MiddleIrFunction(lir_function.name, self.mir_module)
+                mir_callee = MiddleIrFunction(lir_callee.name, self.mir_module)
 
                 mir_callee.return_type = MiddleIrTypeVoid()
                 #mir_callee.arguments = [MiddleIrTypeChar()] * 15
@@ -242,15 +242,31 @@ class FrontEndPowerPc(FrontEnd):
                 # Assign a name to each argument of the function being called.
                 for arg_index, arg in enumerate(mir_callee.arguments):
                     mir_callee.set_argument_name(0, "arg%s" % arg_index)
-
-                # TODO : Obtain function arguments programatically.
-                mir_callee_args = [
-                    self.current_symbols_table.symbols[0x40].item,
-                    ]
-
-                mir_inst = self.mir_inst_builder.call(
-                    mir_callee, mir_callee_args)
                 """
+                du_chain_regs = lir_callee.du_chain[lir_callee.start_address].keys()
+                self.lir_function.update_chains(du_chain_regs, lir_inst.address)
+
+                mir_callee_args = list()
+
+                # TODO : Enhance this code when sober and/or awake.
+                print self.lir_function
+                for arg_idx, (reg_arg, reg_arg_address) in \
+                    enumerate(self.lir_function.ud_chain[address].iteritems()):
+                    print "arg %d (0x%08X) reg %d" % (
+                        arg_idx, reg_arg_address, reg_arg)
+                    mir_callee_args.append(
+                        self.current_symbols_table.symbols[reg_arg_address].item
+                        )
+
+                mir_callee = MiddleIrFunction.get(self.mir_module, lir_callee.name)
+
+                if mir_callee is not None:
+                    mir_inst = self.mir_inst_builder.call(
+                        mir_callee, mir_callee_args)
+                else:
+                    raise FrontEndPowerPcException(
+                        "Unable to get supposedly existing MIR function '%s'" % \
+                        lir_callee.name)
 
         elif lir_inst.is_type(self.iset.PPC_balways):
             #
