@@ -58,7 +58,7 @@ class LowLevelFunction(object):
         # Create basic return types in order to create the function skeleton.
         # At the moment we just create generic (integer) types with the right
         # amount of return values.
-        self.return_type = None
+        self.return_type = 0 # default return type (void)
         self.return_registers = list()
 
     def add_prologue_address(self, address):

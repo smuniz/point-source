@@ -64,9 +64,6 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         generation.
 
         """
-        #print "Creating terporary local variables holding arguments."
-        self.__create_local_variables_for_arguments()
-
         #print "Detecting arguments copy."
         #self.detect_arguments_copy()
 
@@ -530,7 +527,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         # And next is the restore operation for those registers at the last
         # basic block:
         #
-        # 80794E60 lmw %r28, 0x1A8+var_10(%sp)  ; restore %r27 to %r31 
+        # 80794E60 lmw %r27, 0x1A8+var_10(%sp)  ; restore %r27 to %r31 
         #                                       ; simultaneourly
         #
         try:
@@ -572,7 +569,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         # TODO / FIXME : This is probably WRONG !!!
                         self.lir_function.nv_regs = [inst[0].value, self.iset.TOTAL_GPR]
 
-                    inst.analyzing = True
+                    inst.analyzed = True
                     print "    Non-volatile registers detected:", self.lir_function.nv_regs
 
                     #
@@ -714,28 +711,6 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
             self.lir_function.return_type = 0
             print "    Return register(s) could not be detected."
 
-    def __create_local_variables_for_arguments(self):
-        """..."""
-        return # TODO / FIXME : remove this
-        try:
-            address = self.lir_function.start_address
-
-            mir_inst_builder = \
-                self.mir_function.get_instruction_builder_by_address(
-                    address, False)
-
-            # TODO / FIXME : Detect the argument type.
-            var_type_preffix = "i"
-            var_name = "%(var_type_preffix)s_0x%(address)x" % vars()
-            mir_inst = mir_inst_builder.alloca(MiddleIrTypeInt(), None, var_name)
-
-            # TODO / FIXME : Obtain this address programatically.
-            self.current_symbols_table.symbols[0xC] = mir_inst
-
-        except MiddleIrException, err:
-            print format_exc() + '\n'
-            raise PowerPc32GccIdiomAnalyzerException(err)
-
     def detect_simple_argument_registers(self):
         """Detect registers used for argument passing to the current function.
         This is a most simple (to say the least) version possile.
@@ -805,13 +780,21 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         # Add empty UD and DU chains for this instruction given that it doesn't
                         # contain any GPR so chains were never created in it.
                         #
-                        du = self.lir_function.du_chain[self.lir_function.start_address].setdefault(reg, list())
+                        du = self.lir_function.du_chain[
+                            self.lir_function.start_address].setdefault(
+                            reg, list())
                         ## Update DU chains for the ret instruction to
                         ## reflect the use of the registers in use for this
                         ## operation.
                         du.append(lir_inst.address)
-                        ud = self.lir_function.ud_chain[lir_inst.address].setdefault(reg, self.lir_function.start_address)
+                        ud = self.lir_function.ud_chain[
+                            lir_inst.address].setdefault(
+                            reg, self.lir_function.start_address)
                         #print "[+] Callee LIR dump ------------------\n%s" % self.lir_function
+
+                        param_number = self.iset.ARGUMENT_REGISTERS.index(reg)
+
+                        self.lir_function.param_regs[param_number] = [reg, ]
 
         except MiddleIrException, err:
             print format_exc() + '\n'

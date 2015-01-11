@@ -151,15 +151,23 @@ class FrontEndPowerPc(FrontEnd):
             pass
 
         elif lir_inst.is_type(self.iset.PPC_stw):
+            # Instruction : store word
 
-            # TODO / FIXME : Detect GPR3 as the first use of the first
-            # argument.
-            #arg = 
+            # We're about to store a value in the stack so we first check if
+            # the stack variable as been previously created and do it in case
+            # it didn't.
             if address not in self.current_symbols_table.symbols:
-                return None
+                mir_var = self._create_local_variable(address)
 
-            stack_alloc = self.current_symbols_table.symbols[address].item
-            mir_inst = self.mir_inst_builder.store(arg, stack_alloc)
+            # Use the newly created MIR viariable to use it in the store
+            # operation to fully represent the instruction.
+            rs_reg = lir_inst[0].value
+            src_addr = self.lir_function.ud_chain[address][rs_reg]
+            #rs = self.current_symbols_table.symbols[src_addr]
+
+            #print "=-=-=-> %s" % rs
+            #rs = self.current_symbols_table.symbol
+            #mir_inst = self.mir_inst_builder.store(rs, mir_var)
 
         elif lir_inst.is_type(self.iset.PPC_stwu):
             pass
@@ -190,7 +198,6 @@ class FrontEndPowerPc(FrontEnd):
 
         address = lir_inst.address
 
-        print "lir inst b = %s" % lir_inst
         if lir_inst.is_type(self.iset.PPC_b):
             #
             # Instruction : b
@@ -274,8 +281,6 @@ class FrontEndPowerPc(FrontEnd):
             #
             # Instruction : blr
             #
-            print "A" * 50
-            print "=--==-=-=->>>> blr %d" % len(self.lir_function.return_registers)
             if len(self.lir_function.return_registers) == 0:
                 # Function does not return any value (prototype void).
                 mir_inst = self.mir_inst_builder.ret(None)
@@ -312,7 +317,6 @@ class FrontEndPowerPc(FrontEnd):
                 "on '%s' group." % (
                     lir_inst, lir_inst.address, lir_inst.group_name))
 
-        print " OUT" * 10
         return mir_inst
 
     def on_conditional_branch(self, lir_inst):

@@ -168,7 +168,12 @@ class FrontEnd(object):
         # Seems like the function doesn't already exists in our store so
         # we'll create a new one.
         param_regs = list()
-        for param_reg in self.lir_function.param_regs:
+        address = self.lir_function.start_address
+        print "A" * 30
+        print self.lir_function.param_regs
+        for idx, param_reg in enumerate(self.lir_function.param_regs):
+            print "------- Argument %02d : %s" % (idx, param_reg)
+            #self.current_symbols_table.add_symbol(address, 
             param_regs.append(MiddleIrTypeInt())
 
         self.mir_function = MiddleIrFunction.new(
@@ -280,12 +285,12 @@ class FrontEnd(object):
                 # Avoid already detected instructions in idioms and other
                 # analysis.
                 if lir_inst.analyzed:
-                    print "---> inst at 0x%X was already analyzed..." \
-                        "skipping" % lir_inst.address
+                #    print "---> inst at 0x%X was already analyzed..." \
+                #        "skipping" % lir_inst.address
                     continue
-                else:
-                    print "---> inst at 0x%X being analyzed." % \
-                        lir_inst.address
+                #else:
+                #    print "---> inst at 0x%X being analyzed." % \
+                #        lir_inst.address
 
                 #
                 # This step is very important. This is where most of the LIR 
@@ -605,3 +610,26 @@ class FrontEnd(object):
 
             print "\t0x%(address)08X - %(arch)s %(group)15s " \
                   "(type %(inst_numb)3d) - %(inst_repr)-25s" % vars()
+
+    def _create_local_variable(self, address, update_symbols_table=True):
+        """Create a local variable for further usage."""
+        try:
+            mir_inst_builder = \
+                self.mir_function.get_instruction_builder_by_address(
+                    address, False)
+
+            var_type_preffix = "i"
+            var_name = "%(var_type_preffix)s_0x%(address)X" % vars()
+            mir_var = mir_inst_builder.alloca(
+                MiddleIrTypeInt(), None, var_name)
+
+            if update_symbols_table:
+                self.current_symbols_table.add_local_variable(
+                    address, var_name, mir_var)
+
+            return mir_var
+
+        except MiddleIrException, err:
+            print format_exc() + '\n'
+            raise PowerPc32GccIdiomAnalyzerException(err)
+
