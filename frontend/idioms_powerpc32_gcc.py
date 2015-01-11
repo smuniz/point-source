@@ -768,7 +768,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         
                         print "    Parameter register (simple) detected: %s" % \
                             self.iset.reg_name(reg)
-                        # TODO / FIXME : Determine parameter types.
+
                         #if self._handle_store_argument_registers(lir_inst): 
 
                         #    print "    Parameter register (simple) detected: %s" % \
@@ -793,8 +793,8 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         #print "[+] Callee LIR dump ------------------\n%s" % self.lir_function
 
                         param_number = self.iset.ARGUMENT_REGISTERS.index(reg)
-
-                        self.lir_function.param_regs[param_number] = [reg, ]
+                        # TODO / FIXME : Determine parameter types.
+                        self.lir_function.param_regs[param_number] = [reg, MiddleIrTypeInt()]
 
         except MiddleIrException, err:
             print format_exc() + '\n'
@@ -817,57 +817,6 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
             5 : CF_CHG6,
         }
         return changes.get(lir_op_idx, None) in lir_inst.features
-
-    def _handle_store_argument_registers(self, lir_inst):
-        """Detect store operations using ragister parameters in the
-        functions prologue.
-        
-        """
-        try:
-            # Look in the first basic block for an instruction
-            # sequence like the following:
-            #
-            # .text:018000C4 stw     %r3, 8(%r31)
-            # .text:018000C8 stw     %r4, 0xC(%r31)
-            #
-            if lir_inst.type != self.iset.PPC_stw:
-                return False
-
-            # Check that destination is the stack.
-            if not (lir_inst[0].is_reg_n(self.iset.ARGUMENT_REGISTERS) and \
-                lir_inst[1].is_displ and lir_inst[1].is_displ_n(
-                    self.lir_function.stack_access_registers)):
-                return False
-
-            param_number = \
-                self.iset.ARGUMENT_REGISTERS.index(lir_inst[0].value)
-
-            self.lir_function.param_regs[param_number] = [lir_inst[0].value, ]
-            lir_inst.analyzed = True
-
-            #
-            # Add a new local variable to the symbols list.
-            #
-            func_address = self.lir_function.start_address
-            mir_inst_builder = \
-                self.mir_function.get_instruction_builder_by_address(
-                    func_address, False)
-
-            address = lir_inst[1].value[1]
-            var_type_preffix = "i" # TODO / FIXME : Detect the argument type.
-            var_name = "%(var_type_preffix)s_0x%(address)x" % vars()
-            mir_inst = mir_inst_builder.alloca(MiddleIrTypeInt(), None, var_name)
-
-            self.current_symbols_table.add_local_variable(
-                address, var_name, mir_inst)
-
-            return True
-
-        except MiddleIrException, err:
-            print format_exc() + '\n'
-            raise PowerPc32GccIdiomAnalyzerException(err)
-
-        return False
 
     def detect_arguments_copy(self):
         """Check non-volatile registers used as a temporal function

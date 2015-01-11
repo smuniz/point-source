@@ -171,10 +171,13 @@ class FrontEnd(object):
         address = self.lir_function.start_address
         print "A" * 30
         print self.lir_function.param_regs
-        for idx, param_reg in enumerate(self.lir_function.param_regs):
-            print "------- Argument %02d : %s" % (idx, param_reg)
+        for idx, (param_reg, mir_param) in enumerate(
+            self.lir_function.param_regs.iteritems()):
+            print "------- Argument %02d - %s : %s" % (
+                idx, self.iset.GPR_NAMES[param_reg],
+                mir_param)
             #self.current_symbols_table.add_symbol(address, 
-            param_regs.append(MiddleIrTypeInt())
+            param_regs.append(mir_param)
 
         self.mir_function = MiddleIrFunction.new(
             self.mir_module, self.lir_function.name, return_type, param_regs)
@@ -633,3 +636,7 @@ class FrontEnd(object):
             print format_exc() + '\n'
             raise PowerPc32GccIdiomAnalyzerException(err)
 
+    @abc.abstractmethod
+    def _is_stack_destination(self, lir_inst):
+        """Check that destination of the operation is the stack."""
+        return

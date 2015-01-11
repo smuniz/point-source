@@ -364,3 +364,14 @@ class FrontEndPowerPc(FrontEnd):
         lir_function = self.debugger.generate_lir(callee_address)
         #print lir_function
         return lir_function
+
+    def _is_stack_destination(self, lir_inst):
+        """Check that destination of the operation is the stack."""
+        # Is there any PPC instruction whose source is not first operand
+        # and destination are the others and can store values in the stack?
+        # Not that I know so this should work.
+        if not (lir_inst[0].is_reg_n(self.iset.ARGUMENT_REGISTERS) and \
+            lir_inst[1].is_displ and lir_inst[1].is_displ_n(
+                self.lir_function.stack_access_registers)):
+            return False
+
