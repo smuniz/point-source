@@ -793,8 +793,26 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         #print "[+] Callee LIR dump ------------------\n%s" % self.lir_function
 
                         param_number = self.iset.ARGUMENT_REGISTERS.index(reg)
+
+                        # Create a MIR object to represent the newly detected
+                        # parameter.
                         # TODO / FIXME : Determine parameter types.
-                        self.lir_function.param_regs[param_number] = [reg, MiddleIrTypeInt()]
+                        mir_param = MiddleIrTypeInt()
+
+                        # Store the parameter in the function parameters list
+                        # for further usage.
+                        self.lir_function.param_regs[param_number] = \
+                            [reg, mir_param] # TODO : Remove this duplicated
+                                            # mir_param from here and only use
+                                            # symbols table.
+
+                        # Added the newly detected parameter to the parametes
+                        # list of the symbol table that belongs to the function
+                        # being analyzed.
+                        self.current_symbols_table.add_parameter(
+                            param_number,
+                            "i_arg_%02d" % param_number,
+                            mir_param)
 
         except MiddleIrException, err:
             print format_exc() + '\n'
@@ -850,7 +868,8 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     #       before the function call... Just to make sure.
 
                     #self.lir_function.param_regs[inst[1].value] = inst[0].value
-                    raise Exception("FIXME : detect_arguments_copy")
+                    raise IdiomAnalyzerException(
+                        "FIXME : detect_arguments_copy should not be in place.")
                     inst.analyzed = True
 
                     print "    Function's arguments copy register r%d->r%d detected" % \

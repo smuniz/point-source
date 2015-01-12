@@ -169,15 +169,11 @@ class FrontEnd(object):
         # we'll create a new one.
         param_regs = list()
         address = self.lir_function.start_address
-        print "A" * 30
-        print self.lir_function.param_regs
-        for idx, (param_reg, mir_param) in enumerate(
-            self.lir_function.param_regs.iteritems()):
-            print "------- Argument %02d - %s : %s" % (
-                idx, self.iset.GPR_NAMES[param_reg],
-                mir_param)
-            #self.current_symbols_table.add_symbol(address, 
-            param_regs.append(mir_param)
+        for idx, (param_reg, mir_param) in self.lir_function.param_regs.iteritems():
+            #print "------- Argument %02d - %s : %s" % (
+            #    idx, self.iset.GPR_NAMES[param_reg],
+            #    mir_param)
+            param_regs.append(self.current_symbols_table.parameters[idx].item)
 
         self.mir_function = MiddleIrFunction.new(
             self.mir_module, self.lir_function.name, return_type, param_regs)
@@ -425,6 +421,10 @@ class FrontEnd(object):
                 "Unable to generate Low Level IR: %s" % err)
 
         try:
+            # Store the current symbol table to use.
+            self.current_symbols_table = \
+                self.symbols_tables.symbols(self.lir_function.start_address)
+
             print "[+] Initializing idioms analyser..."
             self.idiom_analyzer.init(
                 self.lir_function, None, self.symbols_tables)
@@ -469,10 +469,6 @@ class FrontEnd(object):
             #self.idiom_analyzer.mir_module = self.mir_function.module
             self.idiom_analyzer.init(
                 self.lir_function, self.mir_function, self.symbols_tables)
-
-            # Store the current symbol table to use.
-            self.current_symbols_table = \
-                self.symbols_tables.symbols(self.lir_function.start_address)
 
             # Output LIR for debugging purposes.
             self.__dump_lir()
@@ -554,6 +550,7 @@ class FrontEnd(object):
                 # Save the context for further usage.
                 cur_lir = self.lir_function 
                 cur_mir = self.mir_function
+                cur_sym = self.current_symbols_table
 
                 # Analyze the called function in order to obtain parameters and
                 # return registers information. This will procude a new LIR
@@ -564,6 +561,7 @@ class FrontEnd(object):
                 # Restore the context of the main function being analyzed.
                 self.lir_function = cur_lir
                 self.mir_function = cur_mir
+                self.current_symbols_table = cur_sym
 
                 lir_callee = self.lir_functions_cache.get(callee_address, None)
 

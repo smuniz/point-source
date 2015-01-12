@@ -20,13 +20,16 @@ class SymbolsTable(object):
     """Store all the symbols that belong to a specific function."""
 
     def __init__(self, *args, **kw):
-        #super(SymbolsTable,self).__init__(*args, **kw)
-        #self.itemlist = super(SymbolsTable,self).keys()
         self.symbols = dict()
         self.variables = dict()
+        self.parameters = dict()
+
+    def add_parameter(self, index, name, item):
+        """Add a new parameter symbol to the symbols table."""
+        self.parameters[index] = Symbol(name, None, None, item)
 
     def add_local_variable(self, address, name, item):
-        """Add a new loscal variable to the symbols table."""
+        """Add a new local variable to the symbols table."""
         self.variables[address] = Symbol(name, None, None, item)
 
     def add_symbol(self, address, name, _type, scope, item):
@@ -37,7 +40,14 @@ class SymbolsTable(object):
         self.symbols[address] = Symbol(name, _type, scope, item)
 
     def __str__(self):
-        _str = ["[+] Local variables list:", ]
+        _str = list()
+
+        _str.append("[+] Parameters list:")
+        for k, (idx, i) in enumerate(self.parameters.iteritems()):
+            _str.append("\t%02d | %08d | %10s | %10s | %10s | %r" % (
+                k, idx, i.name, i.type, i.scope, i.item))
+
+        _str.append("[+] Local variables list:")
         for k, (addr, i) in enumerate(self.variables.iteritems()):
             _str.append("\t%02d | %08x | %10s | %10s | %10s | %r" % (
                 k, addr, i.name, i.type, i.scope, i.item))
