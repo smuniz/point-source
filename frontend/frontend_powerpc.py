@@ -153,36 +153,47 @@ class FrontEndPowerPc(FrontEnd):
         elif lir_inst.is_type(self.iset.PPC_stw):
             # Instruction : store word
 
-            # We're about to store a value in the stack so we first check if
-            # the stack variable as been previously created and do it in case
-            # it didn't.
-            if address not in self.current_symbols_table.symbols:
-                mir_var = self._create_local_variable(address)
+            # Determine if destination is the stack or any other location.
+            is_stack_dest = lir_inst[1].value[0] in \
+                self.lir_function.stack_access_registers
 
-            # Use the newly created MIR viariable to use it in the store
-            # operation to fully represent the instruction.
-            rs_reg = lir_inst[0].value
-            #src_addr = self.lir_function.ud_chain[address][rs_reg]
-            #print "=-=-=-> 0x%08X" % src_addr
+            if is_stack_dest:
+                # Seems like the destination register used as base is a stack
+                # (or copy of) access register so we'll go this way.
+                dest_offset = lir_inst[1].value[1]  # Get second element of the
+                                                    # tuple.
 
-            # TODO / FIXME : Determine if destination is the stack or any other
-            # location (Assume stack right now).
-            if True:
-                # Deterine parameter index.
-                rs = None
-                for idx, (param_reg, mir_param) in self.lir_function.param_regs.iteritems():
-                    param_idx = self.iset.ARGUMENT_REGISTERS.index(param_reg)
-                    rs = self.current_symbols_table.parameters[param_idx]
-                    break
+                # We're about to store a value in the stack so we first check
+                # if the stack variable as been previously created and do it in
+                # case it didn't.
+                if dest_offset in self.current_symbols_table.symbols:
+                    mir_var = \
+                        self.current_symbols_table.symbols[dest_offset].item
+                else:
+                    mir_var = self._create_local_variable(dest_offset)
+
+                # Use the newly created MIR viariable to use it in the store
+                # operation to fully represent the instruction.
+                rs_reg = lir_inst[0].value
+
+                # TODO / FIXME : Determine if the source register is some other
+                # variable or anything else besides a prameter.
+                # Assume parameter right now.
+                param_idx = self.iset.ARGUMENT_REGISTERS.index(rs_reg)
+                rs = self.current_symbols_table.parameters.get(param_idx, None)
 
                 if rs is None:
                     raise FrontEndPowerPcException(
                         "Unable to locate rS parameter symbol.")
 
-                print "=-=-=-> %s" % rs
+                print "=-=-=-> rs %s - ptr %s" % (rs.item, mir_var)
 
-            #rs = self.current_symbols_table.symbol
-            #mir_inst = self.mir_inst_builder.store(rs, mir_var)
+                #mir_inst = self.mir_inst_builder.store(rs.item, mir_var)
+
+            else:
+                # A memory area not being the stack is being accessed.
+                raise FrontEndPowerPcException(
+                    "PPC_stw on non-stack is unimplemented")
 
         elif lir_inst.is_type(self.iset.PPC_stwu):
             pass

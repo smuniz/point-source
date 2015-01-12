@@ -142,8 +142,9 @@ class MiddleIrInstructionBuilder(object):
 
     def store(self, mir_value, mir_ptr):
         """Generate a LLVM IR store instruction."""
+        _type = OPCODE_STORE
         return MiddleIrInstruction(self._ptr.store(
-                mir_value, mir_ptr._ptr))
+                mir_value._ptr, mir_ptr._ptr), _type)
 
     #
     # Terminator instructions
