@@ -188,17 +188,8 @@ class FrontEndPowerPc(FrontEnd):
                         "Unable to locate rS parameter symbol.")
 
                 #print "=-=-=-> rS %s - rD %s" % (type(rs), mir_var)
+                #self.mir_function.arguments[0].name = "i_arg%d" % 0
 
-                #rs = MiddleIrConstantInt(MiddleIrTypeInt(), 0x1234)
-                #mir_inst = self.mir_inst_builder.store(rs, mir_var)
-
-                self.mir_function._llvm_definition.args[0].name = "iarg0"
-
-                #print "---> ARGS (%s) : %s" % (
-                #    self.mir_function.name,
-                #    self.mir_function._llvm_definition.args[0])
-
-                print self.mir_module
                 mir_inst = self.mir_inst_builder.store(rs, mir_var)
 
             else:

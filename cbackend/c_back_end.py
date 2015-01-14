@@ -233,11 +233,11 @@ class CBackEnd(object):
         elif mir_inst.group is OTHER_GROUP:
             hir_stmt = self.on_other(mir_inst)
 
-        else:
+        if hir_stmt is None:
             raise CBackEndException(
                 "Unsupported instruction (%s) at %s on '%s' group." % (
                     str(mir_inst).strip(),
-                    ", ".join(["0x%08x" % a for a in mir_inst.addresses]),
+                    ", ".join(["0x%08X" % a for a in mir_inst.addresses]),
                     group_name))
 
         # Check if the translation mechanism worked. In case it didn't we;ll

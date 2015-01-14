@@ -390,7 +390,11 @@ class MiddleIrVolatileInstruction(object):
     def __init__(self, llvm_instruction=None):
         self.llvm_instruction = llvm_instruction
 
+#
+# Instructions groups identifiers and names.
+#
 TERMINATOR_GROUP = 0
+
 BINARY_OP_GROUP = 1
 SHIFT_GROUP = 2
 LOGICAL_SHIFT_GROUP = 3
@@ -404,49 +408,24 @@ OTHER_GROUP = 10
 UNKNOWN_GROUP = 11
 
 GROUP_NAMES = {
-    TERMINATOR_GROUP : "terminator",
+    TERMINATOR_GROUP        : "terminator",
 
-    BINARY_OP_GROUP : "binary",
-    SHIFT_GROUP : "shift",
-    LOGICAL_SHIFT_GROUP : "logical",
-    ARITHMETIC_SHIFT_GROUP : "arithmetic",
-    ASSOCIATIVE_GROUP : "associative",
-    COMMUTATIVE_GROUP : "commutative",
+    BINARY_OP_GROUP         : "binary",
+    SHIFT_GROUP             : "shift",
+    LOGICAL_SHIFT_GROUP     : "logical",
+    ARITHMETIC_SHIFT_GROUP  : "arithmetic",
+    ASSOCIATIVE_GROUP       : "associative",
+    COMMUTATIVE_GROUP       : "commutative",
 
-    MEMORY_ACCESS_GROUP : "memory_access",
+    MEMORY_ACCESS_GROUP     : "memory_access",
 
-    OTHER_GROUP : "other",
-    UNKNOWN_GROUP : "unknown",
+    OTHER_GROUP             : "other",
+    UNKNOWN_GROUP           : "unknown",
     }
 
-"""
-LLVM_ret = 0
-LLVM_br = 1
-LLVM_switch = 2
-LLVM_indirectbr = 3
-LLVM_invoke = 4
-LLVM_resume = 5
-LLVM_unreachable = 6
-
-LLVM_icmp = 0x10
-LLVM_fcmp = 0x11
-LLVM_phi = 0x12
-LLVM_select = 0x13
-LLVM_call = 0x14
-LLVM_va_arg = 0x15
-LLVM_landingpad = 0x16
-
-
-LLVM_alloca = 0x20
-LLVM_load = 0x21
-LLVM_store = 0x22
-LLVM_fence = 0x23
-LLVM_cmpxchg = 0x24
-LLVM_atomicrmw = 0x25
-LLVM_getelementptr = 0x26
-"""
-
-
+#
+# Instructions groups selection.
+#
 TERMINATOR_INSTRUCTIONS = [
     OPCODE_RET,
     OPCODE_BR,
@@ -455,6 +434,21 @@ TERMINATOR_INSTRUCTIONS = [
     OPCODE_INVOKE,
     OPCODE_RESUME,
     OPCODE_UNREACHABLE,
+    ]
+
+BINARY_OP_GROUP = [
+    OPCODE_ADD,
+    OPCODE_FADD,
+    OPCODE_SUB,
+    OPCODE_FSUB,
+    OPCODE_MUL,
+    OPCODE_FMUL,
+    OPCODE_UDIV,
+    OPCODE_SDIV,
+    OPCODE_FDIV,
+    OPCODE_UREM,
+    OPCODE_SREM,
+    OPCODE_FREM,
     ]
 
 OTHER_INSTRUCTIONS = [
@@ -478,591 +472,114 @@ MEMORY_ACCESS_OPERATIONS = [
     ]
 
 """
-
-Binary Operations
-'add' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
-'fadd' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
-'sub' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
-'fsub' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
-'mul' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
-'fmul' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
-'udiv' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
-'sdiv' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
-'fdiv' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
-'urem' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
-'srem' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
-'frem' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
-
 Bitwise Binary Operations
 'shl' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'lshr' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'ashr' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'and' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'or' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'xor' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 
 Vector Operations
 'extractelement' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'insertelement' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'shufflevector' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 
 Aggregate Operations
 'extractvalue' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'insertvalue' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
-
-Memory Access and Addressing Operations
-'alloca' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
-'load' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Examples:
-'store' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
-'fence' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
-'cmpxchg' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
-'atomicrmw' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
-'getelementptr' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 
 Conversion Operations
 'trunc .. to' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'zext .. to' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'sext .. to' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'fptrunc .. to' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'fpext .. to' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'fptoui .. to' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'fptosi .. to' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'uitofp .. to' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'sitofp .. to' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'ptrtoint .. to' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'inttoptr .. to' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'bitcast .. to' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'addrspacecast .. to' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 
 Other Operations
 'icmp' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'fcmp' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'phi' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'select' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'call' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'va_arg' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 'landingpad' Instruction
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Example:
 
 Intrinsic Functions
 
 Variable Argument Handling Intrinsics
 'llvm.va_start' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.va_end' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.va_copy' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 
 Accurate Garbage Collection Intrinsics
 'llvm.gcroot' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.gcread' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.gcwrite' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 
 Code Generator Intrinsics
 'llvm.returnaddress' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.frameaddress' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.read_register' and 'llvm.write_register' Intrinsics
-Syntax:
-Overview:
-Semantics:
 'llvm.stacksave' Intrinsic
-Syntax:
-Overview:
-Semantics:
 'llvm.stackrestore' Intrinsic
-Syntax:
-Overview:
-Semantics:
 'llvm.prefetch' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.pcmarker' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.readcyclecounter' Intrinsic
-Syntax:
-Overview:
-Semantics:
 'llvm.clear_cache' Intrinsic
-Syntax:
-Overview:
-Semantics:
 
 Standard C Library Intrinsics
 'llvm.memcpy' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.memmove' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.memset.*' Intrinsics
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.sqrt.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.powi.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.sin.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.cos.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.pow.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.exp.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.exp2.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.log.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.log10.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.log2.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.fma.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.fabs.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.copysign.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.floor.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.ceil.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.trunc.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.rint.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.nearbyint.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.round.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 
 Bit Manipulation Intrinsics
 'llvm.bswap.*' Intrinsics
-Syntax:
-Overview:
-Semantics:
 'llvm.ctpop.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.ctlz.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.cttz.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 
 Arithmetic with Overflow Intrinsics
 'llvm.sadd.with.overflow.*' Intrinsics
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Examples:
 'llvm.uadd.with.overflow.*' Intrinsics
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Examples:
 'llvm.ssub.with.overflow.*' Intrinsics
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Examples:
 'llvm.usub.with.overflow.*' Intrinsics
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Examples:
 'llvm.smul.with.overflow.*' Intrinsics
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Examples:
 'llvm.umul.with.overflow.*' Intrinsics
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Examples:
 
 Specialised Arithmetic Intrinsics
 'llvm.fmuladd.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Examples:
 
 Half Precision Floating Point Intrinsics
 'llvm.convert.to.fp16' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Examples:
 'llvm.convert.from.fp16' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
-Examples:
 
 Debugger Intrinsics
 
@@ -1070,94 +587,26 @@ Exception Handling Intrinsics
 
 Trampoline Intrinsics
 'llvm.init.trampoline' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.adjust.trampoline' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 
 Memory Use Markers
 'llvm.lifetime.start' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.lifetime.end' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.invariant.start' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.invariant.end' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 
 General Intrinsics
 'llvm.var.annotation' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.ptr.annotation.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.annotation.*' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.trap' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.debugtrap' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.stackprotector' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.stackprotectorcheck' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.objectsize' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.expect' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.assume' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 'llvm.donothing' Intrinsic
-Syntax:
-Overview:
-Arguments:
-Semantics:
 
 Stack Map Intrinsics
 """

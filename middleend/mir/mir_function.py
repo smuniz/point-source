@@ -3,6 +3,7 @@
 # 
 # This code is part of point source decompiler
 #
+from traceback import print_stack
 
 from llvm import *
 from llvm.core import *
@@ -59,11 +60,25 @@ class MiddleIrFunctionException(MiddleIrFunctionBaseException):
 #class MiddleIrIntrinsicFunction(MiddleIrFunction):
 #    def __init__(self, name, mir_module):
 #        MiddleIrFunction.__init__(name, mir_module)
-class MiddleIrValue(Value):
+class MiddleIrValue(MiddleIrLLVMInstance):
 
     def __init__(self, _type):
-        super(MiddleIrValue, self).__init__()
+        super(MiddleIrValue, self).__init__(_type)
         self.type = _type
+        self.name = ""
+
+    @property
+    def name(self):
+        """Return the name of the value."""
+        return self._ptr.name
+
+    @name.setter
+    def name(self, name):
+        """Store the name of the value."""
+        #print print_stack()
+        #print "setting name pre : old = '%s' - new = '%s'" % (self._ptr.name, name)
+        self._ptr.name = name
+        #print "setting name pos : %s" % self._ptr.name
 
     @property
     def type(self):
@@ -76,7 +91,7 @@ class MiddleIrValue(Value):
         self._type = _type
 
 
-class MiddleIrArgument(MiddleIrLLVMInstance):#MiddleIrValue):
+class MiddleIrArgument(MiddleIrValue):
 
     def __init__(self, _type):
         super(MiddleIrArgument, self).__init__(_type)
@@ -91,8 +106,8 @@ class MiddleIrFunction(MiddleIrFunctionBase):
 
     """
 
-    def __init__(self, name, return_type=MiddleIrTypeVoid(), arguments=None,
-        variadic_arguments=False):
+    def __init__(self, name, return_type=MiddleIrTypeVoid(),
+        arguments_types=[], variadic_arguments=False):
         """Initialize the intermediate level IR module class."""
         super(MiddleIrFunction, self).__init__()
 
@@ -109,9 +124,9 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         # function arguments and return declaration to void. 
         #
         self.return_type = return_type
-        self._arguments = arguments # TODO : Enhance this by splitting function
-                                    # type with definition (like LLVM does).
-                                    # No monkey business here! :)
+        self.arguments_types = arguments_types
+        self.arguments = [] # These will be set when the function is
+                            # committed.
         self.variadic_arguments = variadic_arguments    # No variadic args by
                                                         # default. Let the user
                                                         # set them. 
@@ -209,15 +224,15 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         called.
         
         """
-        return [MiddleIrArgument(arg) for arg in self._llvm_definition.args]
+        return self._arguments
 
-    #@arguments.setter
-    #def arguments(self, arguments=None):
-    #    """Set the list of arguments recevied by the function when it's
-    #    called.
+    @arguments.setter
+    def arguments(self, arguments=[]):
+        """Set the list of arguments recevied by the function when it's
+        called.
 
-    #    """
-    #    self._arguments = [] if arguments is None else arguments
+        """
+        self._arguments = arguments
 
     @property
     def name(self):
@@ -256,7 +271,7 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         if self.__llvm_type is None:
             self._llvm_type = MiddleIrTypeFunction(
                                 self.return_type,
-                                self._arguments,
+                                self.arguments_types,
                                 self.variadic_arguments)
 
         return self.__llvm_type
@@ -299,6 +314,15 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         Module object.
 
         """
+        if llvm_func_def is not None:
+            # Set the argument now that the function has been created and
+            # associated to a module. This gives us the arguments to be used
+            # inside the function and not just the arguments types (which are
+            # the types contained in the arguments but are useless by
+            # itselves).
+            self.arguments = [
+                MiddleIrArgument(arg) for arg in llvm_func_def.args
+                ]
         self.__llvm_func_def = llvm_func_def
 
     def _llvm_add_function_to_module(self):

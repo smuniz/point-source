@@ -181,6 +181,11 @@ class FrontEnd(object):
         self.mir_function = MiddleIrFunction.new(
             self.mir_module, self.lir_function.name, return_type, param_regs)
 
+        for idx, (param_reg, mir_param) in self.lir_function.param_regs.iteritems():
+            #print "|==> Name : ", self.mir_function.arguments[idx].name,
+            self.mir_function.arguments[idx].name = "i_arg%d" % idx
+            print "|-->", self.mir_function.arguments[idx].name
+
         # Set the default calling convention.
         #self.mir_function.set_calling_convention(CALL_CONV_C)
 
