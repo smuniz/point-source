@@ -108,7 +108,7 @@ from cbackend.c_back_end import CBackEnd, CBackEndException
 #------------------------------------------------------------------------------
 __description__ = "Point source decompiler"
 __author__      = "Sebastian Muniz"
-__year__        = "2013"
+__year__        = "2014"
 __version__     = "0.1"
 
 __all__ = ['PointSource', 'PointSourceException']

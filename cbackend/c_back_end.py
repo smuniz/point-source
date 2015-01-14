@@ -230,6 +230,9 @@ class CBackEnd(object):
         if mir_inst.group is TERMINATOR_GROUP:
             hir_stmt = self.on_terminator(mir_inst)
 
+        elif mir_inst.group is MEMORY_ACCESS_GROUP:
+            hir_stmt = self.on_memory_access(mir_inst)
+
         elif mir_inst.group is OTHER_GROUP:
             hir_stmt = self.on_other(mir_inst)
 
@@ -281,6 +284,21 @@ class CBackEnd(object):
             hir_stmt = ReturnStatement(int(ret_val))
         else:
             hir_stmt = ReturnStatement()
+
+        return hir_stmt
+
+    def on_memory_access(self, mir_inst):
+        """Process a MIR 'memory access' instruction."""
+        addresses = mir_inst.addresses
+        hir_stmt = None
+
+        if isinstance(mir_inst, MiddleIrStoreInstruction):
+            arguments = mir_inst.get_readable_inners()
+            hir_stmt = Statement(
+                SimpleAssignmentExpression(
+                    mir_inst.pointer.get_readable_inners(),
+                    mir_inst.value.get_readable_inners()),
+                mir_inst.addresses)
 
         return hir_stmt
 

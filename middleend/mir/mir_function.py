@@ -96,6 +96,9 @@ class MiddleIrArgument(MiddleIrValue):
     def __init__(self, _type):
         super(MiddleIrArgument, self).__init__(_type)
 
+    def get_readable_inners(self):
+        """..."""
+        return self.name
 
 class MiddleIrFunction(MiddleIrFunctionBase):
     """Middle level intermediate representation class of functions being
@@ -294,10 +297,10 @@ class MiddleIrFunction(MiddleIrFunctionBase):
     def set_argument_name(self, index, name):
         """Set the name for the argument at the specified index."""
         try:
-            self._llvm_definition.args[index] = name
+            self.arguments[index] = name
         except IndexError, err:
             raise MiddleIrFunctionException(
-                "Function \'%s\' has no argument at index %d." % \
+                "Function '%s' has no argument at index %d." % \
                     (self.name, index))
 
     @property
@@ -324,14 +327,7 @@ class MiddleIrFunction(MiddleIrFunctionBase):
                 MiddleIrArgument(arg) for arg in llvm_func_def.args
                 ]
         self.__llvm_func_def = llvm_func_def
-
-    def _llvm_add_function_to_module(self):
-        """Add the LLVM function definition object to the module."""
-        # Obtain the necessary information to add the specified function to the
-        # current LLVM module.
-        #self.llvm_func_def = self.module.add_function(
-        #    self._llvm_get_type(), self.get_name())
-        pass
+        print self.__llvm_func_def
 
     @property
     def module(self):

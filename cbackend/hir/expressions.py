@@ -85,7 +85,7 @@ class SimpleAssignmentExpression(AssignmentExpression):
     designated by the left operand lvalue. 
 
     """
-    def __init__(self):
+    def __init__(self, left_operand=None, right_operand=None):
         super(SimpleAssignmentExpression, self).__init__()
         self.set(None, None)
 

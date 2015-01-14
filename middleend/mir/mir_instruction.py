@@ -102,12 +102,9 @@ class MiddleIrInstructionBuilder(object):
     #
     # Memory
     #
-    def alloca(self, ty, size=None, name=""):
+    def alloca(self, _type, size=None, name=""):
         """Generate a LLVM IR alloca instruction."""
-        sizeptr = size._ptr if size else None
-        _type = OPCODE_ALLOCA #LLVM_alloca
-        return MiddleIrInstruction(
-            self._ptr.alloca(ty._ptr, sizeptr, name), _type)
+        return MiddleIrAllocaInstruction(self, _type, size, name)
 
     def alloca_array(self, ty, size, name=""):
         """Generate a LLVM IR alloca_array instruction."""
@@ -228,11 +225,12 @@ class MiddleIrInstruction(MiddleIrLLVMInstance, Area):
         """Store the type this instruction belongs to."""
         self._type = _type
 
+        #
         # Automatically set group 
-        # TODO / FIXME : wtf
+        #
         #print "type : %d" % _type
         #print "[[[[[]]]]]]]]]]]]>>> %s" % self._ptr
-        #print str(self._ptr.name)
+
         if self._ptr is None:
             self.group = UNKNOWN_GROUP
 
@@ -697,12 +695,35 @@ class MiddleIrStoreInstruction(MiddleIrInstruction):
 
     def __init__(self, builder, value, pointer, align=0, volatile=False):
         super(MiddleIrStoreInstruction, self).__init__(
-            _type = OPCODE_STORE)
+            _type=OPCODE_STORE)
 
         self.value = value
         self.pointer = pointer
         self.align = align
         self.volatile = volatile
 
-        self._ptr = MiddleIrInstruction(builder._ptr.store(
-                value._ptr, pointer._ptr, align, volatile))
+        self._ptr = builder._ptr.store(
+                value._ptr, pointer._ptr, align, volatile)
+
+    def get_readable_inners(self):
+        """..."""
+        print "===>", self.value.get_readable_inners()
+        print "===>", self.pointer.get_readable_inners()
+        return self.pointer.get_readable_inners()
+
+class MiddleIrAllocaInstruction(MiddleIrInstruction):
+    """Generate a MIR IR 'alloca' instruction."""
+
+    def __init__(self, builder, alloca_type, size=None, name=""):
+        super(MiddleIrAllocaInstruction, self).__init__(
+            _type=OPCODE_ALLOCA)
+
+        self.size_ptr = size._ptr if size else None
+        self.alloca_type = alloca_type
+        self.name = name
+
+        self._ptr = builder._ptr.alloca(alloca_type._ptr)#, self.size_ptr, name)
+
+    def get_readable_inners(self):
+        """..."""
+        return self.name

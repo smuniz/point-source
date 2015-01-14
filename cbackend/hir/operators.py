@@ -12,7 +12,7 @@ class Operator(object):
         if representation is None:
             self.representation = "<undef.op.repr>"
         else:
-            self.setrepresentationesentation(representation)
+            self.representation = representation
 
     @property
     def representation(self):
