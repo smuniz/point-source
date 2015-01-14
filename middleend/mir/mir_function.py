@@ -59,6 +59,27 @@ class MiddleIrFunctionException(MiddleIrFunctionBaseException):
 #class MiddleIrIntrinsicFunction(MiddleIrFunction):
 #    def __init__(self, name, mir_module):
 #        MiddleIrFunction.__init__(name, mir_module)
+class MiddleIrValue(Value):
+
+    def __init__(self, _type):
+        super(MiddleIrValue, self).__init__()
+        self.type = _type
+
+    @property
+    def type(self):
+        """Return the Type object representing the type of the value."""
+        return self._type
+
+    @type.setter
+    def type(self, _type):
+        """Store the Type object representing the type of the value."""
+        self._type = _type
+
+
+class MiddleIrArgument(MiddleIrLLVMInstance):#MiddleIrValue):
+
+    def __init__(self, _type):
+        super(MiddleIrArgument, self).__init__(_type)
 
 
 class MiddleIrFunction(MiddleIrFunctionBase):
@@ -88,7 +109,9 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         # function arguments and return declaration to void. 
         #
         self.return_type = return_type
-        self.arguments = arguments
+        self._arguments = arguments # TODO : Enhance this by splitting function
+                                    # type with definition (like LLVM does).
+                                    # No monkey business here! :)
         self.variadic_arguments = variadic_arguments    # No variadic args by
                                                         # default. Let the user
                                                         # set them. 
@@ -186,15 +209,15 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         called.
         
         """
-        return self._arguments
+        return [MiddleIrArgument(arg) for arg in self._llvm_definition.args]
 
-    @arguments.setter
-    def arguments(self, arguments=None):
-        """Set the list of arguments recevied by the function when it's
-        called.
+    #@arguments.setter
+    #def arguments(self, arguments=None):
+    #    """Set the list of arguments recevied by the function when it's
+    #    called.
 
-        """
-        self._arguments = [] if arguments is None else arguments
+    #    """
+    #    self._arguments = [] if arguments is None else arguments
 
     @property
     def name(self):
@@ -233,7 +256,7 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         if self.__llvm_type is None:
             self._llvm_type = MiddleIrTypeFunction(
                                 self.return_type,
-                                self.arguments,
+                                self._arguments,
                                 self.variadic_arguments)
 
         return self.__llvm_type
@@ -362,23 +385,22 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         variadic_arguments=False):
         """Create a new function."""
         # Make sure that the module exists and it's of the right type.
-        if not isinstance(module, MiddleIrModule):
-            raise MiddleIrFunctionException(
-                "No module specified to add function '%s'." % name)
+        # TODO / FIXME : Remove comments below and fix import problem.
+        #if not isinstance(module, MiddleIrModule):
+        #    raise MiddleIrFunctionException(
+        #        "No module specified to add function '%s'." % name)
 
         # Check if the function already exists inside the module. In case it
         # doesn't exists then we create a new one.
         # Otherwise we'll raise an exception.
-        new_func = module.get_function_by_name(name)
+        if module.get_function_by_name(name) is not None:
+            raise MiddleIrFunctionException(
+                "Function '%s' already exists in module '%s'" % (
+                name, module.name))
 
-        if new_func is None:
-            new_func = MiddleIrFunction(name, return_type, arguments, variadic_arguments)
-            module.add_function(new_func)
-            return new_func
-
-        raise MiddleIrFunctionException(
-            "Function '%s' already exists in module '%s'" % (
-            name, module.name))
+        new_func = MiddleIrFunction(name, return_type, arguments, variadic_arguments)
+        module.add_function(new_func)
+        return new_func
 
     @staticmethod
     def get(module, name):

@@ -180,15 +180,26 @@ class FrontEndPowerPc(FrontEnd):
                 # variable or anything else besides a prameter.
                 # Assume parameter right now.
                 param_idx = self.iset.ARGUMENT_REGISTERS.index(rs_reg)
-                rs = self.current_symbols_table.parameters.get(param_idx, None)
+                #rs = self.current_symbols_table.parameters.get(param_idx, None)
+                rs = self.mir_function.arguments[param_idx]
 
                 if rs is None:
                     raise FrontEndPowerPcException(
                         "Unable to locate rS parameter symbol.")
 
-                print "=-=-=-> rs %s - ptr %s" % (rs.item, mir_var)
+                #print "=-=-=-> rS %s - rD %s" % (type(rs), mir_var)
 
-                #mir_inst = self.mir_inst_builder.store(rs.item, mir_var)
+                #rs = MiddleIrConstantInt(MiddleIrTypeInt(), 0x1234)
+                #mir_inst = self.mir_inst_builder.store(rs, mir_var)
+
+                self.mir_function._llvm_definition.args[0].name = "iarg0"
+
+                #print "---> ARGS (%s) : %s" % (
+                #    self.mir_function.name,
+                #    self.mir_function._llvm_definition.args[0])
+
+                print self.mir_module
+                mir_inst = self.mir_inst_builder.store(rs, mir_var)
 
             else:
                 # A memory area not being the stack is being accessed.
@@ -295,13 +306,21 @@ class FrontEndPowerPc(FrontEnd):
 
                 mir_callee = MiddleIrFunction.get(self.mir_module, lir_callee.name)
 
-                if mir_callee is not None:
-                    mir_inst = self.mir_inst_builder.call(
-                        mir_callee, mir_callee_args)
-                else:
+                if mir_callee is None:
                     raise FrontEndPowerPcException(
                         "Unable to get supposedly existing MIR function '%s'" % \
                         lir_callee.name)
+
+                print "[+] About to create call with %d parameters" % \
+                    len(lir_callee.param_regs)
+
+                # Display arguments matching (debugging purposes).
+                for idx, (param_reg, mir_param) in lir_callee.param_regs.iteritems():
+                    print "    Param %2d : %s -> %s" % (
+                        idx, mir_callee_args, mir_param)
+
+                mir_inst = self.mir_inst_builder.call(
+                    mir_callee, mir_callee_args)
 
         elif lir_inst.is_type(self.iset.PPC_balways):
             #

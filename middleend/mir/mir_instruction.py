@@ -111,6 +111,7 @@ class MiddleIrInstructionBuilder(object):
 
     def alloca_array(self, ty, size, name=""):
         """Generate a LLVM IR alloca_array instruction."""
+        #_type = OPCODE_ALLOCA
         return MiddleIrInstruction(
             self._ptr.alloca_array(ty._ptr, size, name))
 
@@ -140,11 +141,9 @@ class MiddleIrInstructionBuilder(object):
         return MiddleIrInstruction(self._ptr.malloc_array(
                 ty._ptr, size, name))
 
-    def store(self, mir_value, mir_ptr):
+    def store(self, value, pointer, align=0, volatile=False):
         """Generate a LLVM IR store instruction."""
-        _type = OPCODE_STORE
-        return MiddleIrInstruction(self._ptr.store(
-                mir_value._ptr, mir_ptr._ptr), _type)
+        return MiddleIrStoreInstruction(self, value, pointer, align, volatile)
 
     #
     # Terminator instructions
@@ -162,7 +161,7 @@ class MiddleIrInstructionBuilder(object):
     #
     # Others
     #
-    def pointer(self, pointee, addr_space=""):
+    def pointer(self, pointee, addr_space=0):
         """Generate a LLVM IR pointer instruction."""
         llvm_pointee = pointee._ptr
         return MiddleIrInstruction(
@@ -1173,7 +1172,8 @@ class MiddleIrRetInstruction(MiddleIrInstruction):
 
         if ret_val is None:
             #Generate a LLVM IR 'ret_void' instruction.
-            self._ptr = self._ptr.ret_void()
+            #self._ptr = self._ptr.ret_void()
+            self._ptr = builder._ptr.ret_void()
 
         elif type(ret_val) in (tuple, list):
             # Generate a LLVM IR 'ret_many' instruction.
@@ -1242,3 +1242,18 @@ class MiddleIrGepInstruction(MiddleIrInstruction):
     def get_readable_inners(self):
         """..."""
         return self.pointer.get_readable_inners()
+
+class MiddleIrStoreInstruction(MiddleIrInstruction):
+    """Generate a MIR IR 'store' instruction."""
+
+    def __init__(self, builder, value, pointer, align=0, volatile=False):
+        super(MiddleIrStoreInstruction, self).__init__(
+            _type = OPCODE_STORE)
+
+        self.value = value
+        self.pointer = pointer
+        self.align = align
+        self.volatile = volatile
+
+        self._ptr = MiddleIrInstruction(builder._ptr.store(
+                value._ptr, pointer._ptr, align, volatile))

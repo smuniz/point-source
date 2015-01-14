@@ -169,11 +169,14 @@ class FrontEnd(object):
         # we'll create a new one.
         param_regs = list()
         address = self.lir_function.start_address
+
         for idx, (param_reg, mir_param) in self.lir_function.param_regs.iteritems():
-            #print "------- Argument %02d - %s : %s" % (
+            #print "------- Argument %02d : %s <-> %s" % (
             #    idx, self.iset.GPR_NAMES[param_reg],
             #    mir_param)
-            param_regs.append(self.current_symbols_table.parameters[idx].item)
+            param_regs.append(
+                self.current_symbols_table.parameters[idx].item
+                )
 
         self.mir_function = MiddleIrFunction.new(
             self.mir_module, self.lir_function.name, return_type, param_regs)
@@ -621,8 +624,11 @@ class FrontEnd(object):
 
             var_type_preffix = "i"
             var_name = "%(var_type_preffix)s_0x%(address)X" % vars()
+            #int_ptr = MiddleIrTypePointer(MiddleIrTypeInt())
+            int_ptr = MiddleIrTypeInt()
+
             mir_var = mir_inst_builder.alloca(
-                MiddleIrTypeInt(), None, var_name)
+                int_ptr, None, var_name)
 
             if update_symbols_table:
                 self.current_symbols_table.add_local_variable(

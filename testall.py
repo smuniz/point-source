@@ -415,15 +415,19 @@ def do_callorinvokeinstruction():
 #    v2 = b.extract_value(v, 1)
 #    b.ret_many([v1, v2])
 #    #print f
-#
-#
-#def do_builder():
-#    print("    Testing class Builder")
-#    m = MiddleIrModule.new('a')
-#    ft = MiddleIrTypeFunction(ti, [ti])
-#    f = MiddleIrFunction.new(m, ft, 'func')
-#    blk = f.append_basic_block('b')
-#    b = Builder.new(blk)
+
+
+def do_builder():
+    print("    Testing class Builder")
+    m = MiddleIrModule.new('a')
+    #ft = MiddleIrTypeFunction(ti, [ti])
+    #f = MiddleIrFunction.new(m, ft, 'func')
+    f = MiddleIrFunction("func", ti, [ti])
+    m.add_function(f)
+    f._llvm_definition.args[0].name = "a"
+    blk = MiddleIrBasicBlock('b')
+    f.add_basic_block(blk)
+    b = MiddleIrInstructionBuilder.new(blk)
 #    b.ret(MiddleIrConstantInt(ti, 10))
 #    b.position_at_beginning(blk)
 #    b.position_at_end(blk)
@@ -462,13 +466,15 @@ def do_callorinvokeinstruction():
 #    b.xor(v, v)
 #    b.neg(v)
 #    b.not_(v)
-#    p = b.malloc(MiddleIrTypeInt())
-#    b.malloc_array(MiddleIrTypeInt(), k)
-#    b.alloca(MiddleIrTypeInt())
-#    b.alloca_array(MiddleIrTypeInt(), k)
+    p = b.alloca(MiddleIrTypeInt(32))
+    #p = b.malloc(MiddleIrTypeInt())
+    #b.malloc_array(MiddleIrTypeInt(), k)
+    #b.alloca(MiddleIrTypeInt())
+    #b.alloca_array(MiddleIrTypeInt(), k)
 #    b.free(p)
 #    b.load(p)
-#    b.store(k, p)
+    k = f.arguments[0]
+    x = b.store(k, p)
 #    # TODO gep
 #    b.trunc(v, MiddleIrTypeInt(1))
 #    b.zext(v, MiddleIrTypeInt(64))
@@ -528,7 +534,7 @@ def do_llvm_core():
 #    do_phinode()
 #    do_switchinstruction()
 #    do_basicblock()
-#    do_builder()
+    do_builder()
 
 
 #def do_targetdata():
