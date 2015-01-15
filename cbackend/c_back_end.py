@@ -5,7 +5,9 @@
 #
 
 from copy import deepcopy
-from traceback import format_exc
+from traceback import format_exc, print_stack
+print "-" * 40
+print_stack()
 
 from middleend.mir.mir_type import *
 from middleend.mir.mir_instruction import *
@@ -71,18 +73,15 @@ class CBackEnd(object):
 
     @property
     def mir(self):
-        """Return the intermediate language representation of the currently
-        selected function to be shown.
+        """Return the intermediate language representation of the entire
+        module.
         
         """
         return self._mir
 
     @mir.setter
     def mir(self, mir):
-        """Store the intermediate language representation of the currently
-        selected function to be shown.
-        
-        """
+        """Store the intermediate language representation of the module."""
         self._mir = mir
 
     @property
@@ -154,18 +153,15 @@ class CBackEnd(object):
                 self.hir.add_epilogue_address(address)
 
             #
-            # Get all the information for the function declaration.
+            # Get all the information for the function declaration. This
+            # includes return type, function name, all the parameters with
+            # its respective types and optionally the calling convention.
             #
             self.hir.name = mir_function.name
 
-            if isinstance(mir_function.return_type, MiddleIrTypeInt):
-                self.hir.return_type = "int"
-            elif isinstance(mir_function.return_type, MiddleIrTypeVoid):
-                self.hir.return_type = "void"
-            else:
-                raise CBackEndException("Unsupported return type (%s)" % \
-                    mir_function.return_type)
+            self.hir.return_type = mir_function.return_type
 
+            self.hir.parameters = mir_function.arguments
 
             #
             # Iterate through every basic block represented in the MIR and
@@ -271,19 +267,23 @@ class CBackEnd(object):
         addresses = mir_inst.addresses
         hir_stmt = None
 
-        if len(mir_inst.operands) > 0:
+        if isinstance(mir_inst, MiddleIrRetInstruction):
+            # Handle return statement. Prepare the statement according to the
+            # return type (if any).
+            if len(mir_inst.operands) > 0:
+                # In case that the return instruction returns a value (not
+                # void) then the return type must be obtained and processed.
+                ret_op = mir_inst.operands[0]
+                ret_tuple = str(ret_op).split(" ") # split the type and name.
 
-            ret_op = mir_inst.operands[0]
-            ret_tuple = str(ret_op).split(" ")
+                if len(ret_tuple) != 2:
+                    raise CBackEndException("Unable to process operand (%s)" % \
+                        ret_op)
 
-            if len(ret_tuple) != 2:
-                raise CBackEndException("Unable to process operand (%s)" % \
-                    ret_op)
-
-            ret_type, ret_val = ret_tuple
-            hir_stmt = ReturnStatement(int(ret_val))
-        else:
-            hir_stmt = ReturnStatement()
+                ret_type, ret_val = ret_tuple
+                hir_stmt = ReturnStatement(int(ret_val))
+            else:
+                hir_stmt = ReturnStatement()
 
         return hir_stmt
 

@@ -87,15 +87,21 @@ class SimpleAssignmentExpression(AssignmentExpression):
     """
     def __init__(self, left_operand=None, right_operand=None):
         super(SimpleAssignmentExpression, self).__init__()
-        self.set(None, None)
+        self.set(left_operand, right_operand)
 
     def set(self, left_operand, right_operand):
         self.left_operand   = left_operand
         self.right_operand  = right_operand
 
     def __str__(self):
-        return "%s %s %s" % (self.left_operand, self.operator, 
-                            self.right_operand)
+        # TODO : Add cast somehow here.
+        cast = ""
+        if False:
+            _type = "blablabla"
+            cast = "(%s)" % _type
+
+        return "%s %s %s%s;" % \
+            (self.left_operand, self.operator, cast, self.right_operand)
 
 
 class CompoundAssignmentExpression(AssignmentExpression):

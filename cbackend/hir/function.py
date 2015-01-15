@@ -17,16 +17,35 @@ CALLING_CONVENTIONS = {
      CALL_CONV_COLDCALL      : "coldcall",
      CALL_CONV_X86_STDCALL   : "x86call",
      CALL_CONV_X86_FASTCALL  : "x86fastcall",
-     CALL_CONV_GHC           : "unk",
-     CALL_CONV_ARM_APCS      : "unk",
-     CALL_CONV_ARM_AAPCS     : "unk",
-     CALL_CONV_ARM_AAPCS_VFP : "unk",
-     CALL_CONV_MSP430_INTR   : "unk",
-     CALL_CONV_X86_THISCALL  : "unk",
-     CALL_CONV_PTX_KERNEL    : "unk",
-     CALL_CONV_PTX_DEVICE    : "unk",
-     CALL_CONV_MBLAZE_INTR   : "unk",
-     CALL_CONV_MBLAZE_SVOL   : "unk",
+     CALL_CONV_GHC           : "unk_cc",
+     CALL_CONV_ARM_APCS      : "unk_cc",
+     CALL_CONV_ARM_AAPCS     : "unk_cc",
+     CALL_CONV_ARM_AAPCS_VFP : "unk_cc",
+     CALL_CONV_MSP430_INTR   : "unk_cc",
+     CALL_CONV_X86_THISCALL  : "unk_cc",
+     CALL_CONV_PTX_KERNEL    : "unk_cc",
+     CALL_CONV_PTX_DEVICE    : "unk_cc",
+     CALL_CONV_MBLAZE_INTR   : "unk_cc",
+     CALL_CONV_MBLAZE_SVOL   : "unk_cc",
+    }
+
+MIR_TYPE_TO_HIR_STRING = {
+    MiddleIrTypeChar            : "char",
+    MiddleIrTypeInt             : "int",
+    MiddleIrTypeFloat           : "float",
+    MiddleIrTypeDouble          : "double",
+    MiddleIrTypeX86Fp80         : "t_float_80",
+    MiddleIrTypePpcFp128        : "t_ppc_float_128",
+    MiddleIrTypeFp128           : "t_float_128",
+    MiddleIrTypeFunction        : "t_func_",
+    MiddleIrTypeOpaque          : "t_opaque_",
+    MiddleIrTypeStruct          : "struct",
+    MiddleIrTypePackedStruct    : "struct",
+    MiddleIrTypeArray           : "[]",
+    MiddleIrTypePointer         : "*",
+    MiddleIrTypeVector          : "[]",
+    MiddleIrTypeLabel           : "label_",
+    MiddleIrTypeVoid            : "void",
     }
 
 
@@ -73,10 +92,7 @@ class Function(object):
         index.
         
         """
-        try:
-            return self.parameters[n]
-        except IndexError, err:
-            return None
+        return self.parameters.get(n, None)
 
     #def parameter(self, _type, name="", position=None):
     #    """Store the parameter for the current function at the specified
@@ -361,6 +377,21 @@ class Function(object):
     def is_calling_convention_mblaze_svol(self):
         return self.calling_convention == CALL_CONV_MBLAZE_SVOL
 
+    def __create_declaration(self):
+        """Create the function declaration with its return type, attributes,
+        function name and paramaters (if any).
+        
+        """
+        return_type = self.__map_mir_type_to_hir_repr(mir_function.return_type)
+
+        if self.return_type is None:
+            raise CBackEndException("Unsupported return type (%s)" % \
+                type(self.return_type))
+
+    def __map_mir_type_to_hir_repr(self, mir_type):
+        """Return the HIR string representation of the given MIR type."""
+        return MIR_TYPE_TO_HIR_STRING.get(type(mir_type), None)
+
     def __str__(self):
         _str = ""
 
@@ -368,14 +399,28 @@ class Function(object):
         indent_spaces = 4
         indent = " " * (indent_level * indent_spaces)
 
+        #
+        # Create the function header with its return type, function name and
+        # parameters.
+        #
         ret_type = self.return_type
         name = self.name
-        params = "()"#self.parameter
+        if self.has_parameters:
+            params_list = list()
+            for param in self.parameters:
+                params_list.append("%s %s" % (
+                    self.__map_mir_type_to_hir_repr(param), param.name))
+
+            params = "(" + ", ".join(params_list) + ")"
+        else:
+            params = "()"
 
         _str += "%(ret_type)s %(name)s %(params)s\n" % vars()
         _str += "{\n"
 
-        #from textwrap import TextWrapper
+        #
+        # Create the function body with all the corresponding code in it.
+        #
         if len(self) == 0:
             _str += "%(indent)s// Empty function.\n" % vars()
         else:
