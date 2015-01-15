@@ -293,10 +293,11 @@ class HirTextOutput(TextOutputMedia):
 
         params = ""
         if self.hir.has_parameters:
-            params = "%s" % (" ".join(self.hir.get_parameter_n[0]))
+            pass
+            #params = "%s" % (" ".join(self.hir.get_parameter_n[0]))
 
-            params += ", ".join([param_tuple \
-                for param_tuple in self.hir.paramters[1 : ]])
+            #params += ", ".join([param_tuple \
+            #    for param_tuple in self.hir.paramters[1 : ]])
 
         func_repr.append(
             "%(ret_type)s %(call_conv)s%(name)s (%(params)s)" % vars())

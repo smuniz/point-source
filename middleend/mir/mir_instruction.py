@@ -707,8 +707,6 @@ class MiddleIrStoreInstruction(MiddleIrInstruction):
 
     def get_readable_inners(self):
         """..."""
-        print "===>", self.value.get_readable_inners()
-        print "===>", self.pointer.get_readable_inners()
         return self.pointer.get_readable_inners()
 
 class MiddleIrAllocaInstruction(MiddleIrInstruction):

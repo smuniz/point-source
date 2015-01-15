@@ -5,9 +5,7 @@
 #
 
 from copy import deepcopy
-from traceback import format_exc, print_stack
-print "-" * 40
-print_stack()
+from traceback import format_exc
 
 from middleend.mir.mir_type import *
 from middleend.mir.mir_instruction import *
@@ -42,6 +40,25 @@ from cbackend.hir_text_output import HirTextOutput
 
 __all__ = ["CBackEnd", "CBackEndException"]
 
+MIR_TYPE_TO_HIR_STRING = {
+    MiddleIrTypeChar            : "char",
+    MiddleIrTypeInt             : "int",
+    MiddleIrTypeFloat           : "float",
+    MiddleIrTypeDouble          : "double",
+    MiddleIrTypeX86Fp80         : "t_float_80",
+    MiddleIrTypePpcFp128        : "t_ppc_float_128",
+    MiddleIrTypeFp128           : "t_float_128",
+    MiddleIrTypeFunction        : "t_func_",
+    MiddleIrTypeOpaque          : "t_opaque_",
+    MiddleIrTypeStruct          : "struct",
+    MiddleIrTypePackedStruct    : "struct",
+    MiddleIrTypeArray           : "[]",
+    MiddleIrTypePointer         : "*",
+    MiddleIrTypeVector          : "[]",
+    MiddleIrTypeLabel           : "label_",
+    MiddleIrTypeVoid            : "void",
+    }
+
 
 class CBackEndException(Exception):
     pass
@@ -70,6 +87,16 @@ class CBackEnd(object):
 
         # Development flags
         self.debug_inst_info = True
+
+    @property
+    def symbols_tables(self):
+        """Return the symbols tables instance for the current application."""
+        return self._symbols_tables
+
+    @symbols_tables.setter
+    def symbols_tables(self, symbols_tables):
+        """Store the symbols tables instance for the current application."""
+        self._symbols_tables = symbols_tables
 
     @property
     def mir(self):
@@ -144,6 +171,7 @@ class CBackEnd(object):
             # self.hir must contain a global scope and the newly created
             # function in it.
             self.hir = Function()
+            self.hir.symbols_tables = self.symbols_tables
 
             # Pass addresses for instruction tracking purposes.
             for address in mir_function.prologue_addresses:
@@ -159,7 +187,8 @@ class CBackEnd(object):
             #
             self.hir.name = mir_function.name
 
-            self.hir.return_type = mir_function.return_type
+            self.hir.return_type = \
+                self.__map_mir_type_to_hir_repr(mir_function.return_type)
 
             self.hir.parameters = mir_function.arguments
 
@@ -358,6 +387,11 @@ class CBackEnd(object):
         # representation hosted inside the HIR.
         print "[+] Creating HIR representation..."
         print str(self.hir)
-        return
+        #return
         hir_output = HirTextOutput(self.hir)
         hir_output.generate_output("Decompiled code")
+
+    def __map_mir_type_to_hir_repr(self, mir_type):
+        """Return the HIR string representation of the given MIR type."""
+        return MIR_TYPE_TO_HIR_STRING.get(type(mir_type), None)
+

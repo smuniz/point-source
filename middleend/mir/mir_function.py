@@ -75,10 +75,7 @@ class MiddleIrValue(MiddleIrLLVMInstance):
     @name.setter
     def name(self, name):
         """Store the name of the value."""
-        #print print_stack()
-        #print "setting name pre : old = '%s' - new = '%s'" % (self._ptr.name, name)
         self._ptr.name = name
-        #print "setting name pos : %s" % self._ptr.name
 
     @property
     def type(self):
@@ -323,9 +320,12 @@ class MiddleIrFunction(MiddleIrFunctionBase):
             # inside the function and not just the arguments types (which are
             # the types contained in the arguments but are useless by
             # itselves).
-            self.arguments = [
-                MiddleIrArgument(arg) for arg in llvm_func_def.args
-                ]
+            self.arguments = list()
+            for i in range(len(llvm_func_def.args)):
+                arg = MiddleIrArgument(llvm_func_def.args[i])
+                arg.type = self.arguments_types[i]
+                self.arguments.append(arg)
+
         self.__llvm_func_def = llvm_func_def
         print self.__llvm_func_def
 

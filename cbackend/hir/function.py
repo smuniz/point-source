@@ -29,25 +29,6 @@ CALLING_CONVENTIONS = {
      CALL_CONV_MBLAZE_SVOL   : "unk_cc",
     }
 
-MIR_TYPE_TO_HIR_STRING = {
-    MiddleIrTypeChar            : "char",
-    MiddleIrTypeInt             : "int",
-    MiddleIrTypeFloat           : "float",
-    MiddleIrTypeDouble          : "double",
-    MiddleIrTypeX86Fp80         : "t_float_80",
-    MiddleIrTypePpcFp128        : "t_ppc_float_128",
-    MiddleIrTypeFp128           : "t_float_128",
-    MiddleIrTypeFunction        : "t_func_",
-    MiddleIrTypeOpaque          : "t_opaque_",
-    MiddleIrTypeStruct          : "struct",
-    MiddleIrTypePackedStruct    : "struct",
-    MiddleIrTypeArray           : "[]",
-    MiddleIrTypePointer         : "*",
-    MiddleIrTypeVector          : "[]",
-    MiddleIrTypeLabel           : "label_",
-    MiddleIrTypeVoid            : "void",
-    }
-
 
 class FunctionException(Exception):
     """Base exception for HIR function exceptions."""
@@ -71,6 +52,8 @@ class Function(object):
         self.calling_convention = CALL_CONV_C
         self.name = ""
         #self.current = 0
+
+        self.symbols_tables = None
 
     @property
     def has_parameters(self):
@@ -382,15 +365,35 @@ class Function(object):
         function name and paramaters (if any).
         
         """
-        return_type = self.__map_mir_type_to_hir_repr(mir_function.return_type)
+        return_type = self.return_type
 
         if self.return_type is None:
             raise CBackEndException("Unsupported return type (%s)" % \
-                type(self.return_type))
+                self.return_type)
 
-    def __map_mir_type_to_hir_repr(self, mir_type):
-        """Return the HIR string representation of the given MIR type."""
-        return MIR_TYPE_TO_HIR_STRING.get(type(mir_type), None)
+        name = self.name
+        if self.has_parameters:
+            params_list = list()
+            #for param in self.parameters:
+            #    params_list.append("%s %s" % (
+            #        self.__map_mir_type_to_hir_repr(param.type), param.name))
+
+            params = "(" + ", ".join(params_list) + ")"
+        else:
+            params = "()"
+
+        return "%(return_type)s %(name)s %(params)s\n" % vars()
+
+    @property
+    def symbols_tables(self):
+        """Return the symbols tables instance for the current application."""
+        return self._symbols_tables
+
+    @symbols_tables.setter
+    def symbols_tables(self, symbols_tables):
+        """Store the symbols tables instance for the current application."""
+        self._symbols_tables = symbols_tables
+
 
     def __str__(self):
         _str = ""
@@ -403,29 +406,31 @@ class Function(object):
         # Create the function header with its return type, function name and
         # parameters.
         #
-        ret_type = self.return_type
-        name = self.name
-        if self.has_parameters:
-            params_list = list()
-            for param in self.parameters:
-                params_list.append("%s %s" % (
-                    self.__map_mir_type_to_hir_repr(param), param.name))
+        _str += self.__create_declaration()
 
-            params = "(" + ", ".join(params_list) + ")"
-        else:
-            params = "()"
-
-        _str += "%(ret_type)s %(name)s %(params)s\n" % vars()
         _str += "{\n"
 
         #
         # Create the function body with all the corresponding code in it.
+        # The function body is split in two parts:
+        #   1. The local variables declarations.
+        #   2. The rest of the functions code.
         #
         if len(self) == 0:
             _str += "%(indent)s// Empty function.\n" % vars()
         else:
+            # TODO / FIXME : Handle local variables scopes accordingly.
+            #for var_k, var_v in self.symbols_tables.symbols(
+            #    self.start_address).variables.iteritems():
+            #    # Create one variable at a time.
+            #    var_type = self.__map_mir_type_to_hir_repr(var_v.item.alloca_type)
+            #    var_name = var_v.name
+            #    _str += "%(indent)s%(var_type)s %(var_name)s;\n" % vars()
+
             for idx, block in enumerate(self.blocks):
-                _str += "%(indent)s// Block %(idx)d\n" % vars()
+                # Add block id as comment is appropiate.
+                if True:
+                    _str += "%(indent)s// Block %(idx)d\n" % vars()
 
                 # Set the label name in case it was specified and only when
                 # there is more than one block statement present.

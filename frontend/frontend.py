@@ -12,8 +12,6 @@ from idioms import IdiomAnalyzerException
 
 from misc.prerequisites import require
 
-from symbols import SymbolsManager, SymbolsManagerException
-
 ##reload(frontend.generic_disasm.base)
 #require("frontend.generic_disasm.base")
 #from frontend.generic_disasm.base import BaseDebuggerException
@@ -44,12 +42,6 @@ from middleend.mir.mir_function import *
 from middleend.mir.mir_type import *
 
 __all__ = ["FrontEnd", "FrontEndException"]
-
-#
-# Only one instance is required to store all the symbolic information
-# pertaining to this binary.
-#
-symbols_tables = SymbolsManager()
 
 
 class FrontEndException(Exception):
@@ -106,8 +98,7 @@ class FrontEnd(object):
         self.idiom_analyzer = idiom_analyzer_type(self.debugger)
 
         # Setup symbol table for local/global variables refrences, etc..
-        global symbols_tables
-        self.symbols_tables = symbols_tables
+        self.symbols_tables = None
 
         # Development flags
         self.debug_inst_info = True
@@ -123,6 +114,16 @@ class FrontEnd(object):
     def name(self):
         """Return the formatted name of the current front-end."""
         return "FrontEnd%s" % self.TARGET_ARCH
+
+    @property
+    def symbols_tables(self):
+        """Return the symbols tables instance for the current application."""
+        return self._symbols_tables
+
+    @symbols_tables.setter
+    def symbols_tables(self, symbols_tables):
+        """Store the symbols tables instance for the current application."""
+        self._symbols_tables = symbols_tables
 
     @property
     def debugger(self):

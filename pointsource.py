@@ -87,6 +87,11 @@ require("frontend.idioms")
 #reload(frontend.lir.lir_operand)
 #from frontend.lir.lir_operand import LowLevelOperand
 require("frontend.lir.lir_operand")
+
+import frontend.symbols
+require("frontend.symbols")
+from frontend.symbols import SymbolsManager, SymbolsManagerException
+
 #------------------------------------------------------------------------------
 #
 # Load middle-end modules
@@ -151,6 +156,12 @@ class PointSource(object):
         # Front-end holders.
         self.front_end = None
         self.determine_front_end()
+
+        #
+        # Only one instance is required to store all the symbolic information
+        # pertaining to this binary.
+        #
+        self.symbols_tables = SymbolsManager()
 
     def init_debugger_module(self):
         """Detect the current debugger invoking the decompiler and perform the
@@ -248,6 +259,7 @@ class PointSource(object):
         """Initialize the front-end of the decompiler."""
         try:
             self.front_end = self.front_end_type()
+            self.front_end.symbols_tables = self.symbols_tables
         except FrontEndFactory, err :
             raise PointSourceException(
                 "Unable to initialize front-end : %(err)s" % vars())
@@ -257,10 +269,12 @@ class PointSource(object):
     def init_middle_end(self):
         """Initialize the middle-end of the decompiler."""
         self.middle_end = MiddleEnd()
+        self.middle_end.symbols_tables = self.symbols_tables
 
     def init_back_end(self):
         """Initialize the back-end of the decompiler."""
         self.back_end = CBackEnd()
+        self.back_end.symbols_tables = self.symbols_tables
 
     def decompile(self):
         """Decompile the previously specified function."""
