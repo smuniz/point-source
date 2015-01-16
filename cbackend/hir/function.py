@@ -38,11 +38,12 @@ class FunctionException(Exception):
 class Function(object):
     """Function class representing a HIR function."""
 
-    def __init__(self):
+    def __init__(self, backend=None):
         self._prologue_addresses = set()
         self._epilogue_addresses = set()
         self.parameters = list()
         self.blocks = list()
+        self.backend = backend
 
         self.start_address = 0
         self.end_address = 0
@@ -54,6 +55,16 @@ class Function(object):
         #self.current = 0
 
         self.symbols_tables = None
+
+    @property
+    def backend(self):
+        """Return the backend for the current function."""
+        return self._backend
+
+    @backend.setter
+    def backend(self, backend):
+        """Store the backend for the current function."""
+        self._backend = backend
 
     @property
     def has_parameters(self):
@@ -374,9 +385,9 @@ class Function(object):
         name = self.name
         if self.has_parameters:
             params_list = list()
-            #for param in self.parameters:
-            #    params_list.append("%s %s" % (
-            #        self.__map_mir_type_to_hir_repr(param.type), param.name))
+            for param in self.parameters:
+                params_list.append("%s %s" % (
+                    self.backend.map_mir_type_to_hir_repr(param.type), param.name))
 
             params = "(" + ", ".join(params_list) + ")"
         else:
@@ -419,13 +430,17 @@ class Function(object):
         if len(self) == 0:
             _str += "%(indent)s// Empty function.\n" % vars()
         else:
+            address = self.start_address
+            local_vars = self.symbols_tables.symbols(address).variables
+
             # TODO / FIXME : Handle local variables scopes accordingly.
-            #for var_k, var_v in self.symbols_tables.symbols(
-            #    self.start_address).variables.iteritems():
-            #    # Create one variable at a time.
-            #    var_type = self.__map_mir_type_to_hir_repr(var_v.item.alloca_type)
-            #    var_name = var_v.name
-            #    _str += "%(indent)s%(var_type)s %(var_name)s;\n" % vars()
+            for var_k, var_v in local_vars.iteritems():
+                # Create one variable at a time.
+                var_type = self.backend.map_mir_type_to_hir_repr(
+                    var_v.item.alloca_type)
+                var_name = var_v.name
+
+                _str += "%(indent)s%(var_type)s %(var_name)s;\n" % vars()
 
             for idx, block in enumerate(self.blocks):
                 # Add block id as comment is appropiate.

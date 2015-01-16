@@ -103,6 +103,12 @@ class HirTextOutput(TextOutputMedia):
 
         super(HirTextOutput, self).generate_output(title)
 
+    def colorize_simple(self):
+        """Fill the recently created window with the text."""
+        # Iterate through every function present in the MIR.
+        for line in str(self.hir).splitlines():
+            self.__colorize_line(line)
+
     def colorize(self):
         """Fill the recently created window with the text."""
         line_number = 0
@@ -114,18 +120,37 @@ class HirTextOutput(TextOutputMedia):
 
         self.add_lines(func_opening)
 
+        # Map function opening source code to the corresponding assembly lines.
         for index in xrange(len(func_opening)):
             #print "prologue : index %d - line_number %d" % (index, line_number)
             self.address_map[line_number] = self.hir.prologue_addresses
             line_number += 1 # Move forward line number index.
 
-        #
-        # Generate function body.
-        #
+        # Set the indentation and other output-related variables.
         self.label_indent = 1
         indent_level = 1
         indent = " " * (indent_level * 4)
 
+        # Add local variables to the source code output.
+        address = self.hir.start_address
+        local_vars = self.hir.symbols_tables.symbols(address).variables
+
+        for var_k, var_v in local_vars.iteritems():
+            # Create one variable at a time.
+            var_type = self.as_identifier(
+                self.hir.backend.map_mir_type_to_hir_repr(
+                    var_v.item.alloca_type))
+            var_name = self.as_variable_name(var_v.name)
+
+            _str = "%(indent)s%(var_type)s %(var_name)s;\n" % vars()
+            self.add_line(self.as_identifier(_str))
+
+        # Add an empty line but don't count it in the source mapping.
+        self.add_line(self.as_string(""))
+
+        #
+        # Generate function body.
+        #
         for block in self.hir.blocks:
 
             if len(self.hir.blocks) > 1 and block.label is not None:
@@ -156,6 +181,8 @@ class HirTextOutput(TextOutputMedia):
 
         self.add_lines(func_closure)
 
+        # Map the function clousure source code to the corresponding assembly
+        # lines.
         for index in xrange(len(func_closure)):
             #print "epilogue : index %d - line_number %d" % (index, line_number)
             self.address_map[line_number] = self.hir.epilogue_addresses
@@ -291,16 +318,25 @@ class HirTextOutput(TextOutputMedia):
 
         name = self.as_function_name(self.hir.name)
 
-        params = ""
         if self.hir.has_parameters:
-            pass
-            #params = "%s" % (" ".join(self.hir.get_parameter_n[0]))
+            # Create a list of all the parameters along with its corresponding
+            # types and format them accordingly to the user UI settings before
+            # displaying it.
+            params_list = list()
 
-            #params += ", ".join([param_tuple \
-            #    for param_tuple in self.hir.paramters[1 : ]])
+            for param in self.hir.parameters:
+                var_type = self.as_identifier(
+                    self.hir.backend.map_mir_type_to_hir_repr(param.type))
+                var_name = self.as_variable_name(param.name)
+
+                params_list.append("%(var_type)s %(var_name)s" % vars())
+
+            params = "(" + ", ".join(params_list) + ")"
+        else:
+            params = "()"
 
         func_repr.append(
-            "%(ret_type)s %(call_conv)s%(name)s (%(params)s)" % vars())
+            "%(ret_type)s %(call_conv)s%(name)s %(params)s" % vars())
 
         func_repr.append(self.as_string("{"))
 

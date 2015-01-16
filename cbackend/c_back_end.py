@@ -170,7 +170,7 @@ class CBackEnd(object):
 
             # self.hir must contain a global scope and the newly created
             # function in it.
-            self.hir = Function()
+            self.hir = Function(self)
             self.hir.symbols_tables = self.symbols_tables
 
             # Pass addresses for instruction tracking purposes.
@@ -188,7 +188,7 @@ class CBackEnd(object):
             self.hir.name = mir_function.name
 
             self.hir.return_type = \
-                self.__map_mir_type_to_hir_repr(mir_function.return_type)
+                self.map_mir_type_to_hir_repr(mir_function.return_type)
 
             self.hir.parameters = mir_function.arguments
 
@@ -391,7 +391,7 @@ class CBackEnd(object):
         hir_output = HirTextOutput(self.hir)
         hir_output.generate_output("Decompiled code")
 
-    def __map_mir_type_to_hir_repr(self, mir_type):
+    def map_mir_type_to_hir_repr(self, mir_type):
         """Return the HIR string representation of the given MIR type."""
         return MIR_TYPE_TO_HIR_STRING.get(type(mir_type), None)
 
