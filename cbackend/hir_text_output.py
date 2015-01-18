@@ -146,7 +146,7 @@ class HirTextOutput(TextOutputMedia):
             self.add_line(self.as_identifier(_str))
 
         # Add an empty line but don't count it in the source mapping.
-        self.add_line(self.as_string(""))
+        self.add_line("")
 
         #
         # Generate function body.

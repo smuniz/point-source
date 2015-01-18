@@ -442,6 +442,8 @@ class Function(object):
 
                 _str += "%(indent)s%(var_type)s %(var_name)s;\n" % vars()
 
+            _str += "\n" # Add an empty line as a separator.
+
             for idx, block in enumerate(self.blocks):
                 # Add block id as comment is appropiate.
                 if True:
