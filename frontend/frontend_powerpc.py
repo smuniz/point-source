@@ -119,10 +119,10 @@ class FrontEndPowerPc(FrontEnd):
             # Instruction : load word and zero
 
             # Determine if destination is the stack or any other location.
-            is_stack_dest = lir_inst[1].value[0] in \
+            is_stack_src = lir_inst[1].value[0] in \
                 self.lir_function.stack_access_registers
 
-            if is_stack_dest:
+            if is_stack_src:
                 # Seems like the destination register used as base is a stack
                 # (or copy of) access register so we'll go this way.
                 src_offset = lir_inst[1].value[1]  # Get second element of the
@@ -140,11 +140,11 @@ class FrontEndPowerPc(FrontEnd):
                         "Accesing stack without initialization at 0x%08X" % \
                         lir_inst.address)
 
+                # TODO : Is this code bellow really necessary???
                 # Use the newly created MIR viariable in the load
                 # operation to fully represent the instruction.
-                rt_reg = lir_inst[0].value
+                #rt_reg = lir_inst[0].value
 
-                # TODO : Is this code bellow really necessary???
                 ## TODO / FIXME : Determine if the dest register is some other
                 ## variable or anything else besides a parameter. Assume
                 ## IT IS NOT a parameter right now.
@@ -158,11 +158,6 @@ class FrontEndPowerPc(FrontEnd):
                 #if rs is None:
                 #    raise FrontEndPowerPcException(
                 #        "Unable to locate rS parameter symbol.")
-
-                print "=-=-=-> rS %s - rD %s" % (type(mir_var), mir_var)
-                #self.mir_function.arguments[0].name = "i_arg%d" % 0
-
-                mir_inst = self.mir_inst_builder.load(mir_var)
 
                 # Add symbol to the symbols table.
                 self.current_symbols_table.add_symbol(
