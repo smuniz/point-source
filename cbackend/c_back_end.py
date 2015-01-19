@@ -201,6 +201,10 @@ class CBackEnd(object):
             self.hir_block_stmt = CompoundStatement()
             self.hir_function.add_block(self.hir_block_stmt)
 
+            # Store the current symbol table to use.
+            self.current_symbols_table = \
+                self.symbols_manager.symbols(self.function_address)
+
             for bb_idx, mir_basic_block in enumerate(self.mir_function):
                 #print "-> Basic block %d (%s):%s" % (
                 #    bb_idx, mir_basic_block.label, mir_basic_block)
@@ -222,6 +226,7 @@ class CBackEnd(object):
                     #
                     hir_stmt = self.transform_to_hir(mir_inst)
 
+                    hir_is_used = self.symbols_manager.
                     if hir_stmt is not None:
                         # Now the newly created instruction is stored in a basic
                         # block, whose purpose is to represent a group of
