@@ -185,7 +185,6 @@ class FrontEnd(object):
         for idx, (param_reg, mir_param) in self.lir_function.param_regs.iteritems():
             #print "|==> Name : ", self.mir_function.arguments[idx].name,
             self.mir_function.arguments[idx].name = "i_arg%d" % idx
-            print "|-->", self.mir_function.arguments[idx].name
 
         # Set the default calling convention.
         #self.mir_function.set_calling_convention(CALL_CONV_C)
@@ -263,7 +262,7 @@ class FrontEnd(object):
         # Propagate addresses by adding each prologue and epilogue address to
         # the list of addresses in the MIR function in order to keep track of
         # assembly->MIR addrresses during translation.
-        print "[+] Propagatin LIR-to-MIR prologue and epilogue addresses."
+        print "[+] Propagating LIR-to-MIR prologue and epilogue addresses."
 
         for address in self.lir_function.prologue_addresses:
             self.mir_function.add_prologue_address(address)
@@ -409,7 +408,7 @@ class FrontEnd(object):
 
         @func_address : The address of the function to analyze.
         """
-        print "Current depth is %d" % depth
+        #print "Current depth is %d" % depth
 
         try:
             print "[+] Generating Low level IR for function '%s'" % \
@@ -507,6 +506,7 @@ class FrontEnd(object):
             print "[+] Initiating idioms analysis phase 2..."
             self.idiom_analyzer.perform_phase2_analysis()
 
+            print "[+] Displaying current symbols table:"
             print str(self.current_symbols_table)
 
         except IdiomAnalyzerException, err:

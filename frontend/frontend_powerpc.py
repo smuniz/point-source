@@ -102,15 +102,20 @@ class FrontEndPowerPc(FrontEnd):
                 pass
 
         elif lir_inst.is_type(self.iset.PPC_clrlwi):
+            # Instruction : clear left with inmediate
             pass
 
         elif lir_inst.is_type(self.iset.PPC_lbz):
+            # Instruction : load byte and zero
             pass
 
         elif lir_inst.is_type(self.iset.PPC_li):
+            # Instruction : load inmediate
+
             # Add symbol to the symbols table.
             self.current_symbols_table.add_symbol(
-                address, None, None, None, MiddleIrConstantInt(MiddleIrTypeInt(32), lir_inst[1].value))
+                address, None, None, None,
+                MiddleIrConstantInt(MiddleIrTypeInt(32), lir_inst[1].value))
 
         elif lir_inst.is_type(self.iset.PPC_lis):
             pass
@@ -181,10 +186,7 @@ class FrontEndPowerPc(FrontEnd):
             # Instruction : store word
 
             # Determine if destination is the stack or any other location.
-            is_stack_dest = lir_inst[1].value[0] in \
-                self.lir_function.stack_access_registers
-
-            if is_stack_dest:
+            if self._is_stack_destination(lir_inst):
                 # Seems like the destination register used as base is a stack
                 # (or copy of) access register so we'll go this way.
                 dest_offset = lir_inst[1].value[1]  # Get second element of the
@@ -416,8 +418,9 @@ class FrontEndPowerPc(FrontEnd):
         # Is there any PPC instruction whose source is not first operand
         # and destination are the others and can store values in the stack?
         # Not that I know so this should work.
-        if not (lir_inst[0].is_reg_n(self.iset.ARGUMENT_REGISTERS) and \
-            lir_inst[1].is_displ and lir_inst[1].is_displ_n(
-                self.lir_function.stack_access_registers)):
-            return False
+        #if lir_inst[0].is_reg_n(self.iset.ARGUMENT_REGISTERS) and \
+        if lir_inst[1].is_displ_n(
+            self.lir_function.stack_access_registers):
+            return True
+        return False
 

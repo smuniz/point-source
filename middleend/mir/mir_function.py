@@ -327,7 +327,7 @@ class MiddleIrFunction(MiddleIrFunctionBase):
                 self.arguments.append(arg)
 
         self.__llvm_func_def = llvm_func_def
-        print self.__llvm_func_def
+        #print self.__llvm_func_def
 
     @property
     def module(self):

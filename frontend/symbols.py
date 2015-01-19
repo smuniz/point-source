@@ -42,17 +42,17 @@ class SymbolsTable(object):
     def __str__(self):
         _str = list()
 
-        _str.append("[+] Parameters list:")
+        _str.append("    * Parameters list:")
         for k, (idx, i) in enumerate(self.parameters.iteritems()):
             _str.append("\t%02d | %08d | %10s | %10s | %10s | %r" % (
                 k, idx, i.name, i.type, i.scope, i.item))
 
-        _str.append("[+] Local variables list:")
+        _str.append("    * Local variables list:")
         for k, (addr, i) in enumerate(self.variables.iteritems()):
             _str.append("\t%02d | %08x | %10s | %10s | %10s | %r" % (
                 k, addr, i.name, i.type, i.scope, i.item))
             
-        _str.append("[+] Symbols mapping list:")
+        _str.append("    * Symbols mapping list:")
         for k, (addr, i) in enumerate(self.symbols.iteritems()):
             _str.append("\t%02d | %08x | %10s | %10s | %10s | %r" % (
                 k, addr, i.name, i.type, i.scope, i.item))
