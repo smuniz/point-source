@@ -135,29 +135,11 @@ class FrontEndPowerPc(FrontEnd):
                     mir_var = \
                         self.current_symbols_table.variables[src_offset].item
                 else:
-                    #mir_var = self._create_local_variable(src_offset)
                     raise FrontEndPowerPcException(
                         "Accesing stack without initialization at 0x%08X" % \
                         lir_inst.address)
 
-                # TODO : Is this code bellow really necessary???
-                # Use the newly created MIR viariable in the load
-                # operation to fully represent the instruction.
-                #rt_reg = lir_inst[0].value
-
-                ## TODO / FIXME : Determine if the dest register is some other
-                ## variable or anything else besides a parameter. Assume
-                ## IT IS NOT a parameter right now.
-                #if False:
-                #    param_idx = self.iset.ARGUMENT_REGISTERS.index(rt_reg)
-                #    #rs = self.current_symbols_table.parameters.get(param_idx, None)
-                #    rs = self.mir_function.arguments[param_idx]
-                #else:
-                #    rs = 
-
-                #if rs is None:
-                #    raise FrontEndPowerPcException(
-                #        "Unable to locate rS parameter symbol.")
+                mir_inst = self.mir_inst_builder.load(mir_var)
 
                 # Add symbol to the symbols table.
                 self.current_symbols_table.add_symbol(
@@ -182,7 +164,7 @@ class FrontEndPowerPc(FrontEnd):
             elif du_addr in self.current_symbols_table.variables:
                 src = self.current_symbols_table.variables[du_addr].item
             else:
-                print self.current_symbols_table
+                #print self.current_symbols_table
                 raise FrontEndPowerPcException(
                     "No symbol found for DU chain (reg %s) at address "
                     "0x%08X referenced by 0x%08X" % (
@@ -309,21 +291,6 @@ class FrontEndPowerPc(FrontEnd):
                 if lir_callee is None:
                     return None
 
-                """
-                # Using the retrieved LIR function now create a MIR function
-                # with the corresponding information.
-                mir_callee = MiddleIrFunction(lir_callee.name, self.mir_module)
-
-                mir_callee.return_type = MiddleIrTypeVoid()
-                #mir_callee.arguments = [MiddleIrTypeChar()] * 15
-                mir_callee.arguments = MiddleIrTypePointer(MiddleIrTypeChar()),
-
-                self.mir_module.add_function(mir_callee)
-
-                # Assign a name to each argument of the function being called.
-                for arg_index, arg in enumerate(mir_callee.arguments):
-                    mir_callee.set_argument_name(0, "arg%s" % arg_index)
-                """
                 du_chain_regs = lir_callee.du_chain[lir_callee.start_address].keys()
                 self.lir_function.update_chains(
                     du_chain_regs, lir_inst.address, forward=False)
