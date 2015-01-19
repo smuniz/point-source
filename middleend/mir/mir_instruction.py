@@ -141,6 +141,10 @@ class MiddleIrInstructionBuilder(object):
         """Generate a LLVM IR store instruction."""
         return MiddleIrStoreInstruction(self, value, pointer, align, volatile)
 
+    def inttoptr(self, value, dest_type, name=""):
+        """Generate a LLVM IR inttoptr instruction."""
+        return MiddleIrIntToPtrInstruction(self, value, dest_type, name)
+
     #
     # Terminator instructions
     #
@@ -232,9 +236,6 @@ class MiddleIrInstruction(MiddleIrLLVMInstance, Area):
         #print "type : %d" % _type
         #print "[[[[[]]]]]]]]]]]]>>> %s" % self._ptr
 
-        if self._ptr is None:
-            self.group = UNKNOWN_GROUP
-
         if _type in TERMINATOR_INSTRUCTIONS:
             self.group = TERMINATOR_GROUP
 
@@ -243,9 +244,6 @@ class MiddleIrInstruction(MiddleIrLLVMInstance, Area):
 
         elif _type in OTHER_INSTRUCTIONS:
             self.group = OTHER_GROUP
-
-        #if self.is_terminator:
-        #    self.group = TERMINATOR_GROUP
 
         #elif self.is_binary_op:
         #    self.group = BINARY_OP_GROUP
@@ -403,8 +401,13 @@ COMMUTATIVE_GROUP = 6
 
 MEMORY_ACCESS_GROUP = 9
 
-OTHER_GROUP = 10
-UNKNOWN_GROUP = 11
+BITWISE_BINARY_GROUP = 10
+VECTOR_GROUP = 11
+AGGREGATE_GROUP = 12
+CONVERSION_GROUP = 13
+
+OTHER_GROUP = 14
+UNKNOWN_GROUP = 15
 
 GROUP_NAMES = {
     TERMINATOR_GROUP        : "terminator",
@@ -417,6 +420,11 @@ GROUP_NAMES = {
     COMMUTATIVE_GROUP       : "commutative",
 
     MEMORY_ACCESS_GROUP     : "memory_access",
+
+    BITWISE_BINARY_GROUP    : "bitwise_binary",
+    VECTOR_GROUP            : "vector",
+    AGGREGATE_GROUP         : "aggregate",
+    CONVERSION_GROUP        : "conversion",
 
     OTHER_GROUP             : "other",
     UNKNOWN_GROUP           : "unknown",
@@ -470,48 +478,43 @@ MEMORY_ACCESS_OPERATIONS = [
     OPCODE_GETELEMENTPTR,
     ]
 
+BITWISE_BINARY_OPERATIONS = [
+    OPCODE_SHL,
+    OPCODE_LSHR,
+    OPCODE_ASHR,
+    OPCODE_AND,
+    OPCODE_OR,
+    OPCODE_XOR,
+    ]
+
+VECTOR_OPERATIONS = [
+    OPCODE_EXTRACTELEMENT,
+    OPCODE_INSERTELEMENT,
+    OPCODE_SHUFFLEVECTOR,
+    ]
+
+AGGREGATE_OPERATIONS = [
+    OPCODE_EXTRACTVALUE,
+    OPCODE_INSERTVALUE,
+    ]
+
+CONVERSION_OPERATIONS = [
+    OPCODE_TRUNC,
+    OPCODE_ZEXT,
+    OPCODE_SEXT,
+    OPCODE_FPTRUNC,
+    OPCODE_FPEXT,
+    OPCODE_FPTOUI,
+    OPCODE_FPTOSI,
+    OPCODE_UITOFP,
+    OPCODE_SITOFP,
+    OPCODE_PTRTOINT,
+    OPCODE_INTTOPTR,
+    OPCODE_BITCAST,
+    OPCODE_ADDRSPACECAST,
+    ]
+
 """
-Bitwise Binary Operations
-'shl' Instruction
-'lshr' Instruction
-'ashr' Instruction
-'and' Instruction
-'or' Instruction
-'xor' Instruction
-
-Vector Operations
-'extractelement' Instruction
-'insertelement' Instruction
-'shufflevector' Instruction
-
-Aggregate Operations
-'extractvalue' Instruction
-'insertvalue' Instruction
-
-Conversion Operations
-'trunc .. to' Instruction
-'zext .. to' Instruction
-'sext .. to' Instruction
-'fptrunc .. to' Instruction
-'fpext .. to' Instruction
-'fptoui .. to' Instruction
-'fptosi .. to' Instruction
-'uitofp .. to' Instruction
-'sitofp .. to' Instruction
-'ptrtoint .. to' Instruction
-'inttoptr .. to' Instruction
-'bitcast .. to' Instruction
-'addrspacecast .. to' Instruction
-
-Other Operations
-'icmp' Instruction
-'fcmp' Instruction
-'phi' Instruction
-'select' Instruction
-'call' Instruction
-'va_arg' Instruction
-'landingpad' Instruction
-
 Intrinsic Functions
 
 Variable Argument Handling Intrinsics
@@ -744,6 +747,42 @@ class MiddleIrAllocaInstruction(MiddleIrInstruction):
         self.name = name
 
         self._ptr = builder._ptr.alloca(alloca_type._ptr)#, self.size_ptr, name)
+
+    def get_readable_inners(self):
+        """..."""
+        return self.name
+
+
+class MiddleIrPtrToIntInstruction(MiddleIrInstruction):
+    """Generate a MIR IR 'ptrtoint' instruction."""
+
+    def __init__(self, builder, value, dest_type, name=""):
+        super(MiddleIrPtrToIntInstruction, self).__init__(
+            _type=OPCODE_PTRTOINT)
+
+        self.value = value
+        self.dest_type = dest_type
+        self.name = name
+
+        self._ptr = builder._ptr.inttoptr(value._ptr, dest_type._ptr, name)
+
+    def get_readable_inners(self):
+        """..."""
+        return self.name
+
+
+class MiddleIrIntToPtrInstruction(MiddleIrInstruction):
+    """Generate a MIR IR 'inttoptr' instruction."""
+
+    def __init__(self, builder, value, dest_type, name=""):
+        super(MiddleIrIntToPtrInstruction, self).__init__(
+            _type=OPCODE_INTTOPTR)
+
+        self.value = value
+        self.dest_type = dest_type
+        self.name = name
+
+        self._ptr = builder._ptr.inttoptr(value._ptr, dest_type._ptr, name)
 
     def get_readable_inners(self):
         """..."""

@@ -307,6 +307,7 @@ class FrontEndPowerPc(FrontEnd):
                     enumerate(self.lir_function.ud_chain[address].iteritems()):
                     #print "arg %d (0x%08X) reg %d" % (
                     #    arg_idx, reg_arg_address, reg_arg)
+                    
                     mir_callee_args.append(
                         self.current_symbols_table.symbols[reg_arg_address].item
                         )
