@@ -320,34 +320,6 @@ class MiddleIrInstruction(MiddleIrLLVMInstance, Area):
 
     @property
     def is_binary_op(self):
-        return self._ptr.is_binary_op
-
-    @property
-    def is_shift(self):
-        return self._ptr.is_shift
-
-    @property
-    def is_cast(self):
-        return self._ptr.is_cast
-
-    @property
-    def is_logical_shift(self):
-        return self._ptr.is_logical_shift
-
-    @property
-    def is_arithmetic_shift(self):
-        return self._ptr.is_arithmetic_shift
-
-    @property
-    def is_associative(self):
-        return self._ptr.is_associative
-
-    @property
-    def is_commutative(self):
-        return self._ptr.is_commutative
-
-    @property
-    def is_binary_op(self):
         """Indicate if the current instruction is a binary operator."""
         return self._ptr.is_binary_op
 
