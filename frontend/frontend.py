@@ -637,6 +637,8 @@ class FrontEnd(object):
                 int_ptr, None, var_name)
 
             if update_symbols_table:
+                #print "---> Adding local variable offset %d (%s) : %s" % \
+                #    (address, var_name, mir_var)
                 self.current_symbols_table.add_local_variable(
                     address, var_name, mir_var)
 

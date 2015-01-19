@@ -123,8 +123,7 @@ class MiddleIrInstructionBuilder(object):
 
     def load(self, ptr, name=""):
         """Generate a LLVM IR load instruction."""
-        _type = OPCODE_LOAD
-        return MiddleIrInstruction(self._ptr.load(ptr, name), _type)
+        return MiddleIrLoadInstruction(self, ptr, name)
 
     def malloc(self, ty, name=""):
         """Generate a LLVM IR malloc instruction."""
@@ -690,6 +689,27 @@ class MiddleIrGepInstruction(MiddleIrInstruction):
         """..."""
         return self.pointer.get_readable_inners()
 
+
+class MiddleIrLoadInstruction(MiddleIrInstruction):
+    """Generate a MIR IR 'load' instruction."""
+
+    def __init__(self, builder, pointer, name):#, align=0, volatile=False):
+        super(MiddleIrLoadInstruction, self).__init__(
+            _type=OPCODE_LOAD)
+
+        self.pointer = pointer
+        self.name = name
+        #self.align = align
+        #self.volatile = volatile
+
+        self._ptr = builder._ptr.load(
+                pointer._ptr, name)#align, volatile)
+
+    def get_readable_inners(self):
+        """..."""
+        return self.pointer.get_readable_inners()
+
+
 class MiddleIrStoreInstruction(MiddleIrInstruction):
     """Generate a MIR IR 'store' instruction."""
 
@@ -708,6 +728,7 @@ class MiddleIrStoreInstruction(MiddleIrInstruction):
     def get_readable_inners(self):
         """..."""
         return self.pointer.get_readable_inners()
+
 
 class MiddleIrAllocaInstruction(MiddleIrInstruction):
     """Generate a MIR IR 'alloca' instruction."""

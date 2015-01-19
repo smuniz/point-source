@@ -116,7 +116,62 @@ class FrontEndPowerPc(FrontEnd):
             pass
 
         elif lir_inst.is_type(self.iset.PPC_lwz):
-            pass
+            # Instruction : load word and zero
+
+            # Determine if destination is the stack or any other location.
+            is_stack_dest = lir_inst[1].value[0] in \
+                self.lir_function.stack_access_registers
+
+            if is_stack_dest:
+                # Seems like the destination register used as base is a stack
+                # (or copy of) access register so we'll go this way.
+                src_offset = lir_inst[1].value[1]  # Get second element of the
+                                                    # tuple.
+
+                # We're about to store a value in the stack so we first check
+                # if the stack variable as been previously created and do it in
+                # case it didn't.
+                if src_offset in self.current_symbols_table.variables:
+                    mir_var = \
+                        self.current_symbols_table.variables[src_offset].item
+                else:
+                    #mir_var = self._create_local_variable(src_offset)
+                    raise FrontEndPowerPcException(
+                        "Accesing stack without initialization at 0x%08X" % \
+                        lir_inst.address)
+
+                # Use the newly created MIR viariable in the load
+                # operation to fully represent the instruction.
+                rt_reg = lir_inst[0].value
+
+                # TODO : Is this code bellow really necessary???
+                ## TODO / FIXME : Determine if the dest register is some other
+                ## variable or anything else besides a parameter. Assume
+                ## IT IS NOT a parameter right now.
+                #if False:
+                #    param_idx = self.iset.ARGUMENT_REGISTERS.index(rt_reg)
+                #    #rs = self.current_symbols_table.parameters.get(param_idx, None)
+                #    rs = self.mir_function.arguments[param_idx]
+                #else:
+                #    rs = 
+
+                #if rs is None:
+                #    raise FrontEndPowerPcException(
+                #        "Unable to locate rS parameter symbol.")
+
+                print "=-=-=-> rS %s - rD %s" % (type(mir_var), mir_var)
+                #self.mir_function.arguments[0].name = "i_arg%d" % 0
+
+                mir_inst = self.mir_inst_builder.load(mir_var)
+
+                # Add symbol to the symbols table.
+                self.current_symbols_table.add_symbol(
+                    address, None, None, None, mir_inst)
+
+            else:
+                # A memory area not being the stack is being accessed.
+                raise FrontEndPowerPcException(
+                    "PPC_lwz on non-stack is unimplemented")
 
         elif lir_inst.is_type(self.iset.PPC_mr):
             reg = lir_inst[1].value
@@ -129,23 +184,26 @@ class FrontEndPowerPc(FrontEnd):
 
             if du_addr in self.current_symbols_table.symbols:
                 src = self.current_symbols_table.symbols[du_addr].item
-
-                # TODO / FIXME : Check if src is another MIR volatile
-                # instruction.
-                if isinstance(src, MiddleIrVolatileInstruction):
-                    raise FrontEndPowerPcException(
-                        "Chained MIR volatile instructions chaining is "
-                        "unimplemented.")
-                vol = MiddleIrVolatileInstruction(src)
-
-                # Add symbol to the symbols table.
-                self.current_symbols_table.add_symbol(
-                    address, None, None, None, vol)
+            elif du_addr in self.current_symbols_table.variables:
+                src = self.current_symbols_table.variables[du_addr].item
             else:
+                print self.current_symbols_table
                 raise FrontEndPowerPcException(
                     "No symbol found for DU chain (reg %s) at address "
                     "0x%08X referenced by 0x%08X" % (
                     self.iset.GPR_NAMES[reg], du_addr, address))
+
+            # TODO / FIXME : Check if src is another MIR volatile
+            # instruction.
+            if isinstance(src, MiddleIrVolatileInstruction):
+                raise FrontEndPowerPcException(
+                    "Chained MIR volatile instructions chaining is "
+                    "unimplemented.")
+            vol = MiddleIrVolatileInstruction(src)
+
+            # Add symbol to the symbols table.
+            self.current_symbols_table.add_symbol(
+                address, None, None, None, vol)
 
         elif lir_inst.is_type(self.iset.PPC_stb):
             pass
@@ -166,19 +224,19 @@ class FrontEndPowerPc(FrontEnd):
                 # We're about to store a value in the stack so we first check
                 # if the stack variable as been previously created and do it in
                 # case it didn't.
-                if dest_offset in self.current_symbols_table.symbols:
+                if dest_offset in self.current_symbols_table.variables:
                     mir_var = \
-                        self.current_symbols_table.symbols[dest_offset].item
+                        self.current_symbols_table.variables[dest_offset].item
                 else:
                     mir_var = self._create_local_variable(dest_offset)
 
-                # Use the newly created MIR viariable to use it in the store
+                # Use the newly created MIR viariable in the store
                 # operation to fully represent the instruction.
                 rs_reg = lir_inst[0].value
 
                 # TODO / FIXME : Determine if the source register is some other
-                # variable or anything else besides a prameter.
-                # Assume parameter right now.
+                # variable or anything else besides a parameter. Assume
+                # parameter right now.
                 param_idx = self.iset.ARGUMENT_REGISTERS.index(rs_reg)
                 #rs = self.current_symbols_table.parameters.get(param_idx, None)
                 rs = self.mir_function.arguments[param_idx]
