@@ -180,6 +180,7 @@ class FrontEndPowerPc(FrontEnd):
                 address, None, None, None, src)
 
         elif lir_inst.is_type(self.iset.PPC_stb):
+            # Instruction : store byte
             pass
 
         elif lir_inst.is_type(self.iset.PPC_stw):
