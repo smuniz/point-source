@@ -9,8 +9,10 @@ from middleend.mir.mir_llvm_instance import MiddleIrLLVMInstance
 
 from llvm.core import *
 
-#__all__ = ["MiddleIrConstantBool", "MiddleIrConstantInt",
-#    "MiddleIrConstantArray"]
+#__all__ = ["MiddleIrConstantBool",
+#            "MiddleIrConstantInt",
+#            "MiddleIrConstantArray",
+#    ]
 
 
 class MiddleIrBaseConstantException(MiddleIrException):

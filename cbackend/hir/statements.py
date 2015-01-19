@@ -222,8 +222,9 @@ class ExpressionStatement(Statement):
     control or iteration takes place as a result of an expression statement.
 
     """
-    def __init__(self, addresses=None):
-        super(ExpressionStatement, self).__init__(addresses=addresses)
+    def __init__(self, expression=None, addresses=None):
+        super(ExpressionStatement, self).__init__(
+            expression=expression, addresses=addresses)
 
 
 class GotoStatement(Statement):
@@ -231,8 +232,9 @@ class GotoStatement(Statement):
     to the statement associated with the label specified on the goto statement.
 
     """
-    def __init__(self, addresses=None):
-        super(GotoStatement, self).__init__(addresses=addresses)
+    def __init__(self, expression=None, addresses=None):
+        super(GotoStatement, self).__init__(
+            expression=expression, addresses=addresses)
 
     def __str__(self):
         return "goto loc_%X" % self.expression
@@ -249,6 +251,11 @@ class ReturnStatement(Statement):
 
     def __str__(self):
         if self.expression is not None:
-            return "return 0x%x;" % self.expression
+            # TODO : Determine is it's parenthized.
+            if False:
+                _str = "return (%s);"
+            else:
+                _str =  "return %s;"
+            return _str % self.expression
         else:
             return "return;"

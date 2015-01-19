@@ -98,7 +98,7 @@ class FrontEnd(object):
         self.idiom_analyzer = idiom_analyzer_type(self.debugger)
 
         # Setup symbol table for local/global variables refrences, etc..
-        self.symbols_tables = None
+        self.symbols_manager = None
 
         # Development flags
         self.debug_inst_info = True
@@ -116,14 +116,14 @@ class FrontEnd(object):
         return "FrontEnd%s" % self.TARGET_ARCH
 
     @property
-    def symbols_tables(self):
-        """Return the symbols tables instance for the current application."""
-        return self._symbols_tables
+    def symbols_manager(self):
+        """Return the symbols manager instance for the current application."""
+        return self._symbols_manager
 
-    @symbols_tables.setter
-    def symbols_tables(self, symbols_tables):
-        """Store the symbols tables instance for the current application."""
-        self._symbols_tables = symbols_tables
+    @symbols_manager.setter
+    def symbols_manager(self, symbols_manager):
+        """Store the symbols manager instance for the current application."""
+        self._symbols_manager = symbols_manager
 
     @property
     def debugger(self):
@@ -162,8 +162,8 @@ class FrontEnd(object):
             # Delete the previously created function and create a new one. This
             # is what the user requested so do it (definition might have
             # changed, etc.).
-            if self.mir_function in self.symbols_tables:
-                del self.symbols_tables[self.mir_function.name]
+            if self.mir_function in self.symbols_manager:
+                del self.symbols_manager[self.mir_function.name]
             self.mir_function.delete()
 
         # Seems like the function doesn't already exists in our store so
@@ -432,11 +432,11 @@ class FrontEnd(object):
         try:
             # Store the current symbol table to use.
             self.current_symbols_table = \
-                self.symbols_tables.symbols(self.lir_function.start_address)
+                self.symbols_manager.symbols(self.lir_function.start_address)
 
             print "[+] Initializing idioms analyser..."
             self.idiom_analyzer.init(
-                self.lir_function, None, self.symbols_tables)
+                self.lir_function, None, self.symbols_manager)
 
             #
             # Step x
@@ -477,7 +477,7 @@ class FrontEnd(object):
             #self.idiom_analyzer.mir_function = self.mir_function
             #self.idiom_analyzer.mir_module = self.mir_function.module
             self.idiom_analyzer.init(
-                self.lir_function, self.mir_function, self.symbols_tables)
+                self.lir_function, self.mir_function, self.symbols_manager)
 
             # Output LIR for debugging purposes.
             self.__dump_lir()

@@ -9,7 +9,13 @@ from area import Area
 
 
 class Expression(Area):
-    """Generic expression class."""
+    """Expressions are sequences of operators, operands, and punctuators that
+    specify a computation. The evaluation of expressions is based on the
+    operators that the expressions contain and the context in which they are
+    used. An expression can result in a value and can produce side effects. A
+    side effect is a change in the state of the execution environment.
+
+    """
 
     def __init__(self, value=None, addresses=None):
         super(Expression, self).__init__(addresses)

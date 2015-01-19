@@ -613,18 +613,18 @@ class MiddleIrRetInstruction(MiddleIrInstruction):
 
     def __init__(self, builder, ret_val):
         super(MiddleIrRetInstruction, self).__init__(_type=OPCODE_RET)
-        llvm_inst = None
-        operands = None
+        self.operands = None
 
         if ret_val is None:
-            #Generate a LLVM IR 'ret_void' instruction.
-            #self._ptr = self._ptr.ret_void()
+            # Generate a LLVM IR 'ret_void' instruction.
             self._ptr = builder._ptr.ret_void()
 
         elif type(ret_val) in (tuple, list):
             # Generate a LLVM IR 'ret_many' instruction.
             raise MiddleIrInstructionException("TODO / FIXME: ret_many native llvmpy objs")
             self._ptr = builder._ptr.ret_many(ret_val)
+            # Process each return value.
+            #self.operands = None
 
         else:
             # We're returning just one value.

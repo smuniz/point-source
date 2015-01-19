@@ -7,6 +7,7 @@
 from copy import deepcopy
 from traceback import format_exc
 
+from middleend.mir.mir_constants import *
 from middleend.mir.mir_type import *
 from middleend.mir.mir_instruction import *
 
@@ -78,7 +79,7 @@ class CBackEnd(object):
         self.mir = mir
 
         # Initialize HIR storage.
-        self.hir = None
+        self.hir_function = None
 
         self.function_name = None
         self.function_address = None
@@ -89,14 +90,14 @@ class CBackEnd(object):
         self.debug_inst_info = True
 
     @property
-    def symbols_tables(self):
-        """Return the symbols tables instance for the current application."""
-        return self._symbols_tables
+    def symbols_manager(self):
+        """Return the symbols manager instance for the current application."""
+        return self._symbols_manager
 
-    @symbols_tables.setter
-    def symbols_tables(self, symbols_tables):
-        """Store the symbols tables instance for the current application."""
-        self._symbols_tables = symbols_tables
+    @symbols_manager.setter
+    def symbols_manager(self, symbols_manager):
+        """Store the symbols manager instance for the current application."""
+        self._symbols_manager = symbols_manager
 
     @property
     def mir(self):
@@ -112,12 +113,12 @@ class CBackEnd(object):
         self._mir = mir
 
     @property
-    def hir(self):
+    def hir_function(self):
         """Return the high level IR."""
         return self._hir
 
-    @hir.setter
-    def hir(self, hir):
+    @hir_function.setter
+    def hir_function(self, hir):
         """Store the high level IR for further usage."""
         self._hir = hir
 
@@ -165,48 +166,55 @@ class CBackEnd(object):
         try:
             # Obtain the current being decompiled to start the final
             # decompilation process.
-            mir_function = self.mir.get_function_by_address(
+            self.mir_function = self.mir.get_function_by_address(
                 self.function_address) 
 
-            # self.hir must contain a global scope and the newly created
+            # self.hir_function must contain a global scope and the newly created
             # function in it.
-            self.hir = Function(self)
-            self.hir.symbols_tables = self.symbols_tables
+            self.hir_function = Function(self)
+            self.hir_function.symbols_manager = self.symbols_manager
 
             # Pass addresses for instruction tracking purposes.
-            for address in mir_function.prologue_addresses:
-                self.hir.add_prologue_address(address)
+            for address in self.mir_function.prologue_addresses:
+                self.hir_function.add_prologue_address(address)
 
-            for address in mir_function.epilogue_addresses:
-                self.hir.add_epilogue_address(address)
+            for address in self.mir_function.epilogue_addresses:
+                self.hir_function.add_epilogue_address(address)
 
             #
             # Get all the information for the function declaration. This
             # includes return type, function name, all the parameters with
             # its respective types and optionally the calling convention.
             #
-            self.hir.name = mir_function.name
+            self.hir_function.name = self.mir_function.name
 
-            self.hir.return_type = \
-                self.map_mir_type_to_hir_repr(mir_function.return_type)
+            self.hir_function.return_type = \
+                self.map_mir_type_to_hir_repr(self.mir_function.return_type)
 
-            self.hir.parameters = mir_function.arguments
+            self.hir_function.parameters = self.mir_function.arguments
 
             #
             # Iterate through every basic block represented in the MIR and
             # create its HIR equivalent (block statement) with the appropriate
             # statements and expressions inside.
             #
-            hir_block_stmt = CompoundStatement()
-            self.hir.add_block(hir_block_stmt)
+            self.hir_block_stmt = CompoundStatement()
+            self.hir_function.add_block(self.hir_block_stmt)
 
-            for bb_idx, mir_basic_block in enumerate(mir_function):
+            for bb_idx, mir_basic_block in enumerate(self.mir_function):
                 #print "-> Basic block %d (%s):%s" % (
                 #    bb_idx, mir_basic_block.label, mir_basic_block)
 
-                hir_block_stmt.label = mir_basic_block.label
+                self.hir_block_stmt.label = mir_basic_block.label
 
                 for mir_inst in mir_basic_block:
+                    # Make sure that the MIR object is in fact a MIR
+                    # instruction. We've allocated other MIR objects that are
+                    # not instructions, i.e. MiddleIrConstantInt, and hence we
+                    # must make sure what it is before proceeding.
+                    if not isinstance(mir_inst, MiddleIrInstruction):
+                        continue
+
                     #
                     # This step is very important.
                     # This is where most of the MIR instruction are translated
@@ -218,7 +226,7 @@ class CBackEnd(object):
                         # Now the newly created instruction is stored in a basic
                         # block, whose purpose is to represent a group of
                         # instructions altogether.
-                        hir_block_stmt.add_statement(hir_stmt)
+                        self.hir_block_stmt.add_statement(hir_stmt)
 
                         # Copy all graph information from low-level representation to the
                         # intermediate-level language.
@@ -299,20 +307,29 @@ class CBackEnd(object):
         if isinstance(mir_inst, MiddleIrRetInstruction):
             # Handle return statement. Prepare the statement according to the
             # return type (if any).
-            if len(mir_inst.operands) > 0:
+            if mir_inst.operands is None:
+                hir_stmt = ReturnStatement()
+
+            elif len(mir_inst.operands) == 1:
                 # In case that the return instruction returns a value (not
                 # void) then the return type must be obtained and processed.
                 ret_op = mir_inst.operands[0]
-                ret_tuple = str(ret_op).split(" ") # split the type and name.
 
-                if len(ret_tuple) != 2:
+                if isinstance(ret_op, MiddleIrInstruction):
+                    ret_op = self.transform_to_hir(ret_op)
+                    ret_val = str(ret_op)
+                elif isinstance(ret_op, MiddleIrBaseConstant):
+                    #ret_tuple = str(ret_op).split(" ") # split the type and name.
+                    #ret_type, ret_val = ret_tuple
+                    ret_val = ret_op.value
+                else:
                     raise CBackEndException("Unable to process operand (%s)" % \
                         ret_op)
-
-                ret_type, ret_val = ret_tuple
-                hir_stmt = ReturnStatement(int(ret_val))
+                    
+                hir_stmt = ReturnStatement(ret_val)
             else:
-                hir_stmt = ReturnStatement()
+                raise CBackEndException(
+                    "Return statement with multiple values is unimplemented.")
 
         return hir_stmt
 
@@ -322,11 +339,19 @@ class CBackEnd(object):
         hir_stmt = None
 
         if isinstance(mir_inst, MiddleIrStoreInstruction):
-            arguments = mir_inst.get_readable_inners()
-            hir_stmt = Statement(
+            hir_stmt = ExpressionStatement(
                 SimpleAssignmentExpression(
                     mir_inst.pointer.get_readable_inners(),
                     mir_inst.value.get_readable_inners()),
+                mir_inst.addresses)
+
+        elif isinstance(mir_inst, MiddleIrLoadInstruction):
+            hir_stmt = ExpressionStatement(
+                Expression(
+                    mir_inst.pointer.get_readable_inners()),
+                #SimpleAssignmentExpression(
+                #    mir_inst.pointer.get_readable_inners(),
+                #    mir_inst.pointer.get_readable_inners()),
                 mir_inst.addresses)
 
         return hir_stmt
@@ -386,9 +411,9 @@ class CBackEnd(object):
         # Create an output instance to display the current C code
         # representation hosted inside the HIR.
         print "[+] Creating HIR representation..."
-        print str(self.hir)
+        print str(self.hir_function)
         return
-        hir_output = HirTextOutput(self.hir)
+        hir_output = HirTextOutput(self.hir_function)
         hir_output.generate_output("Decompiled code")
 
     def map_mir_type_to_hir_repr(self, mir_type):

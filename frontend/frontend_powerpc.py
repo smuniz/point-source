@@ -193,17 +193,9 @@ class FrontEndPowerPc(FrontEnd):
                     "0x%08X referenced by 0x%08X" % (
                     self.iset.GPR_NAMES[reg], du_addr, address))
 
-            # TODO / FIXME : Check if src is another MIR volatile
-            # instruction.
-            if isinstance(src, MiddleIrVolatileInstruction):
-                raise FrontEndPowerPcException(
-                    "Chained MIR volatile instructions chaining is "
-                    "unimplemented.")
-            vol = MiddleIrVolatileInstruction(src)
-
             # Add symbol to the symbols table.
             self.current_symbols_table.add_symbol(
-                address, None, None, None, vol)
+                address, None, None, None, src)
 
         elif lir_inst.is_type(self.iset.PPC_stb):
             pass
@@ -391,14 +383,8 @@ class FrontEndPowerPc(FrontEnd):
                         "No symbol found at 0x%X for instruction at 0x%X" % \
                         (op_address, lir_inst.address))
 
-                ret_val = self.current_symbols_table.symbols[op_address].item
-
-                # In case we have a volatile instruction then obtain the real
-                # instruction from it and move on.
-                if isinstance(ret_val, MiddleIrVolatileInstruction):
-                    ret_val = ret_val.llvm_instruction
-
-                mir_inst = self.mir_inst_builder.ret(ret_val)
+                mir_inst = self.mir_inst_builder.ret(
+                    self.current_symbols_table.symbols[op_address].item)
 
             else:  # 2 or more (types bigger than built-ins)
                 raise FrontEndPowerPcException(

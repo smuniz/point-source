@@ -54,7 +54,7 @@ class Function(object):
         self.name = ""
         #self.current = 0
 
-        self.symbols_tables = None
+        self.symbols_manager = None
 
     @property
     def backend(self):
@@ -396,14 +396,14 @@ class Function(object):
         return "%(return_type)s %(name)s %(params)s\n" % vars()
 
     @property
-    def symbols_tables(self):
-        """Return the symbols tables instance for the current application."""
-        return self._symbols_tables
+    def symbols_manager(self):
+        """Return the symbols manager instance for the current application."""
+        return self._symbols_manager
 
-    @symbols_tables.setter
-    def symbols_tables(self, symbols_tables):
-        """Store the symbols tables instance for the current application."""
-        self._symbols_tables = symbols_tables
+    @symbols_manager.setter
+    def symbols_manager(self, symbols_manager):
+        """Store the symbols manager instance for the current application."""
+        self._symbols_manager = symbols_manager
 
 
     def __str__(self):
@@ -431,7 +431,7 @@ class Function(object):
             _str += "%(indent)s// Empty function.\n" % vars()
         else:
             address = self.start_address
-            local_vars = self.symbols_tables.symbols(address).variables
+            local_vars = self.symbols_manager.symbols(address).variables
 
             # TODO / FIXME : Handle local variables scopes accordingly.
             for var_k, var_v in local_vars.iteritems():
