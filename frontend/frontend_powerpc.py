@@ -218,14 +218,15 @@ class FrontEndPowerPc(FrontEnd):
                 #self.mir_function.arguments[0].name = "i_arg%d" % 0
 
                 mir_inst = self.mir_inst_builder.store(rs, mir_var)
+                mir_inst.is_used = True
 
             else:
                 # A memory area not being the stack is being accessed.
                 raise FrontEndPowerPcException(
                     "PPC_stw on non-stack is unimplemented")
 
-        elif lir_inst.is_type(self.iset.PPC_stwu):
-            pass
+        #elif lir_inst.is_type(self.iset.PPC_stwu):
+        #    pass
             ##module = self.mir_module._llvm_getModule()
 
             #lhs = MiddleIrConstantInt32(lir_inst[0].value)
@@ -324,6 +325,7 @@ class FrontEndPowerPc(FrontEnd):
 
                 mir_inst = self.mir_inst_builder.call(
                     mir_callee, mir_callee_args)
+                mir_inst.is_used = True
 
         elif lir_inst.is_type(self.iset.PPC_balways):
             #
@@ -352,6 +354,8 @@ class FrontEndPowerPc(FrontEnd):
                 raise FrontEndPowerPcException(
                     "Unsupported multiple return values %s" % \
                     self.lir_function.return_registers)
+
+            mir_inst.is_used = True
 
         else:
             raise FrontEndPowerPcException(

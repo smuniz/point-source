@@ -226,8 +226,10 @@ class CBackEnd(object):
                     #
                     hir_stmt = self.transform_to_hir(mir_inst)
 
-                    hir_is_used = self.symbols_manager.
-                    if hir_stmt is not None:
+                    #mir_address = mir_inst.address
+                    #hir_is_used = self.current_symbols_table.
+                    if hir_stmt is not None and \
+                        mir_inst.is_used is True:
                         # Now the newly created instruction is stored in a basic
                         # block, whose purpose is to represent a group of
                         # instructions altogether.

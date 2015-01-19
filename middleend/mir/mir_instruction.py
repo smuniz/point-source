@@ -214,6 +214,8 @@ class MiddleIrInstruction(MiddleIrLLVMInstance, Area):
         else:
             self.operands = operands
 
+        self.is_used = False
+
     @property
     def type(self):
         """Return the type this instruction belongs to."""
