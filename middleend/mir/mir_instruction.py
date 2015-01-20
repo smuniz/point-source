@@ -206,7 +206,7 @@ class MiddleIrInstruction(MiddleIrLLVMInstance, Area):
 
     """
 
-    def __init__(self, llvm_instruction=None, _type=None, operands=None):
+    def __init__(self, llvm_instruction=None, _type=None):
         """Initialize the intermediate level IR module class."""
         #super(MiddleIrInstruction, self).__init__()
         # LLVM specific objects initialization.
@@ -217,12 +217,18 @@ class MiddleIrInstruction(MiddleIrLLVMInstance, Area):
         
         self.type = _type
 
-        if operands is None:
-            self.operands = list()
-        else:
-            self.operands = operands
-
         self.is_used = False
+        self.yields = None
+
+    @property
+    def yields(self):
+        """Return the type this instruction yields to."""
+        return self._yields
+
+    @yields.setter
+    def yields(self, _yields):
+        """Store the type this instruction yields to."""
+        self._yields = _yields
 
     @property
     def type(self):
@@ -652,6 +658,7 @@ class MiddleIrCallInstruction(MiddleIrInstruction):
         self.name = name
         self.callee = callee
         self.arguments = arguments
+        self.yields = None # TODO : yields ret type??!?!
 
         #
         # LLVM specifics.
@@ -689,6 +696,7 @@ class MiddleIrGepInstruction(MiddleIrInstruction):
         self.pointer = pointer
         self.indices = indices
         self.name = name
+        self.yields = pointer
 
         #
         # LLVM specifics.
@@ -712,6 +720,7 @@ class MiddleIrLoadInstruction(MiddleIrInstruction):
         self.name = name
         #self.align = align
         #self.volatile = volatile
+        self.yields = pointer
 
         self._ptr = builder._ptr.load(
                 pointer._ptr, name)#align, volatile)
@@ -732,6 +741,7 @@ class MiddleIrStoreInstruction(MiddleIrInstruction):
         self.pointer = pointer
         self.align = align
         self.volatile = volatile
+        self.yields = pointer
 
         self._ptr = builder._ptr.store(
                 value._ptr, pointer._ptr, align, volatile)
@@ -751,6 +761,7 @@ class MiddleIrAllocaInstruction(MiddleIrInstruction):
         self.size_ptr = size._ptr if size else None
         self.alloca_type = alloca_type
         self.name = name
+        self.yields = alloca_type
 
         self._ptr = builder._ptr.alloca(alloca_type._ptr)#, self.size_ptr, name)
 
@@ -769,6 +780,7 @@ class MiddleIrPtrToIntInstruction(MiddleIrInstruction):
         self.value = value
         self.dest_type = dest_type
         self.name = name
+        self.yields = dest_type
 
         self._ptr = builder._ptr.ptrtoint(value._ptr, dest_type._ptr, name)
 
@@ -787,6 +799,7 @@ class MiddleIrIntToPtrInstruction(MiddleIrInstruction):
         self.value = value
         self.dest_type = dest_type
         self.name = name
+        self.yields = dest_type
 
         self._ptr = builder._ptr.inttoptr(value._ptr, dest_type._ptr, name)
 

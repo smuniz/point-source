@@ -287,22 +287,34 @@ class FrontEndPowerPc(FrontEnd):
                 #
                 # Create a function call expression and add it to the IR.
                 #
-                # Make sure that the've already analyzed the callee function
+                # Make sure that they've already analyzed the callee function
                 # and we have it in the cache.
                 lir_callee = self.lir_functions_cache.get(
                     branch_address, None)
 
                 if lir_callee is None:
-                    return None
+                    raise FrontEndPowerPcException(
+                        "Unable to locate callee function at 0x%08X" % \
+                        branch_address)
+
+                mir_callee = MiddleIrFunction.get(self.mir_module, lir_callee.name)
+
+                if mir_callee is None:
+                    raise FrontEndPowerPcException(
+                        "Unable to get supposedly existing MIR function" \
+                        " '%s' at 0x%08X" % (
+                        lir_callee.name, lir_callee.start_address))
 
                 du_chain_regs = lir_callee.du_chain[lir_callee.start_address].keys()
+
                 self.lir_function.update_chains(
                     du_chain_regs, lir_inst.address, forward=False)
 
+                # TODO : Enhance this code.
+                # Process every parameter for the callee and add it to a list
+                # of arguments to pass from the caller.
                 mir_callee_args = list()
 
-                # TODO : Enhance this code when sober and/or awake.
-                #print self.lir_function
                 for arg_idx, (reg_arg, reg_arg_address) in \
                     enumerate(self.lir_function.ud_chain[address].iteritems()):
                     #print "arg %d (0x%08X) reg %d" % (
@@ -312,20 +324,19 @@ class FrontEndPowerPc(FrontEnd):
                         self.current_symbols_table.symbols[reg_arg_address].item
                         )
 
-                mir_callee = MiddleIrFunction.get(self.mir_module, lir_callee.name)
-
-                if mir_callee is None:
-                    raise FrontEndPowerPcException(
-                        "Unable to get supposedly existing MIR function '%s'" % \
-                        lir_callee.name)
-
                 print "[+] About to create call with %d parameters" % \
                     len(lir_callee.param_regs)
 
                 # Display arguments matching (debugging purposes).
-                for idx, (param_reg, mir_param) in lir_callee.param_regs.iteritems():
-                    print "    Param %2d : %s -> %s" % (
-                        idx, mir_callee_args, mir_param)
+                for idx, (param_reg, mir_func_arg) in lir_callee.param_regs.iteritems():
+                    #print "    Param %2d : %r -> %r" % (
+                    #    idx, mir_callee_args[idx], mir_func_arg)
+
+                    # Perform any cast/convertion if appropriate.
+                    if self._argument_requires_convertion(
+                        mir_callee_args[idx], mir_func_arg):
+                        print "    Argument %d required convertion" % arg_idx
+                        self._apply_argument_convertion(mir_func_arg)
 
                 mir_inst = self.mir_inst_builder.call(
                     mir_callee, mir_callee_args)

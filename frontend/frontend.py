@@ -30,11 +30,20 @@ from middleend.mir.mir_basicblock import MiddleIrBasicBlock
 
 #reload(middleend.mir.mir_instruction)
 require("middleend.mir.mir_instruction")
-from middleend.mir.mir_instruction import MiddleIrInstructionBuilder
+from middleend.mir.mir_instruction import MiddleIrInstructionBuilder, \
+                                            MiddleIrInstruction
 
 #reload(middleend.mir.mir_function)
 require("middleend.mir.mir_function")
 from middleend.mir.mir_function import *
+
+#reload(middleend.mir.mir_constants)
+require("middleend.mir.mir_constants")
+from middleend.mir.mir_constants import MiddleIrBaseConstant
+
+#reload(middleend.mir.mir_global_variable)
+require("middleend.mir.mir_global_variable")
+from middleend.mir.mir_global_variable import MiddleIrGlobalVariable
 
 #import middleend.mir.mir_type
 #reload(middleend.mir.mir_type)
@@ -652,3 +661,65 @@ class FrontEnd(object):
     def _is_stack_destination(self, lir_inst):
         """Check that destination of the operation is the stack."""
         return
+
+    # TODO : Complete all the possible convertion combinations.
+    convertion_table = {
+            MiddleIrTypeChar : {
+                MiddleIrTypeChar : None,
+                MiddleIrTypeInt : None,
+                },
+            MiddleIrTypeInt : {},
+            MiddleIrTypeFloat : {},
+            MiddleIrTypeDouble : {},
+            MiddleIrTypeX86Fp80 : {},
+            MiddleIrTypePpcFp128 : {},
+            MiddleIrTypeFp128 : {},
+
+            MiddleIrTypeFunction : {},
+            MiddleIrTypeOpaque : {},
+            MiddleIrTypeStruct : {},
+            MiddleIrTypePackedStruct: {},
+            MiddleIrTypeArray : {},
+            MiddleIrTypePointer : {},
+            MiddleIrTypeVector : {},
+            MiddleIrTypeLabel : {},
+            MiddleIrTypeVoid : {},
+        }
+
+    def _argument_requires_convertion(self, mir_src_param, mir_dst_param):
+        """..."""
+        self.__get_inner_type(mir_src_param)
+
+        return False
+
+    def __get_inner_type(self, mir_obj):
+        """..."""
+        src = "undef"
+        if isinstance(mir_obj, MiddleIrInstruction):
+            src = "instruction"
+            inner_type = mir_obj.yields
+            inner_type = self.__get_inner_type(mir_obj.yields)
+        elif isinstance(mir_obj, MiddleIrBaseConstant):
+            src = "constant"
+            inner_type = mir_obj.type
+        elif isinstance(mir_obj, MiddleIrGlobalVariable):
+            src = "global"
+            inner_type = mir_obj.type
+        elif isinstance(mir_obj, MiddleIrBaseType):
+            src = "type"
+            inner_type = mir_obj.type
+        else:
+            raise FrontEndException(
+                "Unimplemented convertion evaluation type : %r (%s)" % (
+                mir_obj, mir_obj))
+
+        print "\tSrc (%s) : %r" % (src, inner_type)
+        return
+
+    def __is_basic_type(self, mir_type):
+        #if isinstance
+        pass
+
+    def _apply_argument_convertion(self, mir_param):
+        """..."""
+        return mir_param

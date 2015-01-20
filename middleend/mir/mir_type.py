@@ -28,7 +28,21 @@ __all__ = [ "MiddleIrTypeChar",
 
 class MiddleIrBaseType(MiddleIrLLVMInstance):
     """Middle IR basic operations on data types."""
-    pass
+    
+    def __init__(self, llvm_type):
+        """Initialize the instance."""
+        super(MiddleIrBaseType, self).__init__(llvm_type)
+        self.type = None
+
+    @property
+    def type(self):
+        """Return the internal type."""
+        return self._type
+
+    @type.setter
+    def type(self, _type):
+        """Store the internal type."""
+        self._type = _type
 
 
 class MiddleIrTypeChar(MiddleIrBaseType):
@@ -131,6 +145,8 @@ class MiddleIrTypeOpaque(MiddleIrBaseType):
         """Store opaque type body definition."""
         self._ptr.set_body([body_element._ptr for body_element in body])
 
+        self.type = list(body)
+
 class MiddleIrTypeStruct(MiddleIrBaseType):
     """Middle level intermediate representation class of unpacked struct type.
     
@@ -141,6 +157,8 @@ class MiddleIrTypeStruct(MiddleIrBaseType):
         element_types = [element._ptr for element in elements]
         super(MiddleIrTypeStruct, self).__init__(
             Type.struct(element_types, name))
+
+        self.type = list(elements)
 
 
 class MiddleIrTypePackedStruct(MiddleIrBaseType):
@@ -154,6 +172,7 @@ class MiddleIrTypePackedStruct(MiddleIrBaseType):
                 name
                 )
             )
+        self.type = list(elements)
 
 
 class MiddleIrTypeArray(MiddleIrBaseType):
@@ -164,16 +183,18 @@ class MiddleIrTypeArray(MiddleIrBaseType):
         super(MiddleIrTypeArray, self).__init__(
             Type.array(_type._ptr, size))
 
+        self.type = _type
+
 
 class MiddleIrTypePointer(MiddleIrBaseType):
     """Middle level intermediate representation class of pointer type."""
 
-    def __init__(self, pointee, addr_space=0):
+    def __init__(self, pointee_type, addr_space=0):
         """Initialize the instance."""
         # TODO : Validate parameter and raise exception.
         #if self.pointee is None:
             #raise MiddleIr
-        self.pointee = pointee
+        self.type = pointee_type
         super(MiddleIrTypePointer, self).__init__(
             Type.pointer(pointee._ptr, addr_space))
 
