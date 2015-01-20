@@ -141,6 +141,10 @@ class MiddleIrInstructionBuilder(object):
         """Generate a LLVM IR store instruction."""
         return MiddleIrStoreInstruction(self, value, pointer, align, volatile)
 
+    def ptrtoint(self, value, dest_type, name=""):
+        """Generate a LLVM IR ptrtoint instruction."""
+        return MiddleIrPtrToIntInstruction(self, value, dest_type, name)
+
     def inttoptr(self, value, dest_type, name=""):
         """Generate a LLVM IR inttoptr instruction."""
         return MiddleIrIntToPtrInstruction(self, value, dest_type, name)
@@ -241,6 +245,36 @@ class MiddleIrInstruction(MiddleIrLLVMInstance, Area):
 
         elif _type in MEMORY_ACCESS_OPERATIONS:
             self.group = MEMORY_ACCESS_GROUP
+
+        elif _type in BINARY_OP_INSTRUCTIONS:
+            self.group = BINARY_OP_GROUP
+
+        #elif _type in SHIFT_GROUP:
+        #    self.group = SHIFT_GROUP
+
+        #elif _type in LOGICAL_SHIFT_GROUP:
+        #    self.group = LOGICAL_SHIFT_GROUP
+
+        #elif _type in ARITHMETIC_SHIFT_GROUP:
+        #    self.group = ARITHMETIC_SHIFT_GROUP
+
+        #elif _type in ASSOCIATIVE_GROUP:
+        #    self.group = ASSOCIATIVE_GROUP
+
+        #elif _type in COMMUTATIVE_GROUP:
+        #    self.group = COMMUTATIVE_GROUP
+
+        elif _type in BITWISE_BINARY_OPERATIONS:
+            self.group = BITWISE_BINARY_GROUP
+
+        elif _type in VECTOR_OPERATIONS:
+            self.group = VECTOR_GROUP
+
+        elif _type in AGGREGATE_OPERATIONS:
+            self.group = AGGREGATE_GROUP
+
+        elif _type in CONVERSION_OPERATIONS:
+            self.group = CONVERSION_GROUP
 
         elif _type in OTHER_INSTRUCTIONS:
             self.group = OTHER_GROUP
@@ -365,11 +399,11 @@ class MiddleIrVolatileInstruction(object):
 TERMINATOR_GROUP = 0
 
 BINARY_OP_GROUP = 1
-SHIFT_GROUP = 2
+#SHIFT_GROUP = 2
 LOGICAL_SHIFT_GROUP = 3
-ARITHMETIC_SHIFT_GROUP = 4
-ASSOCIATIVE_GROUP = 5
-COMMUTATIVE_GROUP = 6
+#ARITHMETIC_SHIFT_GROUP = 4
+#ASSOCIATIVE_GROUP = 5
+#COMMUTATIVE_GROUP = 6
 
 MEMORY_ACCESS_GROUP = 9
 
@@ -385,11 +419,11 @@ GROUP_NAMES = {
     TERMINATOR_GROUP        : "terminator",
 
     BINARY_OP_GROUP         : "binary",
-    SHIFT_GROUP             : "shift",
-    LOGICAL_SHIFT_GROUP     : "logical",
-    ARITHMETIC_SHIFT_GROUP  : "arithmetic",
-    ASSOCIATIVE_GROUP       : "associative",
-    COMMUTATIVE_GROUP       : "commutative",
+    #SHIFT_GROUP             : "shift",
+    #LOGICAL_SHIFT_GROUP     : "logical",
+    #ARITHMETIC_SHIFT_GROUP  : "arithmetic",
+    #ASSOCIATIVE_GROUP       : "associative",
+    #COMMUTATIVE_GROUP       : "commutative",
 
     MEMORY_ACCESS_GROUP     : "memory_access",
 
@@ -415,7 +449,7 @@ TERMINATOR_INSTRUCTIONS = [
     OPCODE_UNREACHABLE,
     ]
 
-BINARY_OP_GROUP = [
+BINARY_OP_INSTRUCTIONS = [
     OPCODE_ADD,
     OPCODE_FADD,
     OPCODE_SUB,
@@ -483,7 +517,7 @@ CONVERSION_OPERATIONS = [
     OPCODE_PTRTOINT,
     OPCODE_INTTOPTR,
     OPCODE_BITCAST,
-    OPCODE_ADDRSPACECAST,
+    #OPCODE_ADDRSPACECAST,
     ]
 
 """
@@ -736,7 +770,7 @@ class MiddleIrPtrToIntInstruction(MiddleIrInstruction):
         self.dest_type = dest_type
         self.name = name
 
-        self._ptr = builder._ptr.inttoptr(value._ptr, dest_type._ptr, name)
+        self._ptr = builder._ptr.ptrtoint(value._ptr, dest_type._ptr, name)
 
     def get_readable_inners(self):
         """..."""

@@ -273,6 +273,9 @@ class CBackEnd(object):
         elif mir_inst.group is MEMORY_ACCESS_GROUP:
             hir_stmt = self.on_memory_access(mir_inst)
 
+        elif mir_inst.group is CONVERSION_GROUP:
+            hir_stmt = self.on_conversion(mir_inst)
+
         elif mir_inst.group is OTHER_GROUP:
             hir_stmt = self.on_other(mir_inst)
 
@@ -360,6 +363,23 @@ class CBackEnd(object):
                 #    mir_inst.pointer.get_readable_inners(),
                 #    mir_inst.pointer.get_readable_inners()),
                 mir_inst.addresses)
+
+        return hir_stmt
+
+    def on_conversion(self, mir_inst):
+        """Process a MIR 'conversion' instruction."""
+        addresses = mir_inst.addresses
+        hir_stmt = None
+
+        #if isinstance(mir_inst, MiddleIrIntToPtrInstruction):
+        #    hir_stmt = ExpressionStatement(
+        #        SimpleAssignmentExpression(
+        #            mir_inst.pointer.get_readable_inners(),
+        #            mir_inst.value.get_readable_inners()),
+        #        mir_inst.addresses)
+
+        #elif isinstance(mir_inst, MiddleIrPtrToIntInstruction):
+        #    pass
 
         return hir_stmt
 
