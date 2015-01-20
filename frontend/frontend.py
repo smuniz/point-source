@@ -668,7 +668,9 @@ class FrontEnd(object):
                 MiddleIrTypeChar : None,
                 MiddleIrTypeInt : None,
                 },
-            MiddleIrTypeInt : {},
+            MiddleIrTypeInt : {
+                MiddleIrTypeArray : ptrtoint,
+                },
             MiddleIrTypeFloat : {},
             MiddleIrTypeDouble : {},
             MiddleIrTypeX86Fp80 : {},
