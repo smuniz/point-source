@@ -23,6 +23,7 @@ __all__ = [ "MiddleIrTypeChar",
             "MiddleIrTypeVector",
             "MiddleIrTypeLabel",
             "MiddleIrTypeVoid",
+            "MiddleIrBaseType",
             ]
 
 

@@ -329,8 +329,8 @@ class FrontEndPowerPc(FrontEnd):
 
                 # Display arguments matching (debugging purposes).
                 for idx, (param_reg, mir_func_arg) in lir_callee.param_regs.iteritems():
-                    #print "    Param %2d : %r -> %r" % (
-                    #    idx, mir_callee_args[idx], mir_func_arg)
+                    print "    Param %2d : %r -> %r" % (
+                        idx, mir_callee_args[idx], mir_func_arg)
 
                     # Perform any cast/convertion if appropriate.
                     if self._argument_requires_convertion(

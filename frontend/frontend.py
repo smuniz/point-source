@@ -38,11 +38,11 @@ require("middleend.mir.mir_function")
 from middleend.mir.mir_function import *
 
 #reload(middleend.mir.mir_constants)
-require("middleend.mir.mir_constants")
+#require("middleend.mir.mir_constants")
 from middleend.mir.mir_constants import MiddleIrBaseConstant
 
 #reload(middleend.mir.mir_global_variable)
-require("middleend.mir.mir_global_variable")
+#require("middleend.mir.mir_global_variable")
 from middleend.mir.mir_global_variable import MiddleIrGlobalVariable
 
 #import middleend.mir.mir_type
@@ -688,17 +688,16 @@ class FrontEnd(object):
 
     def _argument_requires_convertion(self, mir_src_param, mir_dst_param):
         """..."""
-        self.__get_inner_type(mir_src_param)
+        _type = self.__get_inner_type(mir_src_param)
 
         return False
 
-    def __get_inner_type(self, mir_obj):
+    def __get_inner_type(self, mir_obj, indent=0):
         """..."""
         src = "undef"
         if isinstance(mir_obj, MiddleIrInstruction):
             src = "instruction"
             inner_type = mir_obj.yields
-            inner_type = self.__get_inner_type(mir_obj.yields)
         elif isinstance(mir_obj, MiddleIrBaseConstant):
             src = "constant"
             inner_type = mir_obj.type
@@ -713,12 +712,23 @@ class FrontEnd(object):
                 "Unimplemented convertion evaluation type : %r (%s)" % (
                 mir_obj, mir_obj))
 
-        print "\tSrc (%s) : %r" % (src, inner_type)
-        return
+        print "\t%s+---> Src (%s) : %r" % (("    " * indent), src, inner_type)
+
+        if not self.__is_basic_type(inner_type):
+            inner_type = self.__get_inner_type(inner_type, indent+1)
+
+        return inner_type
 
     def __is_basic_type(self, mir_type):
-        #if isinstance
-        pass
+        if  isinstance(mir_type, MiddleIrTypeChar) or \
+            isinstance(mir_type, MiddleIrTypeInt) or \
+            isinstance(mir_type, MiddleIrTypeFloat) or \
+            isinstance(mir_type, MiddleIrTypeDouble) or \
+            isinstance(mir_type, MiddleIrTypeX86Fp80) or \
+            isinstance(mir_type, MiddleIrTypePpcFp128) or \
+            isinstance(mir_type, MiddleIrTypeFp128):
+            return True
+        return False
 
     def _apply_argument_convertion(self, mir_param):
         """..."""
