@@ -663,7 +663,9 @@ class FrontEnd(object):
         return
 
     def _array_to_int(self, mir_src_param, mir_dst_param):
-        return None
+        mir_inst = mir_inst = self.mir_inst_builder.ptrtoint(
+            )
+        return mir_inst
 
     # TODO : Complete all the possible convertion combinations.
     convertion_table = {
