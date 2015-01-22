@@ -662,9 +662,12 @@ class FrontEnd(object):
         """Check that destination of the operation is the stack."""
         return
 
-    def _array_to_int(self, mir_src_param, mir_dst_param):
-        mir_inst = mir_inst = self.mir_inst_builder.ptrtoint(
-            )
+    def _array_char_to_int(self, mir_src_param, mir_dst_param):
+        mir_inst = None
+        print "--> SRC : %s" % mir_src_param
+        print "--> DST : %s" % mir_dst_param
+        mir_inst = self.mir_inst_builder.ptrtoint(mir_src_param, mir_dst_param)
+        print "--> CST : %s" % mir_inst
         return mir_inst
 
     # TODO : Complete all the possible convertion combinations.
@@ -674,10 +677,10 @@ class FrontEnd(object):
             #    #MiddleIrTypeInt : None,
             #    },
             #MiddleIrTypeInt : {
-            #    MiddleIrTypeArray : _array_to_int,
+            #    MiddleIrTypeArray : _array_char_to_int,
 
-            #"conv_array_to_int" : _array_to_int,
-            "conv_MiddleIrTypeInt_to_MiddleIrTypeArray_MiddleIrTypeChar" : _array_to_int,
+            #"conv_array_to_int" : _array_char_to_int,
+            "conv_MiddleIrTypeInt_to_MiddleIrTypeArray_MiddleIrTypeChar" : _array_char_to_int,
 
             #    },
             #MiddleIrTypeFloat : {},
@@ -718,11 +721,11 @@ class FrontEnd(object):
 
         avail_convertions = self.convertion_table.get(dest_type_key, None)
 
-        print "Is convertion available (key %s) for %s -> %s: %s" % (
+        print "Convertion available (key %s) for %s -> %s: %s" % (
             dest_type_key,
             self._class_name(mir_src_param), 
             self._class_name(mir_dst_param), 
-            bool(avail_convertions is not None))
+            str(bool(avail_convertions is not None)).upper())
 
         if avail_convertions is None:
             return None
@@ -735,7 +738,7 @@ class FrontEnd(object):
         """..."""
         indent += 1
         src = "undef"
-        #print "---> %s" % self._class_name(mir_obj)
+
         if isinstance(mir_obj, MiddleIrInstruction):
             src = "instruction"
             inner_type = mir_obj.yields

@@ -378,7 +378,7 @@ class CBackEnd(object):
         #            mir_inst.value.get_readable_inners()),
         #        mir_inst.addresses)
 
-        #elif isinstance(mir_inst, MiddleIrPtrToIntInstruction):
+        #if isinstance(mir_inst, MiddleIrPtrToIntInstruction):
         #    pass
 
         return hir_stmt

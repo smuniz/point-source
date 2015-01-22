@@ -157,6 +157,16 @@ class LowLevelFunction(object):
                 return bblock
         return None
 
+    def get_instruction_by_address(self, ea):
+        """Return the instruction whose address range accomodates the specified
+        address.
+
+        """
+        for bblock in self:
+            if bblock.has_address(ea):
+                return bblock.get_instruction_by_address(ea)
+        return None
+
     @property
     def name(self):
         """Return the name of the function."""

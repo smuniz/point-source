@@ -338,14 +338,21 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                             inst.analyzed = True
                             self.lir_function.add_epilogue_address(inst.address)
 
-                        if inst.type == self.iset.PPC_lwz and \
-                            inst[0].is_reg_n(temp_lr_reg):
-                            inst.analyzed = True
-                            self.lir_function.add_epilogue_address(inst.address)
+                        #if inst.type == self.iset.PPC_lwz and \
+                        #    inst[0].is_reg_n(temp_lr_reg):
+                        #    inst.analyzed = True
+                        #    self.lir_function.add_epilogue_address(inst.address)
+                            ud = \
+                                self.lir_function.ud_chain[inst.address][inst[1].value]
+                            du_inst = self.lir_function.get_instruction_by_address(ud)
 
-                            print "    Link-register restoration found."
-
-                            break
+                            if du_inst.is_type(self.iset.PPC_lwz):
+                                du_inst.analyzed = True
+                                self.lir_function.add_epilogue_address(du_inst.address)
+                                print "    Link-register restoration found."
+                                break
+                            else:
+                                print "    Link-register restoration found (incomplete)."
 
             else:
                 # Indicate that the current function doesn't perform the common
