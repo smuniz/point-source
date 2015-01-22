@@ -330,13 +330,15 @@ class FrontEndPowerPc(FrontEnd):
                 # Display arguments matching (debugging purposes).
                 for idx, (param_reg, mir_func_arg) in lir_callee.param_regs.iteritems():
                     print "    Param %2d : %r -> %r" % (
-                        idx, mir_callee_args[idx], mir_func_arg)
+                        idx, self._class_name(mir_callee_args[idx]), 
+                        self._class_name(mir_func_arg))
 
                     # Perform any cast/convertion if appropriate.
-                    if self._argument_requires_convertion(
-                        mir_callee_args[idx], mir_func_arg):
+                    convertion_routine = self._argument_requires_convertion(
+                        mir_callee_args[idx], mir_func_arg)
+                    if convertion_routine is not None:
                         print "    Argument %d required convertion" % arg_idx
-                        self._apply_argument_convertion(mir_func_arg)
+                        convertion_routine(self, mir_callee_args[idx], mir_func_arg)
 
                 mir_inst = self.mir_inst_builder.call(
                     mir_callee, mir_callee_args)

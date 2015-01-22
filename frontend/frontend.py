@@ -662,41 +662,78 @@ class FrontEnd(object):
         """Check that destination of the operation is the stack."""
         return
 
+    def _array_to_int(self, mir_src_param, mir_dst_param):
+        return None
+
     # TODO : Complete all the possible convertion combinations.
     convertion_table = {
-            MiddleIrTypeChar : {
-                MiddleIrTypeChar : None,
-                MiddleIrTypeInt : None,
-                },
-            MiddleIrTypeInt : {
-                MiddleIrTypeArray : ptrtoint,
-                },
-            MiddleIrTypeFloat : {},
-            MiddleIrTypeDouble : {},
-            MiddleIrTypeX86Fp80 : {},
-            MiddleIrTypePpcFp128 : {},
-            MiddleIrTypeFp128 : {},
+            #MiddleIrTypeChar : {
+            #    #MiddleIrTypeChar : None,
+            #    #MiddleIrTypeInt : None,
+            #    },
+            #MiddleIrTypeInt : {
+            #    MiddleIrTypeArray : _array_to_int,
 
-            MiddleIrTypeFunction : {},
-            MiddleIrTypeOpaque : {},
-            MiddleIrTypeStruct : {},
-            MiddleIrTypePackedStruct: {},
-            MiddleIrTypeArray : {},
-            MiddleIrTypePointer : {},
-            MiddleIrTypeVector : {},
-            MiddleIrTypeLabel : {},
-            MiddleIrTypeVoid : {},
+            #"conv_array_to_int" : _array_to_int,
+            "conv_MiddleIrTypeInt_to_MiddleIrTypeArray_MiddleIrTypeChar" : _array_to_int,
+
+            #    },
+            #MiddleIrTypeFloat : {},
+            #MiddleIrTypeDouble : {},
+            #MiddleIrTypeX86Fp80 : {},
+            #MiddleIrTypePpcFp128 : {},
+            #MiddleIrTypeFp128 : {},
+
+            #MiddleIrTypeFunction : {},
+            #MiddleIrTypeOpaque : {},
+            #MiddleIrTypeStruct : {},
+            #MiddleIrTypePackedStruct: {},
+            #MiddleIrTypeArray : {},
+            #MiddleIrTypePointer : {},
+            #MiddleIrTypeVector : {},
+            #MiddleIrTypeLabel : {},
+            #MiddleIrTypeVoid : {},
         }
 
     def _argument_requires_convertion(self, mir_src_param, mir_dst_param):
         """..."""
-        _type = self.__get_inner_type(mir_src_param)
+        inner_type = self.__get_inner_type(mir_src_param)
 
-        return False
+        if type(inner_type) is list:
+            print "Final type contained in %s is %s" % (
+                self._class_name(inner_type[0]),
+                self._class_name(inner_type[1]))
+
+            inner_type_k = "%s_%s" % (
+                self._class_name(inner_type[0]),
+                self._class_name(inner_type[1]))
+        else:
+            print "Final type is %r" % inner_type #self._class_name(inner_type)
+            inner_type_k = "%s" % self._class_name(inner_type)
+
+        dest_type_key = "conv_%s_to_%s" % (
+            self._class_name(mir_dst_param), inner_type_k)
+
+        avail_convertions = self.convertion_table.get(dest_type_key, None)
+
+        print "Is convertion available (key %s) for %s -> %s: %s" % (
+            dest_type_key,
+            self._class_name(mir_src_param), 
+            self._class_name(mir_dst_param), 
+            bool(avail_convertions is not None))
+
+        if avail_convertions is None:
+            return None
+
+        #conv_func = avail_convertions.get(inner_type, False)
+        #return conv_func
+        return avail_convertions
 
     def __get_inner_type(self, mir_obj, indent=0):
         """..."""
+        indent += 1
         src = "undef"
+        #print "---> %s" % self._class_name(mir_obj)
         if isinstance(mir_obj, MiddleIrInstruction):
             src = "instruction"
             inner_type = mir_obj.yields
@@ -709,20 +746,26 @@ class FrontEnd(object):
         elif isinstance(mir_obj, MiddleIrBaseType):
             src = "type"
             inner_type = mir_obj.type
+
+            if self.__is_container_type(mir_obj):
+                print "%s+---> Con (%s) : %s" % (
+                    ("    " * indent), src, self._class_name(mir_obj))
+                return [mir_obj, mir_obj.type]#self.__get_inner_type(inner_type, indent)]
+
         else:
             raise FrontEndException(
                 "Unimplemented convertion evaluation type : %r (%s)" % (
                 mir_obj, mir_obj))
 
-        print "\t%s+---> Src (%s) : %r" % (("    " * indent), src, inner_type)
+        print "%s+---> Src (%s) : %s" % (("    " * indent), src, self._class_name(mir_obj))
 
         if not self.__is_basic_type(inner_type):
-            inner_type = self.__get_inner_type(inner_type, indent+1)
+            inner_type = self.__get_inner_type(inner_type, indent)
 
         return inner_type
 
     def __is_basic_type(self, mir_type):
-        if  isinstance(mir_type, MiddleIrTypeChar) or \
+        if isinstance(mir_type, MiddleIrTypeChar) or \
             isinstance(mir_type, MiddleIrTypeInt) or \
             isinstance(mir_type, MiddleIrTypeFloat) or \
             isinstance(mir_type, MiddleIrTypeDouble) or \
@@ -732,6 +775,19 @@ class FrontEnd(object):
             return True
         return False
 
-    def _apply_argument_convertion(self, mir_param):
-        """..."""
-        return mir_param
+    def __is_container_type(self, mir_type):
+        if isinstance(mir_type, MiddleIrTypeFunction) or \
+            isinstance(mir_type, MiddleIrTypeOpaque) or \
+            isinstance(mir_type, MiddleIrTypeStruct) or \
+            isinstance(mir_type, MiddleIrTypePackedStruct) or \
+            isinstance(mir_type, MiddleIrTypeArray) or \
+            isinstance(mir_type, MiddleIrTypePointer) or \
+            isinstance(mir_type, MiddleIrTypeVector) or \
+            isinstance(mir_type, MiddleIrTypeLabel) or \
+            isinstance(mir_type, MiddleIrTypeVoid):
+            return True
+        return False
+
+    def _class_name(self, mir_obj):
+        """Return the plain MIR class name."""
+        return repr(mir_obj).split(" ")[0].split(".")[-1]
