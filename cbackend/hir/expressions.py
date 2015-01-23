@@ -56,8 +56,9 @@ class IndirectionUnaryExpression(UnaryExpression):
 class BinaryExpression(Expression):
     """Binary expression class."""
 
-    def __init__(self):
+    def __init__(self, left_operand, operator, right_operand):
         super(BinaryExpression, self).__init__()
+        self.set(left_operand, operator, right_operand)
 
     def set(self, left_operand, operator, right_operand):
         self.left_operand   = left_operand

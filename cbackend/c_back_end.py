@@ -273,6 +273,9 @@ class CBackEnd(object):
         elif mir_inst.group is MEMORY_ACCESS_GROUP:
             hir_stmt = self.on_memory_access(mir_inst)
 
+        elif mir_inst.group is BINARY_OP_GROUP:
+            hir_stmt = self.on_binary(mir_inst)
+
         elif mir_inst.group is CONVERSION_GROUP:
             hir_stmt = self.on_conversion(mir_inst)
 
@@ -353,16 +356,13 @@ class CBackEnd(object):
                 SimpleAssignmentExpression(
                     mir_inst.pointer.get_readable_inners(),
                     mir_inst.value.get_readable_inners()),
-                mir_inst.addresses)
+                addresses)
 
         elif isinstance(mir_inst, MiddleIrLoadInstruction):
             hir_stmt = ExpressionStatement(
                 Expression(
                     mir_inst.pointer.get_readable_inners()),
-                #SimpleAssignmentExpression(
-                #    mir_inst.pointer.get_readable_inners(),
-                #    mir_inst.pointer.get_readable_inners()),
-                mir_inst.addresses)
+                addresses)
 
         return hir_stmt
 
@@ -383,6 +383,31 @@ class CBackEnd(object):
 
         return hir_stmt
 
+    def on_binary(self, mir_inst):
+        """Process a MIR 'binary' instruction."""
+        addresses = mir_inst.addresses
+        hir_stmt = None
+
+        if isinstance(mir_inst, MiddleIrAddInstruction):
+            if isinstance(mir_inst.rhs, MiddleIrBaseConstant):
+                rhs = IntegerLiteralExpression(mir_inst.rhs.get_readable_inners())
+            else:
+                rhs = mir_inst.rhs.get_readable_inners()
+
+            if isinstance(mir_inst.lhs, MiddleIrBaseConstant):
+                lhs = IntegerLiteralExpression(mir_inst.lhs.get_readable_inners())
+            else:
+                lhs = mir_inst.lhs.get_readable_inners()
+
+            hir_stmt = Statement(
+                BinaryExpression(
+                    lhs,
+                    "+",
+                    rhs),
+                addresses)
+
+        return hir_stmt
+
     def on_other(self, mir_inst):
         """Process a MIR 'other' instruction."""
         addresses = mir_inst.addresses
@@ -392,7 +417,7 @@ class CBackEnd(object):
             arguments = mir_inst.get_readable_inners()
             hir_stmt = Statement(
                 FunctionCallExpression(mir_inst.callee.name, arguments),
-                mir_inst.addresses)
+                addresses)
 
         return hir_stmt
 

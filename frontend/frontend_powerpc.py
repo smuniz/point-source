@@ -84,22 +84,36 @@ class FrontEndPowerPc(FrontEnd):
                 alloca.add_address(address)
 
                 name = "szBuffer_0x%X" % address
-                gep = self.mir_inst_builder.gep(
+
+                mir_inst = self.mir_inst_builder.gep(
                     alloca,
                     [MiddleIrConstantInt32(0), MiddleIrConstantInt32(0)],
                     name)
-
-                gep.add_address(address)
-
-                lir_inst.analyzed = True
-
-                # Add newly created symbol to symbol table.
-                # Add symbol to the symbols table.
-                self.current_symbols_table.add_symbol(
-                    address, name, None, None, gep)
-
             else:
-                pass
+                # Not a stack access register.
+                #print "==---===>>>> 0x%0X - %d" % (address, op1.value)
+                op_address = self.lir_function.ud_chain[address][op1.value]
+
+                if not op_address in self.current_symbols_table.symbols:
+                    raise FrontEndPowerPcException(
+                        "No symbol found at 0x%X for instruction at 0x%X" % \
+                        (op_address, lir_inst.address))
+
+                name = "BLAAAA"
+
+                mir_inst = self.mir_inst_builder.add(
+                    self.current_symbols_table.symbols[op_address].item,
+                    MiddleIrConstantInt(MiddleIrTypeInt(32), op2.value),
+                    name)
+
+            mir_inst.add_address(address)
+
+            lir_inst.analyzed = True
+            mir_inst.is_used = True
+
+            # Add newly created symbol to symbol table.
+            self.current_symbols_table.add_symbol(
+                address, name, None, None, mir_inst)
 
         elif lir_inst.is_type(self.iset.PPC_clrlwi):
             # Instruction : clear left with inmediate
@@ -206,22 +220,34 @@ class FrontEndPowerPc(FrontEnd):
                 # operation to fully represent the instruction.
                 rs_reg = lir_inst[0].value
 
-                # TODO / FIXME : Determine if the source register is some other
-                # variable or anything else besides a parameter. Assume
-                # parameter right now.
-                param_idx = self.iset.ARGUMENT_REGISTERS.index(rs_reg)
-                #rs = self.current_symbols_table.parameters.get(param_idx, None)
-                rs = self.mir_function.arguments[param_idx]
+                # Determine if the source register is anything else besides a
+                # parameter register.
+                if lir_inst[0].value == 3: # TODO / FIXME : Remove hardcoded value
+                #if True:#self.is_parameter_register(lir_inst, 0):
+                    param_idx = self.iset.ARGUMENT_REGISTERS.index(rs_reg)
 
-                if rs is None:
-                    raise FrontEndPowerPcException(
-                        "Unable to locate rS parameter symbol.")
+                    try:
+                        rs = self.mir_function.arguments[param_idx]
+                    except IndexError, err:
+                        raise FrontEndPowerPcException(
+                            "Unable to locate rS parameter symbol.")
 
-                #print "=-=-=-> rS %s - rD %s" % (type(rs), mir_var)
-                #self.mir_function.arguments[0].name = "i_arg%d" % 0
+                    # TODO / FIXME : We should use the symbols table, right?
+                    #rs = self.current_symbols_table.parameters.get(param_idx, None)
+
+                    print "=-=-=-> rS %s - rD %s" % (type(rs), mir_var)
+                else:
+                    sym_addr = self.lir_function.ud_chain[address][rs_reg]
+
+                    rs = self.current_symbols_table.symbols[sym_addr].item
+                    #raise Exception("STW non-register parameters.")
 
                 mir_inst = self.mir_inst_builder.store(rs, mir_var)
                 mir_inst.is_used = True
+
+                # Add newly created symbol to symbol table.
+                self.current_symbols_table.add_symbol(
+                    address, None, None, None, mir_inst)
 
             else:
                 # A memory area not being the stack is being accessed.

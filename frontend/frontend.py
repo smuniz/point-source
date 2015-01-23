@@ -296,17 +296,16 @@ class FrontEnd(object):
 
             mir_basic_block = self.mir_function[lir_basic_block_index]
 
-            for lir_inst in lir_basic_block:
-
+            for lir_inst_idx, lir_inst in enumerate(lir_basic_block):
                 # Avoid already detected instructions in idioms and other
                 # analysis.
                 if lir_inst.analyzed:
-                #    print "---> inst at 0x%X was already analyzed..." \
-                #        "skipping" % lir_inst.address
+                    print "---> inst %d at 0x%X was already analyzed..." \
+                        "skipping" % (lir_inst_idx, lir_inst.address)
                     continue
-                #else:
-                #    print "---> inst at 0x%X being analyzed." % \
-                #        lir_inst.address
+                else:
+                    print "---> inst %d at 0x%X being analyzed." % (
+                        lir_inst_idx, lir_inst.address)
 
                 #
                 # This step is very important. This is where most of the LIR 
@@ -318,8 +317,9 @@ class FrontEnd(object):
                 except FrontEndException, err:
                     print format_exc()
                     raise FrontEndException(
-                        "Unable to transform LIR instruction (%s) : %s" % \
-                        (lir_inst, err))
+                        "Unable to transform LIR instruction at "
+                        "0x%08X (%s) : %s" % (
+                            lir_inst.address, lir_inst, err))
 
                 if mir_inst is not None:
 
@@ -341,6 +341,7 @@ class FrontEnd(object):
                     # Copy all graph information from low-level representation to the
                     # intermediate-level language.
                     #self.__propagate_graph_information()
+                    print "Added inst %d" % lir_inst_idx
 
     def transform_to_mir_instruction(self, lir_inst):
         """Get the corresponding MIR instruction according to the LIR
@@ -385,6 +386,10 @@ class FrontEnd(object):
                         (lir_inst.address, group))
 
         except FrontEndException, err:
+            raise FrontEndException(err)
+
+        except Exception, err:
+            print format_exc()
             raise FrontEndException(err)
 
         return mir_inst
@@ -664,13 +669,13 @@ class FrontEnd(object):
 
     def _array_char_to_int(self, mir_src_param, mir_dst_param):
         mir_inst = None
-        print "--> SRC : %s" % mir_src_param
-        print "--> DST : %s" % mir_dst_param
+        #print "--> SRC : %s" % mir_src_param
+        #print "--> DST : %s" % mir_dst_param
         mir_inst = self.mir_inst_builder.ptrtoint(mir_src_param, mir_dst_param)
-        print "--> CST : %s" % mir_inst
+        #print "--> CST : %s" % mir_inst
         return mir_inst
 
-    # TODO : Complete all the possible convertion combinations.
+    # TODO / FIXME : Complete all the possible convertion combinations.
     convertion_table = {
             #MiddleIrTypeChar : {
             #    #MiddleIrTypeChar : None,
@@ -796,3 +801,24 @@ class FrontEnd(object):
     def _class_name(self, mir_obj):
         """Return the plain MIR class name."""
         return repr(mir_obj).split(" ")[0].split(".")[-1]
+
+    def is_parameter_register(self, lir_inst, op_idx):
+        """Indicate if the operand in the specified LIR instruction refers to a
+        parameter register.
+
+        """
+        op = lir_inst[op_idx].value
+
+        du_address = self.lir_function.ud_chain.get(lir_inst.address, None)
+
+        try:
+            if du_address is not None and \
+                op in du_address and \
+                du_address[op] == self.lir_function.start_address and \
+                op not in self.lir_function[du_address[op]]:
+                print "Op %d Xrefd and NOT defined at 0x%08X" % (op, du_address[op])
+                return True
+        except Exception, err:
+            print "X" * 80
+            print format_exc()
+        return False

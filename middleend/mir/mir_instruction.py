@@ -88,9 +88,7 @@ class MiddleIrInstructionBuilder(object):
     #
     def add(self, lhs, rhs, name=""):
         """Generate a LLVM IR add instruction."""
-        #_type = LLVM_add
-        return MiddleIrInstruction(self._ptr.add(
-            lhs._ptr, rhs._ptr, name))
+        return MiddleIrAddInstruction(self, lhs, rhs, name)
 
     #
     # Misc.
@@ -727,7 +725,11 @@ class MiddleIrLoadInstruction(MiddleIrInstruction):
 
     def get_readable_inners(self):
         """..."""
-        return self.pointer.get_readable_inners()
+        if self.name is not "":
+            name = " /* %s */" % self.name
+        else:
+            name = ""
+        return "%s%s" % (self.pointer.get_readable_inners(), name)
 
 
 class MiddleIrStoreInstruction(MiddleIrInstruction):
@@ -802,6 +804,25 @@ class MiddleIrIntToPtrInstruction(MiddleIrInstruction):
         self.yields = dest_type
 
         self._ptr = builder._ptr.inttoptr(value._ptr, dest_type._ptr, name)
+
+    def get_readable_inners(self):
+        """..."""
+        return self.name
+
+
+class MiddleIrAddInstruction(MiddleIrInstruction):
+    """Generate a MIR IR 'add' instruction."""
+
+    def __init__(self, builder, lhs, rhs, name=""): 
+        super(MiddleIrAddInstruction, self).__init__(
+            _type=OPCODE_ADD)
+
+        self.lhs = lhs
+        self.rhs = rhs
+        self.name = name
+        self.yields = lhs
+
+        self._ptr = builder._ptr.add(lhs._ptr, rhs._ptr, name)
 
     def get_readable_inners(self):
         """..."""
