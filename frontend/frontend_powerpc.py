@@ -62,7 +62,70 @@ class FrontEndPowerPc(FrontEnd):
 
         address = lir_inst.address
 
-        if lir_inst.is_type(self.iset.PPC_addi):
+        if lir_inst.is_type(self.iset.PPC_add):
+            # Instruction : add
+
+            op0 = lir_inst[0]
+            op1 = lir_inst[1]
+            op2 = lir_inst[2]
+
+            if op1.value in \
+                self.lir_function.stack_access_registers:
+
+                raise FrontEndPowerPc(
+                    "PPC_add with stack variables is unimplemented")
+#                # TODO/FIXME : This won't work for multiple buffers in stack.
+#
+#                # Add the newly detected stack buffer to the MIR module.
+#                array_size = self.calculate_stack_buffer_limits() - \
+#                    op2.value
+#
+#                array_type = MiddleIrTypeArray(MiddleIrTypeChar(), array_size)
+#
+#                alloca = self.mir_inst_builder.alloca(array_type, "szBuffer")
+#
+#                alloca.add_address(address)
+#
+#                name = "szBuffer_0x%X" % address
+#
+#                mir_inst = self.mir_inst_builder.gep(
+#                    alloca,
+#                    [MiddleIrConstantInt32(0), MiddleIrConstantInt32(0)],
+#                    name)
+            else:
+                # Not a stack access register.
+                op_address_1 = self.lir_function.ud_chain[address][op1.value]
+
+                if not op_address_1 in self.current_symbols_table.symbols:
+                    raise FrontEndPowerPcException(
+                        "No symbol found at 0x%X for instruction at 0x%X" % (
+                        op_address_1, lir_inst.address))
+
+                op_address_2 = self.lir_function.ud_chain[address][op2.value]
+
+                if not op_address_2 in self.current_symbols_table.symbols:
+                    raise FrontEndPowerPcException(
+                        "No symbol found at 0x%X for instruction at 0x%X" % (
+                        op_address_1, lir_inst.address))
+
+                name = "BLAAAA"
+
+                mir_inst = self.mir_inst_builder.add(
+                    self.current_symbols_table.symbols[op_address_1].item,
+                    self.current_symbols_table.symbols[op_address_2].item,
+                    name)
+
+            mir_inst.add_address(address)
+
+            lir_inst.analyzed = True
+            #mir_inst.is_used = True
+
+            # Add newly created symbol to symbol table.
+            self.current_symbols_table.add_symbol(
+                address, name, None, None, mir_inst)
+
+        elif lir_inst.is_type(self.iset.PPC_addi):
+            # Instruction : Add inmediate
 
             op0 = lir_inst[0]
             op1 = lir_inst[1]
@@ -91,13 +154,12 @@ class FrontEndPowerPc(FrontEnd):
                     name)
             else:
                 # Not a stack access register.
-                #print "==---===>>>> 0x%0X - %d" % (address, op1.value)
                 op_address = self.lir_function.ud_chain[address][op1.value]
 
                 if not op_address in self.current_symbols_table.symbols:
                     raise FrontEndPowerPcException(
-                        "No symbol found at 0x%X for instruction at 0x%X" % \
-                        (op_address, lir_inst.address))
+                        "No symbol found for op n.%d at 0x%X for instruction at 0x%X" % (
+                        1, op_address, lir_inst.address))
 
                 name = "BLAAAA"
 
@@ -222,7 +284,7 @@ class FrontEndPowerPc(FrontEnd):
 
                 # Determine if the source register is anything else besides a
                 # parameter register.
-                if lir_inst[0].value in [3, 4, 5, 6]: # TODO / FIXME : Remove hardcoded value
+                if lir_inst[0].value in [3, 4, 5, 6, 7]: # TODO / FIXME : Remove hardcoded value
                 #if True:#self.is_parameter_register(lir_inst, 0):
                     param_idx = self.iset.ARGUMENT_REGISTERS.index(rs_reg)
 
@@ -266,6 +328,69 @@ class FrontEndPowerPc(FrontEnd):
 
             #mir_inst = self.mir_inst_builder.add(rhs_offset, rhs_reg)
             ##print "--->", mir_inst._ptr
+
+        elif lir_inst.is_type(self.iset.PPC_subf):
+            # Instruction : substract from
+
+            op0 = lir_inst[0]
+            op1 = lir_inst[1]
+            op2 = lir_inst[2]
+
+            if op1.value in \
+                self.lir_function.stack_access_registers:
+
+                raise FrontEndPowerPc(
+                    "PPC_subf with stack variables is unimplemented")
+#                # TODO/FIXME : This won't work for multiple buffers in stack.
+#
+#                # Add the newly detected stack buffer to the MIR module.
+#                array_size = self.calculate_stack_buffer_limits() - \
+#                    op2.value
+#
+#                array_type = MiddleIrTypeArray(MiddleIrTypeChar(), array_size)
+#
+#                alloca = self.mir_inst_builder.alloca(array_type, "szBuffer")
+#
+#                alloca.add_address(address)
+#
+#                name = "szBuffer_0x%X" % address
+#
+#                mir_inst = self.mir_inst_builder.gep(
+#                    alloca,
+#                    [MiddleIrConstantInt32(0), MiddleIrConstantInt32(0)],
+#                    name)
+            else:
+                # Not a stack access register.
+                op_address_1 = self.lir_function.ud_chain[address][op1.value]
+
+                if not op_address_1 in self.current_symbols_table.symbols:
+                    raise FrontEndPowerPcException(
+                        "No symbol found at 0x%X for instruction at 0x%X" % (
+                        op_address_1, lir_inst.address))
+
+                op_address_2 = self.lir_function.ud_chain[address][op2.value]
+
+                if not op_address_2 in self.current_symbols_table.symbols:
+                    raise FrontEndPowerPcException(
+                        "No symbol found at 0x%X for instruction at 0x%X" % (
+                        op_address_1, lir_inst.address))
+
+                name = "BLAAAA"
+
+                mir_inst = self.mir_inst_builder.sub(
+                    self.current_symbols_table.symbols[op_address_1].item,
+                    self.current_symbols_table.symbols[op_address_2].item,
+                    name)
+
+            mir_inst.add_address(address)
+
+            lir_inst.analyzed = True
+            #mir_inst.is_used = True
+
+            # Add newly created symbol to symbol table.
+            self.current_symbols_table.add_symbol(
+                address, name, None, None, mir_inst)
+
         else:
             raise FrontEndPowerPcException(
                 "Unable to transform LIR instruction (%s) at 0x%X "

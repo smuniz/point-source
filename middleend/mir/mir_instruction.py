@@ -90,6 +90,10 @@ class MiddleIrInstructionBuilder(object):
         """Generate a LLVM IR add instruction."""
         return MiddleIrAddInstruction(self, lhs, rhs, name)
 
+    def sub(self, lhs, rhs, name=""):
+        """Generate a LLVM IR sub instruction."""
+        return MiddleIrSubInstruction(self, lhs, rhs, name)
+
     #
     # Misc.
     #
@@ -823,6 +827,25 @@ class MiddleIrAddInstruction(MiddleIrInstruction):
         self.yields = lhs
 
         self._ptr = builder._ptr.add(lhs._ptr, rhs._ptr, name)
+
+    def get_readable_inners(self):
+        """..."""
+        return self.name
+
+
+class MiddleIrSubInstruction(MiddleIrInstruction):
+    """Generate a MIR IR 'sub' instruction."""
+
+    def __init__(self, builder, lhs, rhs, name=""): 
+        super(MiddleIrSubInstruction, self).__init__(
+            _type=OPCODE_SUB)
+
+        self.lhs = lhs
+        self.rhs = rhs
+        self.name = name
+        self.yields = lhs
+
+        self._ptr = builder._ptr.sub(lhs._ptr, rhs._ptr, name)
 
     def get_readable_inners(self):
         """..."""

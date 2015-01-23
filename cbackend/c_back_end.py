@@ -423,6 +423,24 @@ class CBackEnd(object):
                     rhs),
                 addresses)
 
+        elif isinstance(mir_inst, MiddleIrSubInstruction):
+            if isinstance(mir_inst.rhs, MiddleIrBaseConstant):
+                rhs = IntegerLiteralExpression(mir_inst.rhs.get_readable_inners())
+            else:
+                rhs = mir_inst.rhs.get_readable_inners()
+
+            if isinstance(mir_inst.lhs, MiddleIrBaseConstant):
+                lhs = IntegerLiteralExpression(mir_inst.lhs.get_readable_inners())
+            else:
+                lhs = mir_inst.lhs.get_readable_inners()
+
+            hir_stmt = Statement(
+                BinaryExpression(
+                    lhs,
+                    "-",
+                    rhs),
+                addresses)
+
         return hir_stmt
 
     def on_other(self, mir_inst):
