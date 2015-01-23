@@ -788,7 +788,7 @@ class MiddleIrPtrToIntInstruction(MiddleIrInstruction):
 
     def get_readable_inners(self):
         """..."""
-        return str(self.value.get_readable_inners())
+        return self.value.get_readable_inners()
 
 
 class MiddleIrIntToPtrInstruction(MiddleIrInstruction):

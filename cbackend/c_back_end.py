@@ -7,6 +7,7 @@
 from copy import deepcopy
 from traceback import format_exc
 
+from middleend.mir.mir_function import *
 from middleend.mir.mir_constants import *
 from middleend.mir.mir_type import *
 from middleend.mir.mir_instruction import *
@@ -352,10 +353,26 @@ class CBackEnd(object):
         hir_stmt = None
 
         if isinstance(mir_inst, MiddleIrStoreInstruction):
+            st_op = mir_inst.value
+
+            if isinstance(st_op, MiddleIrInstruction):
+                st_op = self.transform_to_hir(st_op)
+                st_val = str(st_op)
+            elif isinstance(st_op, MiddleIrBaseConstant):
+                #ret_tuple = str(st_op).split(" ") # split the type and name.
+                #ret_type, ret_val = ret_tuple
+                st_val = st_op.value
+            elif isinstance(st_op, MiddleIrArgument):
+                #st_op = self.transform_to_hir(st_op.name)
+                st_val = st_op.get_readable_inners()
+            else:
+                raise CBackEndException("Unable to process operand (%s)" % \
+                    st_op)
+
             hir_stmt = ExpressionStatement(
                 SimpleAssignmentExpression(
                     mir_inst.pointer.get_readable_inners(),
-                    mir_inst.value.get_readable_inners()),
+                    st_val),#mir_inst.value.get_readable_inners()),
                 addresses)
 
         elif isinstance(mir_inst, MiddleIrLoadInstruction):

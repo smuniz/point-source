@@ -109,7 +109,7 @@ class FrontEndPowerPc(FrontEnd):
             mir_inst.add_address(address)
 
             lir_inst.analyzed = True
-            mir_inst.is_used = True
+            #mir_inst.is_used = True
 
             # Add newly created symbol to symbol table.
             self.current_symbols_table.add_symbol(
@@ -222,7 +222,7 @@ class FrontEndPowerPc(FrontEnd):
 
                 # Determine if the source register is anything else besides a
                 # parameter register.
-                if lir_inst[0].value == 3: # TODO / FIXME : Remove hardcoded value
+                if lir_inst[0].value in [3, 4, 5, 6]: # TODO / FIXME : Remove hardcoded value
                 #if True:#self.is_parameter_register(lir_inst, 0):
                     param_idx = self.iset.ARGUMENT_REGISTERS.index(rs_reg)
 
