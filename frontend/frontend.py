@@ -300,12 +300,13 @@ class FrontEnd(object):
                 # Avoid already detected instructions in idioms and other
                 # analysis.
                 if lir_inst.analyzed:
-                    print "---> inst %d at 0x%X was already analyzed..." \
-                        "skipping" % (lir_inst_idx, lir_inst.address)
+                    #print "---> inst %d at 0x%X was already analyzed..." \
+                    #    "skipping" % (lir_inst_idx, lir_inst.address)
                     continue
                 else:
-                    print "---> inst %d at 0x%X being analyzed." % (
-                        lir_inst_idx, lir_inst.address)
+                    pass
+                    #print "---> inst %d at 0x%X being analyzed." % (
+                    #    lir_inst_idx, lir_inst.address)
 
                 #
                 # This step is very important. This is where most of the LIR 
@@ -341,7 +342,7 @@ class FrontEnd(object):
                     # Copy all graph information from low-level representation to the
                     # intermediate-level language.
                     #self.__propagate_graph_information()
-                    print "Added inst %d" % lir_inst_idx
+                    #print "Added inst %d" % lir_inst_idx
 
     def transform_to_mir_instruction(self, lir_inst):
         """Get the corresponding MIR instruction according to the LIR

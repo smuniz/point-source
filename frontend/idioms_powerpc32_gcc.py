@@ -981,9 +981,6 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 if (idiom_type is not None and \
                     idiom_type.find("char") == -1) or \
                     data is None:
-                    raise IdiomAnalyzerException(
-                        "Unimplemented idiom type for non char* at 0x%X" % 
-                        lo_inst.address)
                     # Global variable reference
                     #
                     # TODO: Check if it's just an integer literal
@@ -992,14 +989,19 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     #address  = (bb[i][1].value & 0xffff) << 16
                     #address += bb[i+1][2].value
 
-                    buffer_size = len(data) + 1 # Add one for the NULL terminator.
-                    array_type = MiddleIrTypeArray(MiddleIrTypeChar(), buffer_size)
+                    if data is None:
+                        data = self.debugger.dword(dest_address)
+
+                    print "data = %d" % data
+                    #buffer_size = len(data) + 1 # Add one for the NULL terminator.
+                    #array_type = MiddleIrTypeArray(MiddleIrTypeChar(), buffer_size)
+                    array_type = MiddleIrTypeInt(32)
 
                     # Create a global variable referencing the char array.
-                    gvar_str = MiddleIrGlobalVariable(
+                    gvar_str = MiddleIrGlobalVariable.new(
+                        self.mir_module,
                         array_type,
-                        MiddleIrConstantStringZ(data),
-                        "sz" + data.capitalize())
+                        "gi_" + str(data).capitalize())
 
                     gvar_str.global_constant = True
                     gvar_str.alignment = 4  # Strings are aligned to a 4-byte
@@ -1008,8 +1010,10 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                                             # be usefull if we want to
                                             # regenerate the binary code.
 
+                    gvar_str.initializer = MiddleIrConstantInt(MiddleIrTypeInt(32), data)
                     # Add the global variable to the current module.
-                    self.mir_module.add_global_variable(gvar_str)
+                    #self.mir_module.add_global_variable(gvar_str)
+                    print self.mir_module
 
                     address = lo_inst.address
 
@@ -1021,11 +1025,12 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         self.mir_function.get_instruction_builder_by_address(
                             address, True)
 
-                    name = "psz%s" % data.capitalize()
-                    gep = mir_inst_builder.gep(
-                        gvar_str,
-                        [MiddleIrConstantInt32(0)] * 2,
-                        name)
+                    name = "psz%s" % str(data).capitalize()
+                    gep = mir_inst_builder.load(gvar_str)
+                    #gep = mir_inst_builder.gep(
+                    #    gvar_str,
+                    #    [MiddleIrConstantInt32(0)] * 2,
+                    #    name)
 
                     gep.add_address(address)
 
@@ -1034,6 +1039,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     #
                     self.current_symbols_table.add_symbol(
                         address, name, None, None, gep)
+                    print self.mir_module
 
                     #
                     # Set MIR instruction address equivalent to the LIR
@@ -1042,7 +1048,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     mir_basic_block = \
                         self.mir_function.get_basic_block_by_address(address)
 
-                    mir_basic_block.add_instruction(gep)     # TODO / FIXME
+                    #mir_basic_block.add_instruction(gep)     # TODO / FIXME
 
                     # TODO: Determine if the address belongs to a function.
                     #f = get_func(address)

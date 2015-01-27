@@ -282,3 +282,8 @@ class BaseDebugger(object):
     def hide_boxed_message(self):
         """Hide a boxed message being displayed."""
         return
+
+    @abc.abstractmethod
+    def dword(self, address):
+        """Return the dword at the specified address."""
+        return

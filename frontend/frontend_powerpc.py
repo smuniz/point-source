@@ -297,7 +297,7 @@ class FrontEndPowerPc(FrontEnd):
                     # TODO / FIXME : We should use the symbols table, right?
                     #rs = self.current_symbols_table.parameters.get(param_idx, None)
 
-                    print "=-=-=-> rS %s - rD %s" % (type(rs), mir_var)
+                    #print "=-=-=-> rS %s - rD %s" % (type(rs), mir_var)
                 else:
                     sym_addr = self.lir_function.ud_chain[address][rs_reg]
 
