@@ -133,7 +133,7 @@ class HirTextOutput(TextOutputMedia):
 
         # Add local variables to the source code output.
         address = self.hir.start_address
-        local_vars = self.hir.symbols_tables.symbols(address).variables
+        local_vars = self.hir.symbols_manager.symbols(address).variables
 
         for var_k, var_v in local_vars.iteritems():
             # Create one variable at a time.
