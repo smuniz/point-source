@@ -63,7 +63,9 @@ class FrontEndPowerPc(FrontEnd):
         address = lir_inst.address
 
         if lir_inst.is_type(self.iset.PPC_add):
+            #
             # Instruction : add
+            #
 
             op0 = lir_inst[0]
             op1 = lir_inst[1]
@@ -125,7 +127,9 @@ class FrontEndPowerPc(FrontEnd):
                 address, name, None, None, mir_inst)
 
         elif lir_inst.is_type(self.iset.PPC_addi):
+            #
             # Instruction : Add inmediate
+            #
 
             op0 = lir_inst[0]
             op1 = lir_inst[1]
@@ -178,19 +182,59 @@ class FrontEndPowerPc(FrontEnd):
                 address, name, None, None, mir_inst)
 
         elif lir_inst.is_type(self.iset.PPC_clrlwi):
+            #
             # Instruction : clear left with inmediate
+            #
             pass
 
         elif lir_inst.is_type(self.iset.PPC_cmpwi):
+            #
             # Instruction : compare word inmediate
-            pass
+            #
+            op_address = self.lir_function.ud_chain[address][op1.value]
+
+            if not op_address in self.current_symbols_table.symbols:
+                raise FrontEndPowerPcException(
+                    "No symbol found for op n.%d at 0x%X for instruction at 0x%X" % (
+                    1, op_address, lir_inst.address))
+
+            op1 = self.current_symbols_table.symbols[op_address].item,
+
+            op_address = self.lir_function.ud_chain[address][op1.value]
+
+            if not op_address in self.current_symbols_table.symbols:
+                raise FrontEndPowerPcException(
+                    "No symbol found for op n.%d at 0x%X for instruction at 0x%X" % (
+                    1, op_address, lir_inst.address))
+
+            op2 = self.current_symbols_table.symbols[op_address].item,
+
+            mir_inst = self.mir_inst_builder.icmp(
+                op1,
+                op2,
+                MiddleIrConstantInt(MiddleIrTypeInt(32), op2.value),
+                name)
+
+            mir_inst.add_address(address)
+
+            lir_inst.analyzed = True
+            #mir_inst.is_used = True
+
+            # Add newly created symbol to symbol table.
+            self.current_symbols_table.add_symbol(
+                address, name, None, None, mir_inst)
+
 
         elif lir_inst.is_type(self.iset.PPC_lbz):
+            #
             # Instruction : load byte and zero
+            #
             pass
 
         elif lir_inst.is_type(self.iset.PPC_li):
+            #
             # Instruction : load inmediate
+            #
 
             # Add symbol to the symbols table.
             self.current_symbols_table.add_symbol(
@@ -201,7 +245,9 @@ class FrontEndPowerPc(FrontEnd):
             pass
 
         elif lir_inst.is_type(self.iset.PPC_lwz):
+            #
             # Instruction : load word and zero
+            #
 
             # Determine if destination is the stack or any other location.
             is_stack_src = lir_inst[1].value[0] in \
@@ -260,11 +306,15 @@ class FrontEndPowerPc(FrontEnd):
                 address, None, None, None, src)
 
         elif lir_inst.is_type(self.iset.PPC_stb):
+            #
             # Instruction : store byte
+            #
             pass
 
         elif lir_inst.is_type(self.iset.PPC_stw):
+            #
             # Instruction : store word
+            #
 
             # Determine if destination is the stack or any other location.
             if self._is_stack_destination(lir_inst):
@@ -334,7 +384,9 @@ class FrontEndPowerPc(FrontEnd):
             ##print "--->", mir_inst._ptr
 
         elif lir_inst.is_type(self.iset.PPC_subf):
+            #
             # Instruction : substract from
+            #
 
             op0 = lir_inst[0]
             op1 = lir_inst[1]

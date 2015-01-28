@@ -146,18 +146,12 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     print "INVALID (should be %d bytes)" % frame_size
 
             else:
-                # This shouldn't happen so we abort in case it does but first
-                # we run a check.
-                print "[-] Stack allocation NOT found. Using debugger detection: ",
+                print "[-] Stack allocation NOT found. Using debugger detection:",
 
-                # TODO / FIXME : Remove IDA specific function call.
-                if idc.GetFrameLvarSize(inst.address) == 0:
-                    print "OK"
-                else:
-                    print "INVALID"
-
-                raise PowerPc32GccIdiomAnalyzerException(
-                    "Unable to determine stack size.")
+                # TODO : Remove IDA specific function call.
+                frame_size = idc.GetFrameLvarSize(inst.address)
+                self.lir_function.stack_size = frame_size
+                print "OK (%d bytes)" % frame_size
 
             # STEP 1.B
             #
@@ -509,15 +503,21 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         self.lir_function.add_epilogue_address(inst.address)
                     return
 
-            print "    Stack restoration analysis : INCOMPLETE"
-
         except MiddleIrException, err:
             print format_exc() + '\n'
 
             raise PowerPc32GccIdiomAnalyzerException(err)
 
-        raise PowerPc32GccIdiomAnalyzerException(
-            "Unable to locate epilogue.")
+        # Before announcing that the lack of epilogue is invalid we first check
+        # if the function posses other characteristics such us prologue, if
+        # it's a leaf procedure or not, stacak size, etc. in order to determine
+        # if the is a stub/stackless function or not.
+        # TODO : Add more complex tests here.
+        if self.lir_function.stack_size > 0:
+            raise PowerPc32GccIdiomAnalyzerException(
+                "Unable to locate epilogue.")
+        else:
+            print "    Stack restoration analysis : Stack-less function"
 
     def detect_register_variables(self):
         """Detect possible register variables in the prologue by detecting
