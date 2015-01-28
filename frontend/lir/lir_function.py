@@ -350,6 +350,12 @@ class LowLevelFunction(object):
                         return
 
     def generate_chains(self):
+        try:
+            return self._generate_chains()
+        except Exception, err:
+            from traceback import format_exc
+            print format_exc()
+    def _generate_chains(self):
         """
         Generate def-use and use-def chains for the low level IR so further
         analysis can me performed, i.e. live analysis, dead code elimination,
@@ -390,7 +396,10 @@ class LowLevelFunction(object):
 
                 for lir_op_idx, lir_op in enumerate(lir_inst.operands):
 
-                    if not lir_op.is_reg:
+                    #print "---> 0x%08X - op %d" % (
+                    #    lir_inst.address, lir_op_idx)
+
+                    if not lir_op.is_reg:# and not lir_op.is_displ and lir_op.is_phrase:
                         # Only work on tempoerary registers.
                         continue
 

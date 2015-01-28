@@ -910,36 +910,50 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         continue
 
                     # The higher 16 bits are always set with a LIS instruciton.
-                    if hi_inst.type == self.iset.PPC_lis:
+                    if hi_inst.is_type(self.iset.PPC_lis):
 
-                        # Get the LIS instruction position inside the current
-                        # basic block.
-                        hi_inst_idx = bb.get_instruction_index(hi_inst)
+                        ## Get the LIS instruction position inside the current
+                        ## basic block.
+                        #hi_inst_idx = bb.get_instruction_index(hi_inst)
 
-                        if not hi_inst_idx:
-                            raise PowerPc32GccIdiomAnalyzerException(
-                                "Couldn't locate index (high) for 0x%X:%s" \
-                                % (hi_inst.address, hi_inst))
+                        #if not hi_inst_idx:
+                        #    raise PowerPc32GccIdiomAnalyzerException(
+                        #        "Couldn't locate index (high) for 0x%X:%s" \
+                        #        % (hi_inst.address, hi_inst))
 
                         # TODO / FIXME : Use DU and UD chains instead of just
                         # the current basic block.
-                        self.detect_load_word_lower(bb, hi_inst_idx)
+                        self.validate_load_word_lower(bb, hi_inst)
 
         except MiddleIrException, err:
             print format_exc() + '\n'
             raise PowerPc32GccIdiomAnalyzerException(err)
 
-    def detect_load_word_lower(self, bb, hi_inst_idx):
+    def validate_load_word_lower(self, bb, hi_inst):
         """Detects the lower 16 bit load operation to complete the word
         assignment into a processor register. The lower part instruction used
         could vary so we must perform a series of tests.
 
         """
         # Get the instruction referenced by at specified index.
-        hi_inst = bb[hi_inst_idx]
+        #hi_inst = bb[hi_inst_idx]
 
         # Find the instruction that modifies the lower 16 bits.
-        for lo_inst in bb[hi_inst_idx + 1 : ]:
+        #for lo_inst in bb[hi_inst_idx + 1 : ]:
+
+        address = hi_inst.address
+        op1 = hi_inst[0]
+        op1_address = self.lir_function.ud_chain[address][op1.value]
+
+        if not op1_address in self.current_symbols_table.symbols:
+            raise IdiomAnalyzerException(
+                "No symbol found at 0x%X for instruction at 0x%X" % (
+                op1_address, hi_inst.address))
+        print "A" * 30
+        lo_inst = bb.get_instruction_by_address(op1_address)
+        print "===========>", lo_inst
+
+        if True:
 
             # Avoid the immediate (addi???) instruction because it could
             # reuse the registers like this:
