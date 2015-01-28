@@ -399,11 +399,16 @@ class LowLevelFunction(object):
                     #print "---> 0x%08X - op %d" % (
                     #    lir_inst.address, lir_op_idx)
 
-                    if not lir_op.is_reg:# and not lir_op.is_displ and lir_op.is_phrase:
+                    if not lir_op.is_reg and not lir_op.is_displ and \
+                        not lir_op.is_phrase:
                         # Only work on tempoerary registers.
                         continue
 
-                    op = lir_op.value
+                    if lir_op.is_reg:
+                        op = lir_op.value
+                    else:
+                        #print "%s - %s - %s" % (lir_op.type, lir_op, lir_inst)
+                        op = lir_op.value[0]
 
                     if self.__is_destination_operand(lir_inst, lir_op_idx):
                         if op in reg_defs:

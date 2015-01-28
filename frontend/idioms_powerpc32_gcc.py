@@ -942,16 +942,16 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         #for lo_inst in bb[hi_inst_idx + 1 : ]:
 
         address = hi_inst.address
-        op1 = hi_inst[0]
-        op1_address = self.lir_function.ud_chain[address][op1.value]
 
-        if not op1_address in self.current_symbols_table.symbols:
-            raise IdiomAnalyzerException(
-                "No symbol found at 0x%X for instruction at 0x%X" % (
-                op1_address, hi_inst.address))
-        print "A" * 30
+        op1 = hi_inst[0]
+        op1_address = self.lir_function.du_chain[address].get(op1.value, None)
+
+        #if not op1_address in self.current_symbols_table.symbols:
+        #    raise IdiomAnalyzerException(
+        #        "No symbol found at 0x%X for instruction at 0x%X" % (
+        #        op1_address, hi_inst.address))
+        op1_address = op1_address[0]
         lo_inst = bb.get_instruction_by_address(op1_address)
-        print "===========>", lo_inst
 
         if True:
 
@@ -985,16 +985,21 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 dest_address = idaapi.get_first_dref_from(hi_inst.address)
                 idiom_type = idaapi.idc_guess_type(dest_address)
 
-                #print "    src:0x%X (idx %2d) ---> dest:0x%X - type:%s" % \
-                #        (lo_inst.address, hi_inst_idx, dest_address, idiom_type)
+                print "    src:0x%X (idx ???) ---> dest:0x%X - type:%s" % \
+                        (lo_inst.address, dest_address, idiom_type)
 
                 # Check wheater the pointed address contains a string
                 # or it's just a global variable.
-                data  = self.get_string_by_address(dest_address)
+                #data  = self.get_string_by_address(dest_address)
 
-                if (idiom_type is not None and \
-                    idiom_type.find("char") == -1) or \
-                    data is None:
+                if idiom_type is None:
+                elif idiom_type.startswith("void *"):
+                elif idiom_type is "__int16":
+                elif idiom_type is "int":
+                elif idiom_type is "__int64":
+                elif idiom_type is "char":
+                elif idiom_type.startswith("char["):
+                elif idiom_type.startswith("char *["):
                     # Global variable reference
                     #
                     # TODO: Check if it's just an integer literal
@@ -1003,8 +1008,8 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     #address  = (bb[i][1].value & 0xffff) << 16
                     #address += bb[i+1][2].value
 
-                    if data is None:
-                        data = self.debugger.dword(dest_address)
+                    #if data is None:
+                    data = self.debugger.dword(dest_address)
 
                     print "data @ 0x%X = 0x%x" % (lo_inst.address, data)
                     #buffer_size = len(data) + 1 # Add one for the NULL terminator.
@@ -1072,6 +1077,8 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     #    expr = IntegerLiteralExpression(address)
 
                 else:
+                    data  = self.get_string_by_address(dest_address)
+
                     #
                     # Add the newly detected string reference to the MIR
                     # module by creating an array of char (int 8) type and
@@ -1079,7 +1086,8 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     #
                     if data is None:
                         raise PowerPc32GccIdiomAnalyzerException(
-                            "data is None")
+                            "0x%08X : data is None @ 0x%08x" % (
+                            lo_inst.address, dest_address))
 
                     # Add one for the NULL terminator and make sure se create a
                     # builder.stringz to hold the NULL terminator. Otherwise we
