@@ -209,11 +209,7 @@ class FrontEndPowerPc(FrontEnd):
 
             op2 = self.current_symbols_table.symbols[op_address].item,
 
-            mir_inst = self.mir_inst_builder.icmp(
-                op1,
-                op2,
-                MiddleIrConstantInt(MiddleIrTypeInt(32), op2.value),
-                name)
+            mir_inst = self.mir_inst_builder.icmp(cond, op1, op2)
 
             mir_inst.add_address(address)
 

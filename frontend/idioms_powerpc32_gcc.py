@@ -918,7 +918,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
 
                         if not hi_inst_idx:
                             raise PowerPc32GccIdiomAnalyzerException(
-                                "Couldn't locate index for 0x%X:%s" \
+                                "Couldn't locate index (high) for 0x%X:%s" \
                                 % (hi_inst.address, hi_inst))
 
                         # TODO / FIXME : Use DU and UD chains instead of just
@@ -992,7 +992,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     if data is None:
                         data = self.debugger.dword(dest_address)
 
-                    print "data = %d" % data
+                    print "data @ 0x%X = 0x%x" % (lo_inst.address, data)
                     #buffer_size = len(data) + 1 # Add one for the NULL terminator.
                     #array_type = MiddleIrTypeArray(MiddleIrTypeChar(), buffer_size)
                     array_type = MiddleIrTypeInt(32)
@@ -1013,7 +1013,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     gvar_str.initializer = MiddleIrConstantInt(MiddleIrTypeInt(32), data)
                     # Add the global variable to the current module.
                     #self.mir_module.add_global_variable(gvar_str)
-                    print self.mir_module
+                    #print self.mir_module
 
                     address = lo_inst.address
 
@@ -1039,7 +1039,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     #
                     self.current_symbols_table.add_symbol(
                         address, name, None, None, gep)
-                    print self.mir_module
+                    #print self.mir_module
 
                     #
                     # Set MIR instruction address equivalent to the LIR
