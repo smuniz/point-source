@@ -155,7 +155,7 @@ class MiddleIrInstructionBuilder(object):
     # Terminator instructions
     #
     def branch(self, bblk):
-        """Generate a LLVM IR branch instruction."""
+        """Generate a LLVM IR 'branch' instruction."""
         _type = OPCODE_UNREACHABLE #LLVM_unreachable
         llvm_type = self._ptr.branch(bblk._ptr)
         return MiddleIrInstruction(llvm_inst, _type)
@@ -167,8 +167,12 @@ class MiddleIrInstructionBuilder(object):
     #
     # Others
     #
+    def icmp(self, cond, op1, op2):
+        """Generate a LLVM IR 'icmp' instruction."""
+        return MiddleIrIcmpInstruction(self, cond, op1, op2)
+
     def pointer(self, pointee, addr_space=0):
-        """Generate a LLVM IR pointer instruction."""
+        """Generate a LLVM IR 'pointer' instruction."""
         llvm_pointee = pointee._ptr
         return MiddleIrInstruction(
             self._ptr.pointer(llvm_pointee, addr_space))
@@ -850,3 +854,24 @@ class MiddleIrSubInstruction(MiddleIrInstruction):
     def get_readable_inners(self):
         """..."""
         return self.name
+
+class MiddleIrIcmpInstruction(MiddleIrInstruction):
+    """Generate a MIR IR 'icmp' instruction."""
+
+    def __init__(self, builder, cond, op1, op2):
+        super(MiddleIrIcmpInstruction, self).__init__(
+            _type=OPCODE_ICMP)
+
+        self.cond = cond
+
+        self.op1 = op1
+        self.op2 = op2
+
+        self._ptr = builder._ptr.icmp(
+            cond,
+            op1._ptr,
+            op2._ptr)
+
+    def get_readable_inners(self):
+        """..."""
+        return "A" * 20

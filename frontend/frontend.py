@@ -378,13 +378,15 @@ class FrontEnd(object):
                 mir_inst = self.on_conditional_branch(lir_inst)
 
             elif lir_inst.type in self.unimplemented_types:
-                mir_inst = self.on_unknown(lir_inst)
-
-            else:
                 #mir_inst = self.on_unknown(lir_inst)
                 raise FrontEndException(
-                    "Unsupported instruction at 0x%X on '%s' group." % \
-                        (lir_inst.address, group))
+                    "Unknown instruction \"%s\" at 0x%08X" % (
+                    lir_inst.mnemonic, lir_inst.address))
+
+            else:
+                raise FrontEndException(
+                    "Unidentified instruction (type %r - group %s) at 0x%08X" % (
+                        lir_inst.type, group, lir_inst.address))
 
         except FrontEndException, err:
             raise FrontEndException(err)

@@ -197,7 +197,7 @@ class MiddleIrTypePointer(MiddleIrBaseType):
             #raise MiddleIr
         self.type = pointee_type
         super(MiddleIrTypePointer, self).__init__(
-            Type.pointer(pointee._ptr, addr_space))
+            Type.pointer(pointee_type._ptr, addr_space))
 
 
 class MiddleIrTypeVector(MiddleIrBaseType):

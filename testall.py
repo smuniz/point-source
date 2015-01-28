@@ -125,7 +125,7 @@ def do_type():
     MiddleIrTypePackedStruct([ti]*100)
     MiddleIrTypeArray(ti, 100)
     ptr = MiddleIrTypePointer(ti, 4)
-    pte = ptr.pointee
+    pte = ptr.type
     MiddleIrTypeVector(ti, 100)
     MiddleIrTypeVoid()
     MiddleIrTypeLabel()
@@ -443,10 +443,10 @@ def do_builder():
 #    b.invoke(f, [MiddleIrConstantInt(ti,10)], blk, blk)
 #    # b.unwind() # removed
 #    b.unreachable()
-#    v = f.args[0]
+    v = f.arguments[0]
 #    fv = MiddleIrConstantReal(MiddleIrTypeFloat(), "1.0")
-#    k = MiddleIrConstantInt(ti, 10)
-#    b.add(v, v)
+    k = MiddleIrConstantInt(ti, 10)
+    b.add(v, v)
 #    b.fadd(fv, fv)
 #    b.sub(v, v)
 #    b.fsub(fv, fv)
@@ -488,7 +488,7 @@ def do_builder():
     b.ptrtoint(p, ti)
     b.inttoptr(k, MiddleIrTypePointer(MiddleIrTypeInt()))
 #    b.bitcast(v, MiddleIrTypeFloat())
-#    b.icmp(IPRED_ULT, v, v)
+    b.icmp(IPRED_ULT, v, v)
 #    b.fcmp(RPRED_ULT, fv, fv)
 #    vi = MiddleIrConstantVector([MiddleIrConstantInt(ti,42)]*10)
 #    vi_mask = MiddleIrConstantVector([MiddleIrConstantInt(ti, X) for X in range(20)])

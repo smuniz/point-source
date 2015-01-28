@@ -181,6 +181,10 @@ class FrontEndPowerPc(FrontEnd):
             # Instruction : clear left with inmediate
             pass
 
+        elif lir_inst.is_type(self.iset.PPC_cmpwi):
+            # Instruction : compare word inmediate
+            pass
+
         elif lir_inst.is_type(self.iset.PPC_lbz):
             # Instruction : load byte and zero
             pass
@@ -564,12 +568,7 @@ class FrontEndPowerPc(FrontEnd):
 
         :param lir_inst: LIR instruction to convert into MIR instruction.
         """
-        mir_inst = None
-
-        #lir_inst = UnknownExpression()
-        #mir_inst.set(str(lir_inst))
-
-        return mir_inst
+        return None
 
     def _extract_callee_address(self, lir_inst):
         """Return the callee address from a call instruction, if any."""

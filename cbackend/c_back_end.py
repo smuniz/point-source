@@ -499,7 +499,7 @@ class CBackEnd(object):
         # representation hosted inside the HIR.
         print "[+] Creating HIR representation..."
         print str(self.hir_function)
-        #return
+        return
         hir_output = HirTextOutput(self.hir_function)
         hir_output.generate_output("Decompiled code")
 

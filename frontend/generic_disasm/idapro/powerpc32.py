@@ -20,6 +20,21 @@ class InstructionSet(object):
     PPC_andc = idaapi.PPC_andc          # AND with Complement
     PPC_andi = idaapi.PPC_andi          # AND Immediate
     PPC_andis = idaapi.PPC_andis        # AND Immediate Shifted
+
+    PPC_cmpwi = idaapi.PPC_cmpwi        # Compare Word Immediate
+    PPC_cmpw = idaapi.PPC_cmpw      # Compare Word
+    PPC_cmplwi = idaapi.PPC_cmplwi      # Compare Logical Word Immediate
+    PPC_cmplw = idaapi.PPC_cmplw        # Compare Logical Word
+    PPC_cmpdi = idaapi.PPC_cmpdi        # Compare Double Word Immediate
+    PPC_cmpd = idaapi.PPC_cmpd      # Compare Double Word
+    PPC_cmpldi = idaapi.PPC_cmpldi      # Compare Logical Double Word Immediate
+    PPC_cmpld = idaapi.PPC_cmpld        # Compare Logical Double Word
+
+    PPC_cmp = idaapi.PPC_cmp        # Compare
+    PPC_cmpi = idaapi.PPC_cmpi      # Compare Immediate
+    PPC_cmpl = idaapi.PPC_cmpl      # Compare Logical
+    PPC_cmpli = idaapi.PPC_cmpli        # Compare Logical Immediate
+
     PPC_divd = idaapi.PPC_divd          # Divide Double Word
     PPC_divdu = idaapi.PPC_divdu        # Divide Double Word Unsigned
     PPC_divw = idaapi.PPC_divw          # Divide Word
@@ -214,10 +229,7 @@ class InstructionSet(object):
     PPC_bns = idaapi.PPC_bns        # Branch if not summary overflow
 
     # UNIMPLEMENTED_TYPES
-    PPC_cmp = idaapi.PPC_cmp        # Compare
-    PPC_cmpi = idaapi.PPC_cmpi      # Compare Immediate
-    PPC_cmpl = idaapi.PPC_cmpl      # Compare Logical
-    PPC_cmpli = idaapi.PPC_cmpli        # Compare Logical Immediate
+
     PPC_cntlzd = idaapi.PPC_cntlzd      # Count Leading Zeros Double Word
     PPC_cntlzw = idaapi.PPC_cntlzw      # Count Leading Zeros Word
     PPC_crand = idaapi.PPC_crand        # Condition Register AND
@@ -309,15 +321,6 @@ class InstructionSet(object):
     #PPC_twi = idaapi.PPC_twi       # Trap Word Immediate
 
     #-------------
-
-    PPC_cmpwi = idaapi.PPC_cmpwi        # Compare Word Immediate
-    PPC_cmpw = idaapi.PPC_cmpw      # Compare Word
-    PPC_cmplwi = idaapi.PPC_cmplwi      # Compare Logical Word Immediate
-    PPC_cmplw = idaapi.PPC_cmplw        # Compare Logical Word
-    PPC_cmpdi = idaapi.PPC_cmpdi        # Compare Double Word Immediate
-    PPC_cmpd = idaapi.PPC_cmpd      # Compare Double Word
-    PPC_cmpldi = idaapi.PPC_cmpldi      # Compare Logical Double Word Immediate
-    PPC_cmpld = idaapi.PPC_cmpld        # Compare Logical Double Word
 
     #PPC_trap = idaapi.PPC_trap         # Trap Word Unconditionally
     #PPC_trapd = idaapi.PPC_trapd       # Trap Double Word Unconditionally
@@ -578,6 +581,21 @@ ASSIGNMENT_TYPES = [
     InstructionSet.PPC_andc,        # AND with Complement
     InstructionSet.PPC_andi,        # AND Immediate
     InstructionSet.PPC_andis,       # AND Immediate Shifted
+
+    InstructionSet.PPC_cmpwi,       # Compare Word Immediate
+    InstructionSet.PPC_cmpw,        # Compare Word
+    InstructionSet.PPC_cmplwi,      # Compare Logical Word Immediate
+    InstructionSet.PPC_cmplw,       # Compare Logical Word
+    InstructionSet.PPC_cmpdi,       # Compare Double Word Immediate
+    InstructionSet.PPC_cmpd,        # Compare Double Word
+    InstructionSet.PPC_cmpldi,      # Compare Logical Double Word Immediate
+    InstructionSet.PPC_cmpld,       # Compare Logical Double Word
+
+    InstructionSet.PPC_cmp,         # Compare
+    InstructionSet.PPC_cmpi,        # Compare Immediate
+    InstructionSet.PPC_cmpl,        # Compare Logical
+    InstructionSet.PPC_cmpli,       # Compare Logical Immediate
+
     InstructionSet.PPC_divd,        # Divide Double Word
     InstructionSet.PPC_divdu,       # Divide Double Word Unsigned
     InstructionSet.PPC_divw,        # Divide Word
