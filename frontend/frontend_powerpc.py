@@ -110,7 +110,7 @@ class FrontEndPowerPc(FrontEnd):
                         "No symbol found at 0x%X for instruction at 0x%X" % (
                         op_address_1, lir_inst.address))
 
-                name = "BLAAAA"
+                name = ""
 
                 mir_inst = self.mir_inst_builder.add(
                     self.current_symbols_table.symbols[op_address_1].item,
@@ -165,7 +165,7 @@ class FrontEndPowerPc(FrontEnd):
                         "No symbol found for op n.%d at 0x%X for instruction at 0x%X" % (
                         1, op_address, lir_inst.address))
 
-                name = "BLAAAA"
+                name = ""
 
                 mir_inst = self.mir_inst_builder.add(
                     self.current_symbols_table.symbols[op_address].item,
@@ -427,7 +427,7 @@ class FrontEndPowerPc(FrontEnd):
                         "No symbol found at 0x%X for instruction at 0x%X" % (
                         op_address_1, lir_inst.address))
 
-                name = "BLAAAA"
+                name = ""
 
                 mir_inst = self.mir_inst_builder.sub(
                     self.current_symbols_table.symbols[op_address_1].item,

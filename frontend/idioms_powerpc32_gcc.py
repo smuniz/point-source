@@ -912,17 +912,8 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     # The higher 16 bits are always set with a LIS instruciton.
                     if hi_inst.is_type(self.iset.PPC_lis):
 
-                        ## Get the LIS instruction position inside the current
-                        ## basic block.
-                        #hi_inst_idx = bb.get_instruction_index(hi_inst)
-
-                        #if not hi_inst_idx:
-                        #    raise PowerPc32GccIdiomAnalyzerException(
-                        #        "Couldn't locate index (high) for 0x%X:%s" \
-                        #        % (hi_inst.address, hi_inst))
-
-                        # TODO / FIXME : Use DU and UD chains instead of just
-                        # the current basic block.
+                        # Now find the load of the lower 2 16 bits and figure
+                        # out what they are and what point to (if any).
                         self.validate_load_word_lower(bb, hi_inst)
 
         except MiddleIrException, err:
@@ -954,25 +945,12 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         lo_inst = bb.get_instruction_by_address(op1_address)
 
         if True:
-
-            # Avoid the immediate (addi???) instruction because it could
-            # reuse the registers like this:
+            # Look for the second part of the following code instructions
+            # sequence.
             #
             # lis     %r3, ((sub_80028C04+0x10000)@h)
             # addi    %r3, %r3, -0x73FC # sub_80028C04
             #
-            # TODO / FIXME : What the hell was I trying to do here?
-            #if bb[hi_inst_idx + 1] != lo_inst:
-
-            #    # Stop looking if the register affecting the upper
-            #    # part was redefined.
-
-            #    # TODO: distinct between store and load operations.
-            #    #if lo_inst.type == hi_inst.type and \
-            #    if lo_inst[0].value == hi_inst[0].value:
-            #        #print "break at 0x%X" % lo_inst.address
-            #        break
-
             if ( lo_inst.type == self.iset.PPC_addi and \
                 hi_inst[0].value == lo_inst[1].value ) \
                 or \
@@ -981,7 +959,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 hi_inst[0].value == lo_inst[1].value[0] ):
 
                 # Obtain the memory address referenced by the idiom.
-                # TODO / FIXME : Remove Ida Pro specifics.
+                # TODO : Remove Ida Pro specifics.
                 dest_address = idaapi.get_first_dref_from(hi_inst.address)
                 idiom_type = idaapi.idc_guess_type(dest_address)
 
@@ -993,22 +971,21 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 #data  = self.get_string_by_address(dest_address)
 
                 if idiom_type is None:
+                    raise IdiomAnalyzerException(
+                        "Unimplemented 'None' guessed type.")
+
                 elif idiom_type.startswith("void *"):
-                elif idiom_type is "__int16":
-                elif idiom_type is "int":
-                elif idiom_type is "__int64":
-                elif idiom_type is "char":
-                elif idiom_type.startswith("char["):
-                elif idiom_type.startswith("char *["):
+                    raise IdiomAnalyzerException(
+                        "Unimplemented 'void *' guessed type.")
+
+                elif idiom_type == "__int16":
+                    raise IdiomAnalyzerException(
+                        "Unimplemented '__int16' guessed type.")
+
+                elif idiom_type == "int":
+                    #
                     # Global variable reference
                     #
-                    # TODO: Check if it's just an integer literal
-                    # expression or a global variable reference.
-                    #
-                    #address  = (bb[i][1].value & 0xffff) << 16
-                    #address += bb[i+1][2].value
-
-                    #if data is None:
                     data = self.debugger.dword(dest_address)
 
                     print "data @ 0x%X = 0x%x" % (lo_inst.address, data)
@@ -1032,7 +1009,6 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     gvar_str.initializer = MiddleIrConstantInt(MiddleIrTypeInt(32), data)
                     # Add the global variable to the current module.
                     #self.mir_module.add_global_variable(gvar_str)
-                    #print self.mir_module
 
                     address = lo_inst.address
 
@@ -1045,39 +1021,31 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                             address, True)
 
                     name = "psz%s" % str(data).capitalize()
-                    gep = mir_inst_builder.load(gvar_str)
-                    #gep = mir_inst_builder.gep(
-                    #    gvar_str,
-                    #    [MiddleIrConstantInt32(0)] * 2,
-                    #    name)
+                    mir_load = mir_inst_builder.load(gvar_str)
 
-                    gep.add_address(address)
+                    mir_load.add_address(address)
 
-                    #
                     # Add newly created symbol to symbol table.
-                    #
                     self.current_symbols_table.add_symbol(
-                        address, name, None, None, gep)
-                    #print self.mir_module
+                        address, name, None, None, mir_load)
 
-                    #
                     # Set MIR instruction address equivalent to the LIR
                     # instruction used to get it.
-                    #
                     mir_basic_block = \
                         self.mir_function.get_basic_block_by_address(address)
 
-                    #mir_basic_block.add_instruction(gep)     # TODO / FIXME
+                    #mir_basic_block.add_instruction(mir_load) # TODO / FIXME
 
-                    # TODO: Determine if the address belongs to a function.
-                    #f = get_func(address)
-                    #if f is not None and f.startEA == address:
-                    #    expr = get_func_name(get_func(address).startEA)
-                    #else:
-                    #    expr = IntegerLiteralExpression(address)
+                elif idiom_type == "__int64":
+                    raise IdiomAnalyzerException(
+                        "Unimplemented '__int64' guessed type.")
 
-                else:
-                    data  = self.get_string_by_address(dest_address)
+                elif idiom_type == "char":
+                    raise IdiomAnalyzerException(
+                        "Unimplemented 'char' guessed type.")
+
+                elif idiom_type.startswith("char["):
+                    data = self.get_string_by_address(dest_address)
 
                     #
                     # Add the newly detected string reference to the MIR
@@ -1129,10 +1097,18 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     self.current_symbols_table.add_symbol(
                         lo_inst.address, name, None, None, gep)
 
-                # Mark instructions as analyzed and remove them from
-                # the list of remaining LIR instructions.
-                hi_inst.analyzed = True
-                lo_inst.analyzed = True
+                elif idiom_type.startswith("char *["):
+                    raise IdiomAnalyzerException(
+                        "Unimplemented 'char *[]' guessed type.")
+
+                else:
+                    raise IdiomAnalyzerException(
+                        "Unknown guessed type '%s'." % idiom_type)
+
+        # Mark instructions as analyzed and remove them from
+        # the list of remaining LIR instructions.
+        hi_inst.analyzed = True
+        lo_inst.analyzed = True
 
         return True
 
