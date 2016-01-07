@@ -68,7 +68,7 @@ class Disassembler(BaseDebugger):
     #
     # instruc_t.feature
     #
-    FEATURE_STOP = CF_STOP  #  Instruction doesn't pass execution to the next instruction
+    #FEATURE_STOP = CF_STOP  #  Instruction doesn't pass execution to the next instruction
     FEATURE_CALL = CF_CALL  #  CALL instruction (should make a procedure here)
     FEATURE_CHG1 = CF_CHG1  #  The instruction modifies the first operand
     FEATURE_CHG2 = CF_CHG2  #  The instruction modifies the second operand
