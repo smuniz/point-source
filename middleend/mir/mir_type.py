@@ -5,7 +5,8 @@
 #
 from middleend.mir.mir_llvm_instance import MiddleIrLLVMInstance
 
-from llvm.core import Type
+from llvmlite.llvmpy.core import Type
+#import llvmlite.ir as Type
 
 __all__ = [ "MiddleIrTypeChar",
             "MiddleIrTypeInt",

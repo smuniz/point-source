@@ -68,10 +68,9 @@ def dependancy_check(dependancy_list):
 
 # List of modules required to operate Binary Scope.
 dependancy_list = {
-    "llvm" : "Python bindings for LLVM",
+    "llvmlite" : "Lightweight wrapper around basic LLVM functionality",
     }
 
 def run_dependancy_check():
     if len(dependancy_check(dependancy_list)) > 0:
-        exit(1)
-
+        raise ImportError("Unable to import required modules")

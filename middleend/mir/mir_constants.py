@@ -7,7 +7,7 @@ from middleend.mir_exception import MiddleIrException
 from middleend.mir.mir_type import *
 from middleend.mir.mir_llvm_instance import MiddleIrLLVMInstance
 
-from llvm.core import *
+#from llvm.core import *
 
 #__all__ = ["MiddleIrConstantBool",
 #            "MiddleIrConstantInt",

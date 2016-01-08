@@ -13,8 +13,7 @@ from middleend.mir.area import Area
 from middleend.mir_exception import MiddleIrException
 from middleend.mir.mir_function import MiddleIrFunction
 
-from llvm import *
-from llvm.core import *
+from llvmlite.ir import *
 
 #
 # Keep track of modules created during a session so if the user specifies a new

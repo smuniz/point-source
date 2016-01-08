@@ -385,4 +385,5 @@ def main():
             point_source.log("[!] Decompilation took %.2f seconds" % (end - start))
 
 if __name__ in ["__main__"]:
-    main()
+    #main()
+    print "A" * 200

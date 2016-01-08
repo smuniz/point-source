@@ -5,50 +5,52 @@
 #
 from traceback import print_stack
 
-from llvm import *
-from llvm.core import *
+from llvmlite.ir import *
 
-from mir_module import *
+#from mir_module import *
 #from middleend.mir_exception import MiddleIrException
 from mir_function_base import MiddleIrFunctionBase, \
                                 MiddleIrFunctionBaseException
 from mir_type import *
 
+from middleend.mir.mir_llvm_instance import MiddleIrLLVMInstance
+
 #
 # LLVM calling conventions converted to our equivalents.
 #
-CALL_CONV_C             = CC_C
-CALL_CONV_FASTCALL      = CC_FASTCALL
-CALL_CONV_COLDCALL      = CC_COLDCALL
-CALL_CONV_X86_STDCALL   = CC_X86_STDCALL
-CALL_CONV_X86_FASTCALL  = CC_X86_FASTCALL
-CALL_CONV_GHC           = CC_GHC
-CALL_CONV_ARM_APCS      = CC_ARM_APCS
-CALL_CONV_ARM_AAPCS     = CC_ARM_AAPCS
-CALL_CONV_ARM_AAPCS_VFP = CC_ARM_AAPCS_VFP
-CALL_CONV_MSP430_INTR   = CC_MSP430_INTR
-CALL_CONV_X86_THISCALL  = CC_X86_THISCALL
-CALL_CONV_PTX_KERNEL    = CC_PTX_KERNEL
-CALL_CONV_PTX_DEVICE    = CC_PTX_DEVICE
-CALL_CONV_MBLAZE_INTR   = CC_MBLAZE_INTR
-CALL_CONV_MBLAZE_SVOL   = CC_MBLAZE_SVOL
+from idaapi import *
+#CALL_CONV_C             = CM_CC_C
+CALL_CONV_FASTCALL      = CM_CC_FASTCALL
+#CALL_CONV_COLDCALL      = CM_CC_COLDCALL
+#CALL_CONV_X86_STDCALL   = CM_CC_X86_STDCALL
+#CALL_CONV_X86_FASTCALL  = CM_CC_X86_FASTCALL
+#CALL_CONV_GHC           = CM_CC_GHC
+#CALL_CONV_ARM_APCS      = CM_CC_ARM_APCS
+#CALL_CONV_ARM_AAPCS     = CM_CC_ARM_AAPCS
+#CALL_CONV_ARM_AAPCS_VFP = CM_CC_ARM_AAPCS_VFP
+#CALL_CONV_MSP430_INTR   = CM_CC_MSP430_INTR
+#CALL_CONV_X86_THISCALL  = CM_CC_X86_THISCALL
+#CALL_CONV_PTX_KERNEL    = CM_CC_PTX_KERNEL
+#CALL_CONV_PTX_DEVICE    = CM_CC_PTX_DEVICE
+#CALL_CONV_MBLAZE_INTR   = CM_CC_MBLAZE_INTR
+#CALL_CONV_MBLAZE_SVOL   = CM_CC_MBLAZE_SVOL
 
 CALLING_CONVENTIONS = {
-     CALL_CONV_C             : "C",
+     #CALL_CONV_C             : "C",
      CALL_CONV_FASTCALL      : "Fastcall",
-     CALL_CONV_COLDCALL      : "Coldcall",
-     CALL_CONV_X86_STDCALL   : "x86 stdcall",
-     CALL_CONV_X86_FASTCALL  : "x86 fastcall",
-     CALL_CONV_GHC           : "GHC",
-     CALL_CONV_ARM_APCS      : "ARM Procedure Calling Standard",
-     CALL_CONV_ARM_AAPCS     : "ARM Architecture Procedure Calling Standard",
-     CALL_CONV_ARM_AAPCS_VFP : "ARM Architecture Procedure Calling Standard - hard floating point ABI",
-     CALL_CONV_MSP430_INTR   : "MSP430 interrupt routines",
-     CALL_CONV_X86_THISCALL  : "x86 thiscall",
-     CALL_CONV_PTX_KERNEL    : "PTX kernel",
-     CALL_CONV_PTX_DEVICE    : "PTX device",
-     CALL_CONV_MBLAZE_INTR   : "MBlaze ???",
-     CALL_CONV_MBLAZE_SVOL   : "MBlaze ???",
+     #CALL_CONV_COLDCALL      : "Coldcall",
+     #CALL_CONV_X86_STDCALL   : "x86 stdcall",
+     #CALL_CONV_X86_FASTCALL  : "x86 fastcall",
+     #CALL_CONV_GHC           : "GHC",
+     #CALL_CONV_ARM_APCS      : "ARM Procedure Calling Standard",
+     #CALL_CONV_ARM_AAPCS     : "ARM Architecture Procedure Calling Standard",
+     #CALL_CONV_ARM_AAPCS_VFP : "ARM Architecture Procedure Calling Standard - hard floating point ABI",
+     #CALL_CONV_MSP430_INTR   : "MSP430 interrupt routines",
+     #CALL_CONV_X86_THISCALL  : "x86 thiscall",
+     #CALL_CONV_PTX_KERNEL    : "PTX kernel",
+     #CALL_CONV_PTX_DEVICE    : "PTX device",
+     #CALL_CONV_MBLAZE_INTR   : "MBlaze ???",
+     #CALL_CONV_MBLAZE_SVOL   : "MBlaze ???",
     }
 
 
