@@ -11,7 +11,7 @@ from middleend.mir.mir_llvm_instance import MiddleIrLLVMInstance
 
 from area import Area
 
-from llvmlite.ir import *
+from llvmlite import ir
 
 #__all__ = [ "MiddleIrInstructionBuilder",
 #            "MiddleIrInstructionBuilderException",
@@ -39,7 +39,7 @@ class MiddleIrInstructionBuilder(object):
         # Instantiate a LLVM instruction builder to create each instruction
         # specified by the user.
         #
-        self._ptr = Builder.new(mir_basic_block._ptr)
+        self._ptr = ir.IRBuilder(mir_basic_block._ptr)
 
     @property
     def _ptr(self):
@@ -792,11 +792,11 @@ class MiddleIrStoreInstruction(MiddleIrInstruction):
         self.value = value
         self.pointer = pointer
         self.align = align
-        self.volatile = volatile
+        self.volatile = volatile # unused in llvmlite
         self.yields = pointer
 
         self._ptr = builder._ptr.store(
-                value._ptr, pointer._ptr, align, volatile)
+                value._ptr, pointer._ptr, align)#, volatile)
 
     def get_readable_inners(self):
         """..."""

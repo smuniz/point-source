@@ -467,7 +467,7 @@ class CBackEnd(object):
                 ["0x%08x" % addr for addr in hir_stmt.addresses if not None])
             group = hir_group.capitalize()
             stmt_type = hir_stmt.type
-            stmt_repr = hir_stmt._ptr.opcode_name
+            stmt_repr = "BLABLA" #hir_stmt._ptr.opcode_name
 
             print "\t%(addresses)s %(group)15s " \
                   "(type %(stmt_type)3d) - %(stmt_repr)-25s" % vars()

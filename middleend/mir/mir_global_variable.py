@@ -10,7 +10,7 @@ from middleend.mir_exception import MiddleIrException
 from middleend.mir.mir_llvm_instance import MiddleIrLLVMInstance
 from area import Area
 
-from llvm.core import *
+from llvmlite import *
 
 
 class MiddleIrGlobalValueException(MiddleIrException):

@@ -7,13 +7,13 @@ from traceback import print_stack
 
 from llvmlite.ir import *
 
-#from mir_module import *
 #from middleend.mir_exception import MiddleIrException
 from mir_function_base import MiddleIrFunctionBase, \
                                 MiddleIrFunctionBaseException
 from mir_type import *
 
 from middleend.mir.mir_llvm_instance import MiddleIrLLVMInstance
+from middleend.mir.mir_module import MiddleIrModule
 
 #
 # LLVM calling conventions converted to our equivalents.
@@ -141,7 +141,7 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         self.module = None
 
         # Set the default calling convention.
-        self.calling_convention = CALL_CONV_C
+        self.calling_convention = CALL_CONV_FASTCALL
 
         self._llvm_definition = None
 

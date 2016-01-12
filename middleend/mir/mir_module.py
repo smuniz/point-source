@@ -4,16 +4,16 @@
 # This code is part of point source decompiler
 #
 
-import middleend.mir.mir_llvm_instance
-reload(middleend.mir.mir_llvm_instance)
-from middleend.mir.mir_llvm_instance import MiddleIrLLVMInstance
 
 from middleend.mir.area import Area
 
 from middleend.mir_exception import MiddleIrException
-from middleend.mir.mir_function import MiddleIrFunction
 
-from llvmlite.ir import *
+import middleend.mir.mir_llvm_instance
+reload(middleend.mir.mir_llvm_instance)
+from middleend.mir.mir_llvm_instance import MiddleIrLLVMInstance
+
+from llvmlite import ir
 
 #
 # Keep track of modules created during a session so if the user specifies a new
@@ -42,7 +42,7 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
     def __init__(self, name):
         """Initialize the intermediate level IR module class."""
         # Create an empty LLVM IR module.
-        super(MiddleIrModule, self).__init__(Module.new(name))
+        super(MiddleIrModule, self).__init__(ir.Module(name))
 
         # Display debugging information during development phase.
         self.debug = True
@@ -142,10 +142,11 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
             fty = mir_function._llvm_type._ptr
             name = mir_function.name
 
-            llvm_func_def = self._ptr.add_function(fty, name)
+            #llvm_func_def = self._ptr.add_function(fty, name)
+            llvm_func_def = ir.Function(self._ptr, fty, name)
 
             mir_function._llvm_definition = llvm_func_def
-        except LLVMException, err:
+        except Exception, err:
             raise MiddleIrModuleException(err)
 
     def remove_function(self, mir_function):
@@ -186,7 +187,7 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
         try:
             if self.ALLOW_MIR_VERIFY:
                 self._ptr.verify()
-        except LLVMException, err:
+        except Exception, err:
             raise MiddleIrModuleException(err)
 
     #def get_function_by_address(self, address):

@@ -12,21 +12,21 @@ from middleend.mir.mir_function import *
 # MIR calling conventions to C equivalents.
 #
 CALLING_CONVENTIONS = {
-     CALL_CONV_C             : "ccall",
+     #CALL_CONV_C             : "ccall",
      CALL_CONV_FASTCALL      : "fastcall",
-     CALL_CONV_COLDCALL      : "coldcall",
-     CALL_CONV_X86_STDCALL   : "x86call",
-     CALL_CONV_X86_FASTCALL  : "x86fastcall",
-     CALL_CONV_GHC           : "unk_cc",
-     CALL_CONV_ARM_APCS      : "unk_cc",
-     CALL_CONV_ARM_AAPCS     : "unk_cc",
-     CALL_CONV_ARM_AAPCS_VFP : "unk_cc",
-     CALL_CONV_MSP430_INTR   : "unk_cc",
-     CALL_CONV_X86_THISCALL  : "unk_cc",
-     CALL_CONV_PTX_KERNEL    : "unk_cc",
-     CALL_CONV_PTX_DEVICE    : "unk_cc",
-     CALL_CONV_MBLAZE_INTR   : "unk_cc",
-     CALL_CONV_MBLAZE_SVOL   : "unk_cc",
+     #CALL_CONV_COLDCALL      : "coldcall",
+     #CALL_CONV_X86_STDCALL   : "x86call",
+     #CALL_CONV_X86_FASTCALL  : "x86fastcall",
+     #CALL_CONV_GHC           : "unk_cc",
+     #CALL_CONV_ARM_APCS      : "unk_cc",
+     #CALL_CONV_ARM_AAPCS     : "unk_cc",
+     #CALL_CONV_ARM_AAPCS_VFP : "unk_cc",
+     #CALL_CONV_MSP430_INTR   : "unk_cc",
+     #CALL_CONV_X86_THISCALL  : "unk_cc",
+     #CALL_CONV_PTX_KERNEL    : "unk_cc",
+     #CALL_CONV_PTX_DEVICE    : "unk_cc",
+     #CALL_CONV_MBLAZE_INTR   : "unk_cc",
+     #CALL_CONV_MBLAZE_SVOL   : "unk_cc",
     }
 
 
@@ -50,7 +50,7 @@ class Function(object):
 
         self.return_type = None
 
-        self.calling_convention = CALL_CONV_C
+        self.calling_convention = CALL_CONV_FASTCALL
         self.name = ""
         #self.current = 0
 
@@ -311,65 +311,65 @@ class Function(object):
     #def __delitem__(self, item):
     #    raise FunctionException("Function.__delitem__()")
 
-    @property
-    def is_calling_convention_c(self):
-        return self.calling_convention == CALL_CONV_C
+    #@property
+    #def is_calling_convention_c(self):
+    #    return self.calling_convention == CALL_CONV_C
 
     @property
     def is_calling_convention_fastcall(self):
         return self.calling_convention == CALL_CONV_FASTCALL
 
-    @property
-    def is_calling_convention_coldcall(self):
-        return self.calling_convention == CALL_CONV_COLDCALL
+    #@property
+    #def is_calling_convention_coldcall(self):
+    #    return self.calling_convention == CALL_CONV_COLDCALL
 
-    @property
-    def is_calling_convention_x86_stdcall(self):
-        return self.calling_convention == CALL_CONV_X86_STDCALL
+    #@property
+    #def is_calling_convention_x86_stdcall(self):
+    #    return self.calling_convention == CALL_CONV_X86_STDCALL
 
-    @property
-    def is_calling_convention_x86_fastcall(self):
-        return self.calling_convention == CALL_CONV_X86_FASTCALL
+    #@property
+    #def is_calling_convention_x86_fastcall(self):
+    #    return self.calling_convention == CALL_CONV_X86_FASTCALL
 
-    @property
-    def is_calling_convention_ghc(self):
-        return self.calling_convention == CALL_CONV_GHC
+    #@property
+    #def is_calling_convention_ghc(self):
+    #    return self.calling_convention == CALL_CONV_GHC
 
-    @property
-    def is_calling_convention_arm_apcs(self):
-        return self.calling_convention == CALL_CONV_ARM_APCS
+    #@property
+    #def is_calling_convention_arm_apcs(self):
+    #    return self.calling_convention == CALL_CONV_ARM_APCS
 
-    @property
-    def is_calling_convention_arm_aapcs(self):
-        return self.calling_convention == CALL_CONV_ARM_AAPCS
+    #@property
+    #def is_calling_convention_arm_aapcs(self):
+    #    return self.calling_convention == CALL_CONV_ARM_AAPCS
 
-    @property
-    def is_calling_convention_arm_aapcs_vfp(self):
-        return self.calling_convention == CALL_CONV_ARM_AAPCS_VFP
+    #@property
+    #def is_calling_convention_arm_aapcs_vfp(self):
+    #    return self.calling_convention == CALL_CONV_ARM_AAPCS_VFP
 
-    @property
-    def is_calling_convention_msp430_intr(self):
-        return self.calling_convention == CALL_CONV_MSP430_INTR
+    #@property
+    #def is_calling_convention_msp430_intr(self):
+    #    return self.calling_convention == CALL_CONV_MSP430_INTR
 
-    @property
-    def is_calling_convention_x86_thiscall(self):
-        return self.calling_convention == CALL_CONV_X86_THISCALL
+    #@property
+    #def is_calling_convention_x86_thiscall(self):
+    #    return self.calling_convention == CALL_CONV_X86_THISCALL
 
-    @property
-    def is_calling_convention_ptx_kernel(self):
-        return self.calling_convention == CALL_CONV_PTX_KERNEL
+    #@property
+    #def is_calling_convention_ptx_kernel(self):
+    #    return self.calling_convention == CALL_CONV_PTX_KERNEL
 
-    @property
-    def is_calling_convention_ptx_device(self):
-        return self.calling_convention == CALL_CONV_PTX_DEVICE
+    #@property
+    #def is_calling_convention_ptx_device(self):
+    #    return self.calling_convention == CALL_CONV_PTX_DEVICE
 
-    @property
-    def is_calling_convention_mblaze_intr(self):
-        return self.calling_convention == CALL_CONV_MBLAZE_INTR
+    #@property
+    #def is_calling_convention_mblaze_intr(self):
+    #    return self.calling_convention == CALL_CONV_MBLAZE_INTR
 
-    @property
-    def is_calling_convention_mblaze_svol(self):
-        return self.calling_convention == CALL_CONV_MBLAZE_SVOL
+    #@property
+    #def is_calling_convention_mblaze_svol(self):
+    #    return self.calling_convention == CALL_CONV_MBLAZE_SVOL
 
     def __create_declaration(self):
         """Create the function declaration with its return type, attributes,

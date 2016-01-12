@@ -531,7 +531,7 @@ class FrontEnd(object):
             raise FrontEndException("Idioms analysis failed (%s)" % err)
 
         except MiddleIrException, err:
-            #print format_exc() + '\n'
+            print format_exc() + '\n'
             raise FrontEndException("Middle IR error (%s)" % err)
 
         #

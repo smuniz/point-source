@@ -7,7 +7,7 @@ from middleend.mir_exception import MiddleIrException
 from middleend.mir.mir_type import *
 from middleend.mir.mir_llvm_instance import MiddleIrLLVMInstance
 
-#from llvm.core import *
+from llvmlite import ir
 
 #__all__ = ["MiddleIrConstantBool",
 #            "MiddleIrConstantInt",
@@ -60,7 +60,7 @@ class MiddleIrConstantInt(MiddleIrBaseConstant):
     def __init__(self, const_type, value):
         """Initialize the instance."""
         super(MiddleIrConstantInt, self).__init__(
-            Constant.int(const_type._ptr, value)
+            ir.Constant(const_type._ptr, value)
             )
 
         self.value = value
