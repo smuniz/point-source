@@ -1,86 +1,86 @@
 #!/bin/sh
 
-#PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test1.c -o ./test1.ll
-#PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH llc --x86-asm-syntax=intel test1.ll -o test1
-#PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH llc --march=ppc32 test1.ll -o test1.S
+#clang -cc1 -S -emit-llvm ../src/test1.c -o ./test1.ll
+#llc --x86-asm-syntax=intel test1.ll -o test1
+#llc --march=ppc32 test1.ll -o test1.S
 
-#PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH llc -march=cpp test82.ll
+#llc -march=cpp test82.ll
 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test0.c  -o  test0.ll  
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test1.c  -o  test1.ll  
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test2.c  -o  test2.ll  
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test3.c  -o  test3.ll  
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test4.c  -o  test4.ll  
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test5.c  -o  test5.ll  
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test6.c  -o  test6.ll  
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test7.c  -o  test7.ll  
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test8.c  -o  test8.ll  
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test9.c  -o  test9.ll  
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test10.c -o  test10.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test11.c -o  test11.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test12.c -o  test12.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test13.c -o  test13.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test14.c -o  test14.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test15.c -o  test15.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test16.c -o  test16.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test17.c -o  test17.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test18.c -o  test18.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test19.c -o  test19.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test20.c -o  test20.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test21.c -o  test21.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test22.c -o  test22.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test23.c -o  test23.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test24.c -o  test24.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test30.c -o  test30.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test33.c -o  test33.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test34.c -o  test34.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test35.c -o  test35.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test36.c -o  test36.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test37.c -o  test37.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test38.c -o  test38.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test39.c -o  test39.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test40.c -o  test40.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test41.c -o  test41.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test42.c -o  test42.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test43.c -o  test43.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test44.c -o  test44.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test45.c -o  test45.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test46.c -o  test46.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test47.c -o  test47.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test48.c -o  test48.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test49.c -o  test49.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test50.c -o  test50.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test51.c -o  test51.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test52.c -o  test52.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test53.c -o  test53.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test54.c -o  test54.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test55.c -o  test55.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test56.c -o  test56.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test57.c -o  test57.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test58.c -o  test58.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test59.c -o  test59.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test60.c -o  test60.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test61.c -o  test61.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test62.c -o  test62.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test63.c -o  test63.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test64.c -o  test64.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test65.c -o  test65.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test66.c -o  test66.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test67.c -o  test67.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test68.c -o  test68.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test69.c -o  test69.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test70.c -o  test70.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test71.c -o  test71.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test72.c -o  test72.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test73.c -o  test73.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test74.c -o  test74.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test75.c -o  test75.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test76.c -o  test76.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test77.c -o  test77.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test78.c -o  test78.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test79.c -o  test79.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test80.c -o  test80.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test81.c -o  test81.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test82.c -o  test82.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test83.c -o  test83.ll 
-PATH=/opt/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/:$PATH clang -cc1 -S -emit-llvm ../src/test84.c -o  test84.ll 
+clang -cc1 -S -emit-llvm ../src/test0.c  -o  test0.ll  
+clang -cc1 -S -emit-llvm ../src/test1.c  -o  test1.ll  
+clang -cc1 -S -emit-llvm ../src/test2.c  -o  test2.ll  
+clang -cc1 -S -emit-llvm ../src/test3.c  -o  test3.ll  
+clang -cc1 -S -emit-llvm ../src/test4.c  -o  test4.ll  
+clang -cc1 -S -emit-llvm ../src/test5.c  -o  test5.ll  
+clang -cc1 -S -emit-llvm ../src/test6.c  -o  test6.ll  
+clang -cc1 -S -emit-llvm ../src/test7.c  -o  test7.ll  
+clang -cc1 -S -emit-llvm ../src/test8.c  -o  test8.ll  
+clang -cc1 -S -emit-llvm ../src/test9.c  -o  test9.ll  
+clang -cc1 -S -emit-llvm ../src/test10.c -o  test10.ll 
+clang -cc1 -S -emit-llvm ../src/test11.c -o  test11.ll 
+clang -cc1 -S -emit-llvm ../src/test12.c -o  test12.ll 
+clang -cc1 -S -emit-llvm ../src/test13.c -o  test13.ll 
+clang -cc1 -S -emit-llvm ../src/test14.c -o  test14.ll 
+clang -cc1 -S -emit-llvm ../src/test15.c -o  test15.ll 
+clang -cc1 -S -emit-llvm ../src/test16.c -o  test16.ll 
+clang -cc1 -S -emit-llvm ../src/test17.c -o  test17.ll 
+clang -cc1 -S -emit-llvm ../src/test18.c -o  test18.ll 
+clang -cc1 -S -emit-llvm ../src/test19.c -o  test19.ll 
+clang -cc1 -S -emit-llvm ../src/test20.c -o  test20.ll 
+clang -cc1 -S -emit-llvm ../src/test21.c -o  test21.ll 
+clang -cc1 -S -emit-llvm ../src/test22.c -o  test22.ll 
+clang -cc1 -S -emit-llvm ../src/test23.c -o  test23.ll 
+clang -cc1 -S -emit-llvm ../src/test24.c -o  test24.ll 
+clang -cc1 -S -emit-llvm ../src/test30.c -o  test30.ll 
+clang -cc1 -S -emit-llvm ../src/test33.c -o  test33.ll 
+clang -cc1 -S -emit-llvm ../src/test34.c -o  test34.ll 
+clang -cc1 -S -emit-llvm ../src/test35.c -o  test35.ll 
+clang -cc1 -S -emit-llvm ../src/test36.c -o  test36.ll 
+clang -cc1 -S -emit-llvm ../src/test37.c -o  test37.ll 
+clang -cc1 -S -emit-llvm ../src/test38.c -o  test38.ll 
+clang -cc1 -S -emit-llvm ../src/test39.c -o  test39.ll 
+clang -cc1 -S -emit-llvm ../src/test40.c -o  test40.ll 
+clang -cc1 -S -emit-llvm ../src/test41.c -o  test41.ll 
+clang -cc1 -S -emit-llvm ../src/test42.c -o  test42.ll 
+clang -cc1 -S -emit-llvm ../src/test43.c -o  test43.ll 
+clang -cc1 -S -emit-llvm ../src/test44.c -o  test44.ll 
+clang -cc1 -S -emit-llvm ../src/test45.c -o  test45.ll 
+clang -cc1 -S -emit-llvm ../src/test46.c -o  test46.ll 
+clang -cc1 -S -emit-llvm ../src/test47.c -o  test47.ll 
+clang -cc1 -S -emit-llvm ../src/test48.c -o  test48.ll 
+clang -cc1 -S -emit-llvm ../src/test49.c -o  test49.ll 
+clang -cc1 -S -emit-llvm ../src/test50.c -o  test50.ll 
+clang -cc1 -S -emit-llvm ../src/test51.c -o  test51.ll 
+clang -cc1 -S -emit-llvm ../src/test52.c -o  test52.ll 
+clang -cc1 -S -emit-llvm ../src/test53.c -o  test53.ll 
+clang -cc1 -S -emit-llvm ../src/test54.c -o  test54.ll 
+clang -cc1 -S -emit-llvm ../src/test55.c -o  test55.ll 
+clang -cc1 -S -emit-llvm ../src/test56.c -o  test56.ll 
+clang -cc1 -S -emit-llvm ../src/test57.c -o  test57.ll 
+clang -cc1 -S -emit-llvm ../src/test58.c -o  test58.ll 
+clang -cc1 -S -emit-llvm ../src/test59.c -o  test59.ll 
+clang -cc1 -S -emit-llvm ../src/test60.c -o  test60.ll 
+clang -cc1 -S -emit-llvm ../src/test61.c -o  test61.ll 
+clang -cc1 -S -emit-llvm ../src/test62.c -o  test62.ll 
+clang -cc1 -S -emit-llvm ../src/test63.c -o  test63.ll 
+clang -cc1 -S -emit-llvm ../src/test64.c -o  test64.ll 
+clang -cc1 -S -emit-llvm ../src/test65.c -o  test65.ll 
+clang -cc1 -S -emit-llvm ../src/test66.c -o  test66.ll 
+clang -cc1 -S -emit-llvm ../src/test67.c -o  test67.ll 
+clang -cc1 -S -emit-llvm ../src/test68.c -o  test68.ll 
+clang -cc1 -S -emit-llvm ../src/test69.c -o  test69.ll 
+clang -cc1 -S -emit-llvm ../src/test70.c -o  test70.ll 
+clang -cc1 -S -emit-llvm ../src/test71.c -o  test71.ll 
+clang -cc1 -S -emit-llvm ../src/test72.c -o  test72.ll 
+clang -cc1 -S -emit-llvm ../src/test73.c -o  test73.ll 
+clang -cc1 -S -emit-llvm ../src/test74.c -o  test74.ll 
+clang -cc1 -S -emit-llvm ../src/test75.c -o  test75.ll 
+clang -cc1 -S -emit-llvm ../src/test76.c -o  test76.ll 
+clang -cc1 -S -emit-llvm ../src/test77.c -o  test77.ll 
+clang -cc1 -S -emit-llvm ../src/test78.c -o  test78.ll 
+clang -cc1 -S -emit-llvm ../src/test79.c -o  test79.ll 
+clang -cc1 -S -emit-llvm ../src/test80.c -o  test80.ll 
+clang -cc1 -S -emit-llvm ../src/test81.c -o  test81.ll 
+clang -cc1 -S -emit-llvm ../src/test82.c -o  test82.ll 
+clang -cc1 -S -emit-llvm ../src/test83.c -o  test83.ll 
+clang -cc1 -S -emit-llvm ../src/test84.c -o  test84.ll 
