@@ -1,10 +1,15 @@
+# IDA Pro backup files
+*.id[b012]
+*.nam
+*.til
+
 # Vim backup files
-*.swp
+*.sw[op]
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
 #*.py[cod]
-*.py[co] # removed .pyd cause I need the backup of that ATM.
+*.py[oc~]
 
 # C extensions
 *.so
