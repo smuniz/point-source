@@ -4,7 +4,7 @@
 # This code is part of point source decompiler
 #
 
-from multidigrah import MultiDiGraph
+from multidigrah import MultiDiGraph, MultiDiGraphException
 
 
 class LowLevelBasicBlockException(MultiDiGraphException):

@@ -3,7 +3,7 @@
 # 
 # This code is part of point source decompiler
 #
-from multidigrah import MultiDiGraph
+from multidigrah import MultiDiGraph, MultiDiGraphException
 
 
 class LowLevelFunctionException(MultiDiGraphException):
@@ -352,10 +352,10 @@ class LowLevelFunction(MultiDiGraph):
             # initialize pred and succ
             pred, succ = {}, {}
             for bb in self:
-                pred[bb] = set(prog.predecessors(bb))
-                succ[bb] = set(prog.successors(bb))
+                pred[bb] = set(self.predecessors(bb))
+                succ[bb] = set(self.successors(bb))
              
-            cfg             = SomeObject()
+            cfg             = self
             cfg.nodes       = set(self.basic_blocks)
             cfg.pred        = pred
             cfg.succ        = succ
