@@ -3,14 +3,15 @@
 # 
 # This code is part of point source decompiler
 #
+from multidigrah import MultiDiGraph
 
 
-class LowLevelFunctionException(Exception):
+class LowLevelFunctionException(MultiDiGraphException):
     """Generic exceptino for the low-level function IR."""
     pass
 
 
-class LowLevelFunction(object):
+class LowLevelFunction(MultiDiGraph):
     """This class holds all the information obtained from the different phases
     of the analysis and it includes instructions, basic blocks boundaries, etc.
 
@@ -271,10 +272,7 @@ class LowLevelFunction(object):
     @property
     def instructions_count(self):
         """Get the total number of instructions in the current function."""
-        count = 0
-        for inst in self.basic_blocks:
-            count += len(inst)
-        return count
+        return sum([len(inst) for inst in self.basic_blocks])
 
     def get_basic_blocks_count(self):
         """Get the total number of basic blocks in the current function."""
@@ -351,10 +349,33 @@ class LowLevelFunction(object):
 
     def generate_chains(self):
         try:
-            return self._generate_chains()
+            # initialize pred and succ
+            pred, succ = {}, {}
+            for bb in self:
+                pred[bb] = set(prog.predecessors(bb))
+                succ[bb] = set(prog.successors(bb))
+             
+            cfg             = SomeObject()
+            cfg.nodes       = set(self.basic_blocks)
+            cfg.pred        = pred
+            cfg.succ        = succ
+            cfg.entry_point = s0
+             
+            analysis               = self
+            analysis.meet          = meet_env
+            analysis.step_forward  = step_forward
+            analysis.step_backward = step_backward
+             
+            # run the whole thing
+            IN, OUT = maximal_fixed_point(analysis, cfg)
+            #print 'a   at program point s3 is', OUT[s3]['a']
+            #print 'ret at program point s4 is', OUT[s4]['ret']
+
+            #return self._generate_chains()
         except Exception, err:
             from traceback import format_exc
             print format_exc()
+
     def _generate_chains(self):
         """
         Generate def-use and use-def chains for the low level IR so further
@@ -365,7 +386,7 @@ class LowLevelFunction(object):
         reg_defs = dict()
         prev_reg_def = dict()
 
-        for bb_index, lir_bb in enumerate(self):
+        for lir_bb_idx, lir_bb in enumerate(self):
 
             for lir_inst in lir_bb:
 
@@ -472,3 +493,122 @@ class LowLevelFunction(object):
             5 : CF_CHG6,
         }
         return changes.get(lir_op_idx, None) in lir_inst.features
+
+    def forward_transfer_function(analysis, bb, IN_bb):
+        OUT_bb = IN_bb.copy()
+        for insn in bb:
+            analysis.step_forward(insn, OUT_bb)
+        return OUT_bb
+
+    def backward_transfer_function(self, analysis, bb, OUT_bb):
+        IN_bb = OUT_bb.copy()
+        for insn in reversed(bb):
+            analysis.step_backward(insn, IN_bb)
+        return IN_bb
+
+    def update(self, env, bb, newval, todo_set, todo_candidates):
+        if newval != env[bb]:
+            print '{0} has changed, adding {1}'.format(bb, todo_candidates)
+            env[bb] = newval
+            todo_set |= todo_candidates
+
+    def maximal_fixed_point(self, analysis, cfg, init={}):
+        # state at the entry and exit of each basic block
+        IN, OUT = {}, {}
+        for bb in cfg.nodes:
+            IN[bb] = {}
+            OUT[bb] = {}
+        IN[cfg.entry_point] = init
+
+        # first make a pass over each basic block
+        todo_forward = cfg.nodes
+        todo_backward = cfg.nodes
+     
+        while todo_backward or todo_forward:
+            while todo_forward:
+                bb = todo_forward.pop()
+
+                ####
+                # compute the environment at the entry of this BB
+                new_IN = reduce(analysis.meet, map(OUT.get, cfg.pred[bb]), IN[bb])
+                update(IN, bb, new_IN, todo_backward, cfg.pred[bb])
+
+                ####
+                # propagate information for this basic block
+                new_OUT = forward_transfer_function(analysis, bb, IN[bb])
+                update(OUT, bb, new_OUT, todo_forward, cfg.succ[bb])
+
+            while todo_backward:
+                bb = todo_backward.pop()
+
+                ####
+                # compute the environment at the exit of this BB
+                new_OUT = reduce(analysis.meet, map(IN.get, succ[bb]), OUT[bb])
+                update(OUT, bb, new_OUT, todo_forward, cfg.succ[bb])
+
+                ####
+                # propagate information for this basic block (backwards)
+                new_IN = backward_transfer_function(analysis, bb, OUT[bb])
+                update(IN, bb, new_IN, todo_backward, cfg.pred[bb])
+
+        ####
+        # IN and OUT have converged
+        return IN, OUT
+
+    def meet_val(self, lhs, rhs):
+        result = None
+
+        if lhs == 'NAC' or rhs == 'NAC':
+            result = 'NAC'
+
+        elif lhs == 'UNDEF' or rhs == 'UNDEF':
+            result = 'UNDEF'
+
+        else:
+            result = 'CONST'
+     
+        return result
+     
+    def meet_env(self, lhs, rhs):
+        lhs_keys = set(lhs.keys())
+        rhs_keys = set(rhs.keys())
+        result = {}
+
+        for var in lhs_keys - rhs_keys:
+            result[var] = lhs[var]
+
+        for var in rhs_keys - lhs_keys:
+            result[var] = rhs[var]
+
+        for var in lhs_keys & rhs_keys:
+            result[var] = meet_val(lhs[var], rhs[var])
+
+        return result
+
+    def abstract_value(self, env, expr):
+        if expr.isdigit():
+            return 'CONST'
+
+        try:
+            return env[expr]
+        except KeyError:
+            return 'UNDEF'
+
+    def step_forward(self, insn, env_in):
+        if type(insn) == str:
+            return
+
+        var, op, expr = insn
+
+        # insn is var = c
+        if len(expr) == 1:
+            env_in[var] = abstract_value(env_in, expr)
+
+        else:
+            e1, op, e2 = expr
+            val1 = abstract_value(env_in, e1)
+            val2 = abstract_value(env_in, e2)
+            env_in[var] = meet_val(val1, val2)
+
+    def step_backward(self, insn, env_in):
+        pass

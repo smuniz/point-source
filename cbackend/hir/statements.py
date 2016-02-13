@@ -29,7 +29,7 @@ Types of supported statements:
     * (C++)try blocks 
 """
 
-from graph import Graph
+from multidigrah import MultiDiGraph
 from area import Area
 from expressions import Expression
 

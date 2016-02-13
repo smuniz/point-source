@@ -4,15 +4,15 @@
 # This code is part of point source decompiler
 #
 
-from simplegrah import SimpleGraph
+from multidigrah import MultiDiGraph
 
 
-class LowLevelBasicBlockException(Exception):
+class LowLevelBasicBlockException(MultiDiGraphException):
     """Generic exceptino for the low-level basic block IR."""
     pass
 
 
-class LowLevelBasicBlock(SimpleGraph):
+class LowLevelBasicBlock(MultiDiGraph):
     """Handle a list of instructions contained in an araddress with possible
     in/out references from other parts of the program.
 

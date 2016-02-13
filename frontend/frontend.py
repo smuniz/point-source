@@ -399,20 +399,26 @@ class FrontEnd(object):
 
     def __propagate_graph_information(self):
         """
-        With all the function instructions and basic blocks created, the
-        information from the basic blocks referencing each other is set (this
-        is used for the function graph analysis and others).
+        Propagate control flow graph information fom LIR to MIR.
 
         """
-        for bb_index, lir_bb in enumerate(self.lir_function):
+        #
+        # With all the function instructions and basic blocks created, the
+        # information from the basic blocks referencing each other is set.
+        #
+        # This is used for the function graph analysis and other analysis.
+        #
+        for lir_bb_idx, lir_bb in enumerate(self.lir_function):
 
-            for edge_ea in self.lir_function[bb_index].get_in_edges():
+            for edge_ea in self.lir_function[lir_bb_idx].get_in_edges():
+
+                # TODO : Clean this mess
                 bblock = self.lir_function.get_basic_block_by_address(edge_ea)
                 bblock_index = self.lir_function.get_basic_block_index(bblock)
 
-                block = self.mir_function[bblock_index]
+                #block = self.mir_function[bblock_index]
 
-                self.mir_function[bb_index].add_in_edge(bblock_index)
+                self.mir_function[lir_bb_idx].add_in_edge(bblock_index)
 
     def __dump_lir(self):
         """Dump the current LIR function to the debugger output."""
@@ -497,6 +503,7 @@ class FrontEnd(object):
 
             # Output LIR for debugging purposes.
             self.__dump_lir()
+            raise Exception("ads")
 
             #
             # Step x
