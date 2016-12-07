@@ -71,22 +71,22 @@ class IdiomAnalyzer(object):
 
     def get_signed_value(self, value):
         """..."""
-        return (value + 2**31) % 2**32 - 2**31 # WTF?
+        return (value + 2**31) % 2**32 - 2**31 # WTF? XXX
 
+    @abc.abstractmethod
     def perform_phase0_analysis(self):
         """Execute the basic idiom analysis on current function previous to MIR
         generation.
 
         """
-        # Add any prior action.
-        self._perform_phase0_analysis()
-        # Add any post action.
+        return
 
     def perform_phase1_analysis(self):
         """Execute the basic idiom analysis on current function previous to MIR
         generation.
 
         """
+        # TODO Make this method abstract and move the code into a decorator.
         # This is used when a function is being analyzed to determine minimal
         # information about it but no detailed information or analysis are
         # necessary.
@@ -97,14 +97,13 @@ class IdiomAnalyzer(object):
         self._perform_phase1_analysis()
         # Add any post action.
 
+    @abc.abstractmethod
     def perform_phase2_analysis(self):
         """Execute the basic idiom analysis on current function after to MIR
         generation procedure.
 
         """
-        # Add any prior action.
-        self._perform_phase2_analysis()
-        # Add any post action.
+        return
 
     @abc.abstractmethod
     def detect_prologue(self):

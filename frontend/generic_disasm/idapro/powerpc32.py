@@ -542,12 +542,12 @@ class InstructionSet(object):
     DCR       = idaapi.o_idpspec5     # Device control register
 
     SPR_NAMES = {
-        SPR       : "SPR",
-        TWOFPR    : "TWOFPR",
-        SHMBME    : "SHMBME",
-        CRF       : "CRF",
-        CRB       : "CRB",
-        DCR       : "DCR",
+        SPR       : "spr",
+        TWOFPR    : "twofpr",
+        SHMBME    : "shmbme",
+        CRF       : "crf",
+        CRB       : "crb",
+        DCR       : "dcr",
     }
 
     ARGUMENT_REGISTERS = [GPR3, GPR4, GPR5, GPR6, GPR7, GPR8, GPR9, GPR10]

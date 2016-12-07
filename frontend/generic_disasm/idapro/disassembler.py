@@ -372,7 +372,7 @@ class Disassembler(BaseDebugger):
             # Create a new operand representation and pass the registers names
             # table so the instance can translate registers numbers to its
             # string representation.
-            lir_op = LowLevelOperand(
+            lir_op = LowLevelOperand(lir_inst.address,
                 self.instruction_set.GPR_NAMES, self.instruction_set.SPR_NAMES)
 
             #print "\tidx %d (n %d) - ty %d val %d" % \
@@ -460,6 +460,12 @@ class Disassembler(BaseDebugger):
             func.endEA,
             self.get_function_name(func.startEA),
             self.instruction_set)
+
+        # Do not try to analyze externs becuase no functio body is present.
+        # TODO Enhance this.
+        if func.owner == 0xFFFFFFFF:
+            lir_function.is_extern = True
+            return lir_function
 
         dones = {}
         for basic_block in FlowChart(func):

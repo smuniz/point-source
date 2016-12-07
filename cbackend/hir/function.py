@@ -8,27 +8,27 @@ from statements import Statement, CompoundStatement
 
 from middleend.mir.mir_function import *
 
+##
+## MIR calling conventions to C equivalents.
+##
+#CALLING_CONVENTIONS = {
+#     #CALL_CONV_C             : "ccall",
+#     CALL_CONV_FASTCALL      : "fastcall",
+#     #CALL_CONV_COLDCALL      : "coldcall",
+#     #CALL_CONV_X86_STDCALL   : "x86call",
+#     #CALL_CONV_X86_FASTCALL  : "x86fastcall",
+#     #CALL_CONV_GHC           : "unk_cc",
+#     #CALL_CONV_ARM_APCS      : "unk_cc",
+#     #CALL_CONV_ARM_AAPCS     : "unk_cc",
+#     #CALL_CONV_ARM_AAPCS_VFP : "unk_cc",
+#     #CALL_CONV_MSP430_INTR   : "unk_cc",
+#     #CALL_CONV_X86_THISCALL  : "unk_cc",
+#     #CALL_CONV_PTX_KERNEL    : "unk_cc",
+#     #CALL_CONV_PTX_DEVICE    : "unk_cc",
+#     #CALL_CONV_MBLAZE_INTR   : "unk_cc",
+#     #CALL_CONV_MBLAZE_SVOL   : "unk_cc",
+#    }
 #
-# MIR calling conventions to C equivalents.
-#
-CALLING_CONVENTIONS = {
-     #CALL_CONV_C             : "ccall",
-     CALL_CONV_FASTCALL      : "fastcall",
-     #CALL_CONV_COLDCALL      : "coldcall",
-     #CALL_CONV_X86_STDCALL   : "x86call",
-     #CALL_CONV_X86_FASTCALL  : "x86fastcall",
-     #CALL_CONV_GHC           : "unk_cc",
-     #CALL_CONV_ARM_APCS      : "unk_cc",
-     #CALL_CONV_ARM_AAPCS     : "unk_cc",
-     #CALL_CONV_ARM_AAPCS_VFP : "unk_cc",
-     #CALL_CONV_MSP430_INTR   : "unk_cc",
-     #CALL_CONV_X86_THISCALL  : "unk_cc",
-     #CALL_CONV_PTX_KERNEL    : "unk_cc",
-     #CALL_CONV_PTX_DEVICE    : "unk_cc",
-     #CALL_CONV_MBLAZE_INTR   : "unk_cc",
-     #CALL_CONV_MBLAZE_SVOL   : "unk_cc",
-    }
-
 
 class FunctionException(Exception):
     """Base exception for HIR function exceptions."""
@@ -50,7 +50,7 @@ class Function(object):
 
         self.return_type = None
 
-        self.calling_convention = CALL_CONV_FASTCALL
+        self.calling_convention = "fastcc"#nCALL_CONV_FASTCALL
         self.name = ""
         #self.current = 0
 
@@ -121,10 +121,10 @@ class Function(object):
     @calling_convention.setter
     def calling_convention(self, calling_convention):
         """Store the calling convention for the current function."""
-        if calling_convention not in CALLING_CONVENTIONS:
-            raise FunctionException(
-                "Invalid calling convention specified (%s)" % \
-                calling_convention)
+        #if calling_convention not in CALLING_CONVENTIONS:
+        #    raise FunctionException(
+        #        "Invalid calling convention specified (%s)" % \
+        #        calling_convention)
 
         self._calling_convention = calling_convention
 
@@ -317,7 +317,7 @@ class Function(object):
 
     @property
     def is_calling_convention_fastcall(self):
-        return self.calling_convention == CALL_CONV_FASTCALL
+        return self.calling_convention == "fastcc"#nCALL_CONV_FASTCALL
 
     #@property
     #def is_calling_convention_coldcall(self):

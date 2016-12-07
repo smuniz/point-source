@@ -16,9 +16,9 @@ import cbackend.hir.area
 reload(cbackend.hir.area)
 from cbackend.hir.area import Area
 
-import cbackend.hir.graph
-reload(cbackend.hir.graph)
-from cbackend.hir.graph import Graph
+#import cbackend.hir.graph
+#reload(cbackend.hir.graph)
+#from cbackend.hir.graph import Graph
 
 import cbackend.hir.operators
 reload(cbackend.hir.operators)
@@ -47,17 +47,17 @@ MIR_TYPE_TO_HIR_STRING = {
     MiddleIrTypeInt             : "int",
     MiddleIrTypeFloat           : "float",
     MiddleIrTypeDouble          : "double",
-    MiddleIrTypeX86Fp80         : "t_float_80",
-    MiddleIrTypePpcFp128        : "t_ppc_float_128",
-    MiddleIrTypeFp128           : "t_float_128",
+    #MiddleIrTypeX86Fp80         : "t_float_80",
+    #MiddleIrTypePpcFp128        : "t_ppc_float_128",
+    #MiddleIrTypeFp128           : "t_float_128",
     MiddleIrTypeFunction        : "t_func_",
-    MiddleIrTypeOpaque          : "t_opaque_",
+    #MiddleIrTypeOpaque          : "t_opaque_",
     MiddleIrTypeStruct          : "struct",
-    MiddleIrTypePackedStruct    : "struct",
+    #MiddleIrTypePackedStruct    : "struct",
     MiddleIrTypeArray           : "[]",
     MiddleIrTypePointer         : "*",
-    MiddleIrTypeVector          : "[]",
-    MiddleIrTypeLabel           : "label_",
+    #MiddleIrTypeVector          : "[]",
+    #MiddleIrTypeLabel           : "label_",
     MiddleIrTypeVoid            : "void",
     }
 
@@ -225,7 +225,7 @@ class CBackEnd(object):
                     # This is where most of the MIR instruction are translated
                     # to its HIR equivalents for further usage.
                     #
-                    hir_stmt = self.transform_to_hir(mir_inst)
+                    hir_stmt = self.transform_mir_to_hir(mir_inst)
 
                     #mir_address = mir_inst.address
                     #hir_is_used = self.current_symbols_table.
@@ -241,12 +241,13 @@ class CBackEnd(object):
                         #self.__propagate_graph_information()
 
         except Exception, err:
+            # TODO add a more accurate exception handler.
             print format_exc()
 
             raise CBackEndException(
                 "High level IR code generation failed : %s" % err)
 
-    def transform_to_hir(self, mir_inst):
+    def transform_mir_to_hir(self, mir_inst):
         """Get the corresponding HIR statement according to the MIR
         instruction.
 
@@ -268,6 +269,7 @@ class CBackEnd(object):
         hir_stmt = None
         group_name = mir_inst.group_name
 
+        print "=" * 30
         if mir_inst.group is TERMINATOR_GROUP:
             hir_stmt = self.on_terminator(mir_inst)
 
@@ -277,18 +279,11 @@ class CBackEnd(object):
         elif mir_inst.group is BINARY_OP_GROUP:
             hir_stmt = self.on_binary(mir_inst)
 
-        elif mir_inst.group is CONVERSION_GROUP:
+        elif mir_inst.group is CONVERTION_GROUP:
             hir_stmt = self.on_conversion(mir_inst)
 
         elif mir_inst.group is OTHER_GROUP:
             hir_stmt = self.on_other(mir_inst)
-
-        if hir_stmt is None:
-            raise CBackEndException(
-                "Unsupported instruction (%s) at %s on '%s' group." % (
-                    str(mir_inst).strip(),
-                    ", ".join(["0x%08X" % a for a in mir_inst.addresses]),
-                    group_name))
 
         # Check if the translation mechanism worked. In case it didn't we;ll
         # raise an exception and notify the user about the offending
@@ -296,7 +291,7 @@ class CBackEnd(object):
         #
         # This should be submitted for analysis in case that the user agrees.
         #
-        if hir_stmt is None:
+        if not hir_stmt:
             raise CBackEndException(
                 "Empty instruction (%s) at %s on '%s' group." % (
                     str(mir_inst).strip(),
@@ -308,6 +303,8 @@ class CBackEnd(object):
         #
         # Store the instruction address for debugging purposes.
         hir_stmt.addresses = deepcopy(mir_inst.addresses)
+        print "%s HIR STMT addresses ----->" % ",".join(["0x%x" % x for x in mir_inst.addresses]), 
+        print ",".join(["0x%x" % x for x in hir_stmt.addresses])
 
         self.__display_instruction_information(mir_inst, group_name)
 
@@ -316,6 +313,7 @@ class CBackEnd(object):
     def on_terminator(self, mir_inst):
         """Process a MIR terminator instruction."""
         addresses = mir_inst.addresses
+        print "on_terminator ---->", hex(addresses[0])
         hir_stmt = None
 
         if isinstance(mir_inst, MiddleIrRetInstruction):
@@ -330,7 +328,9 @@ class CBackEnd(object):
                 ret_op = mir_inst.operands[0]
 
                 if isinstance(ret_op, MiddleIrInstruction):
-                    ret_op = self.transform_to_hir(ret_op)
+                    ret_op = self.transform_mir_to_hir(ret_op)
+                    # Add addresses from inner instruction.
+                    addresses += ret_op.addresses
                     ret_val = str(ret_op)
                 elif isinstance(ret_op, MiddleIrBaseConstant):
                     #ret_tuple = str(ret_op).split(" ") # split the type and name.
@@ -350,21 +350,29 @@ class CBackEnd(object):
     def on_memory_access(self, mir_inst):
         """Process a MIR 'memory access' instruction."""
         addresses = mir_inst.addresses
+        print "on_memory_access ---->", hex(addresses[0])
         hir_stmt = None
 
         if isinstance(mir_inst, MiddleIrStoreInstruction):
             st_op = mir_inst.value
 
             if isinstance(st_op, MiddleIrInstruction):
-                st_op = self.transform_to_hir(st_op)
+                st_op = self.transform_mir_to_hir(st_op)
+                # Add addresses from inner instruction.
+                addresses += st_op.addresses
                 st_val = str(st_op)
+
             elif isinstance(st_op, MiddleIrBaseConstant):
                 #ret_tuple = str(st_op).split(" ") # split the type and name.
                 #ret_type, ret_val = ret_tuple
                 st_val = st_op.value
+
             elif isinstance(st_op, MiddleIrArgument):
-                #st_op = self.transform_to_hir(st_op.name)
+                #st_op = self.transform_mir_to_hir(st_op.name)
+                # Add addresses from inner instruction.
+                #addresses += st_op.addresses
                 st_val = st_op.get_readable_inners()
+
             else:
                 raise CBackEndException("Unable to process operand (%s)" % \
                     st_op)
@@ -387,6 +395,7 @@ class CBackEnd(object):
         """Process a MIR 'conversion' instruction."""
         addresses = mir_inst.addresses
         hir_stmt = None
+        print "on_conversion ---->", hex(addresses[0])
 
         #if isinstance(mir_inst, MiddleIrIntToPtrInstruction):
         #    hir_stmt = ExpressionStatement(
@@ -404,6 +413,8 @@ class CBackEnd(object):
         """Process a MIR 'binary' instruction."""
         addresses = mir_inst.addresses
         hir_stmt = None
+        print mir_inst
+        print "on_binary ---->", " - ".join(["0x%X" % x for x in addresses])
 
         if isinstance(mir_inst, MiddleIrAddInstruction):
             if isinstance(mir_inst.rhs, MiddleIrBaseConstant):
@@ -499,7 +510,7 @@ class CBackEnd(object):
         # representation hosted inside the HIR.
         print "[+] Creating HIR representation..."
         print str(self.hir_function)
-        return
+        #return
         hir_output = HirTextOutput(self.hir_function)
         hir_output.generate_output("Decompiled code")
 

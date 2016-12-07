@@ -3,7 +3,10 @@
 # 
 # This code is part of point source decompiler
 #
+from traceback import format_exc
+
 from multidigrah import MultiDiGraph, MultiDiGraphException
+from idc import MakeComm #FIXME
 
 
 class LowLevelFunctionException(MultiDiGraphException):
@@ -17,8 +20,11 @@ class LowLevelFunction(MultiDiGraph):
 
     """
 
-    def __init__(self, start_address, end_address, func_name, iset):
+    def __init__(self, start_address, end_address, func_name, iset,
+        is_extern=False):
         """Instance initialization."""
+        self.__debug = False
+
         #Store information about the function being analyzed.
         self.start_address = start_address
         self.end_address = end_address
@@ -62,6 +68,8 @@ class LowLevelFunction(MultiDiGraph):
         self.return_type = 0 # default return type (void)
         self.return_registers = list()
 
+        self.is_extern = is_extern
+
     def add_prologue_address(self, address):
         """Mark the specified address as part of the function prologue and
         remove it from the list of statements to analyze.
@@ -77,12 +85,22 @@ class LowLevelFunction(MultiDiGraph):
         self.epilogue_addresses.append(address)
 
     @property
+    def is_extern(self):
+        """Return a value indicating if the function is an extern or not."""
+        return self._is_extern
+
+    @is_extern.setter
+    def is_extern(self, is_extern):
+        """Store a value indicating if the function is an extern or not."""
+        self._is_extern = is_extern
+
+    @property
     def leaf_procedure(self):
         """Indicate whether the current function is a leaf procedure or not."""
         return self._leaf_procedure
 
     @leaf_procedure.setter
-    def leaf_procedure(self, leaf_procedure=False):
+    def leaf_procedure(self, leaf_procedure):
         """Store the size of bytes of the function stack. """
         self._leaf_procedure = leaf_procedure
 
@@ -199,6 +217,12 @@ class LowLevelFunction(MultiDiGraph):
 
                 # Generate the final instruction reprenstation containing all
                 # the information gathered.
+                if self.__debug:
+                    MakeComm(inst.address,
+                        "DU=%-20s\nUD=%-20s\n" % (
+                        self.du_chains_printable(inst.address),
+                        self.ud_chains_printable(inst.address)))
+
                 function_repr += \
                     "%08X %s %-30s\t; DU=%-20s\n\t\t\t\t\t; UD=%-20s\n" % (
                     inst.address,
@@ -330,15 +354,19 @@ class LowLevelFunction(MultiDiGraph):
                 iterable_inst = reversed(lir_basic_block)
 
             for lir_inst in iterable_inst:
-                if lir_inst.address >= address:
-                    continue
+                if forward:
+                    if lir_inst.address >= address:
+                        continue # shouldn't it leave?
+                else:
+                    if lir_inst.address <= address:
+                        continue # same
 
                 for lir_op_idx, lir_op in enumerate(lir_inst):
                     if lir_op.is_reg_n(lir_ops_values):
                         #if self.__is_destination_operand(lir_inst, lir_op_idx):
                         reg = lir_op.value
-                        #print "Found reg %d match at 0x%08X -> 0x%08X" % (
-                        #    reg, lir_inst.address, address)
+                        print "Found reg %d match at 0x%08X -> 0x%08X" % (
+                            reg, lir_inst.address, address)
                         
                         # Proceed to update DU chain.
                         du = self.du_chain[lir_inst.address].setdefault(reg, list())
@@ -347,36 +375,36 @@ class LowLevelFunction(MultiDiGraph):
                         ud = self.ud_chain[address].setdefault(reg, lir_inst.address)
                         return
 
-    def generate_chains(self):
+    def _generate_chains(self):
         try:
             # initialize pred and succ
             pred, succ = {}, {}
             for bb in self:
                 pred[bb] = set(self.predecessors(bb))
                 succ[bb] = set(self.successors(bb))
-             
+
             cfg             = self
             cfg.nodes       = set(self.basic_blocks)
             cfg.pred        = pred
             cfg.succ        = succ
             cfg.entry_point = s0
-             
+
             analysis               = self
             analysis.meet          = meet_env
             analysis.step_forward  = step_forward
             analysis.step_backward = step_backward
-             
+
             # run the whole thing
-            IN, OUT = maximal_fixed_point(analysis, cfg)
+            IN, OUT = self.maximal_fixed_point(analysis, cfg)
             #print 'a   at program point s3 is', OUT[s3]['a']
             #print 'ret at program point s4 is', OUT[s4]['ret']
 
             #return self._generate_chains()
         except Exception, err:
-            from traceback import format_exc
             print format_exc()
+            raise LowLevelFunctionException(err)
 
-    def _generate_chains(self):
+    def generate_chains(self):
         """
         Generate def-use and use-def chains for the low level IR so further
         analysis can me performed, i.e. live analysis, dead code elimination,
@@ -421,15 +449,18 @@ class LowLevelFunction(MultiDiGraph):
                     #    lir_inst.address, lir_op_idx)
 
                     if not lir_op.is_reg and not lir_op.is_displ and \
-                        not lir_op.is_phrase:
+                        not lir_op.is_phrase and not lir_op.is_special:
                         # Only work on tempoerary registers.
                         continue
 
                     if lir_op.is_reg:
                         op = lir_op.value
                     else:
-                        #print "%s - %s - %s" % (lir_op.type, lir_op, lir_inst)
-                        op = lir_op.value[0]
+                        if lir_op.is_special:
+                            op = lir_op.reg_name
+                        else:
+                            #print "%s - %s - %s" % (lir_op.type, lir_op, lir_inst)
+                            op = lir_op.value[0]
 
                     if self.__is_destination_operand(lir_inst, lir_op_idx):
                         if op in reg_defs:
@@ -494,7 +525,7 @@ class LowLevelFunction(MultiDiGraph):
         }
         return changes.get(lir_op_idx, None) in lir_inst.features
 
-    def forward_transfer_function(analysis, bb, IN_bb):
+    def forward_transfer_function(self, analysis, bb, IN_bb):
         OUT_bb = IN_bb.copy()
         for insn in bb:
             analysis.step_forward(insn, OUT_bb)
@@ -531,12 +562,12 @@ class LowLevelFunction(MultiDiGraph):
                 ####
                 # compute the environment at the entry of this BB
                 new_IN = reduce(analysis.meet, map(OUT.get, cfg.pred[bb]), IN[bb])
-                update(IN, bb, new_IN, todo_backward, cfg.pred[bb])
+                self.update(IN, bb, new_IN, todo_backward, cfg.pred[bb])
 
                 ####
                 # propagate information for this basic block
-                new_OUT = forward_transfer_function(analysis, bb, IN[bb])
-                update(OUT, bb, new_OUT, todo_forward, cfg.succ[bb])
+                new_OUT = self.forward_transfer_function(analysis, bb, IN[bb])
+                self.update(OUT, bb, new_OUT, todo_forward, cfg.succ[bb])
 
             while todo_backward:
                 bb = todo_backward.pop()
@@ -544,12 +575,12 @@ class LowLevelFunction(MultiDiGraph):
                 ####
                 # compute the environment at the exit of this BB
                 new_OUT = reduce(analysis.meet, map(IN.get, succ[bb]), OUT[bb])
-                update(OUT, bb, new_OUT, todo_forward, cfg.succ[bb])
+                self.update(OUT, bb, new_OUT, todo_forward, cfg.succ[bb])
 
                 ####
                 # propagate information for this basic block (backwards)
-                new_IN = backward_transfer_function(analysis, bb, OUT[bb])
-                update(IN, bb, new_IN, todo_backward, cfg.pred[bb])
+                new_IN = self.backward_transfer_function(analysis, bb, OUT[bb])
+                self.update(IN, bb, new_IN, todo_backward, cfg.pred[bb])
 
         ####
         # IN and OUT have converged
@@ -566,9 +597,9 @@ class LowLevelFunction(MultiDiGraph):
 
         else:
             result = 'CONST'
-     
+
         return result
-     
+
     def meet_env(self, lhs, rhs):
         lhs_keys = set(lhs.keys())
         rhs_keys = set(rhs.keys())
@@ -581,7 +612,7 @@ class LowLevelFunction(MultiDiGraph):
             result[var] = rhs[var]
 
         for var in lhs_keys & rhs_keys:
-            result[var] = meet_val(lhs[var], rhs[var])
+            result[var] = self.meet_val(lhs[var], rhs[var])
 
         return result
 
@@ -608,7 +639,7 @@ class LowLevelFunction(MultiDiGraph):
             e1, op, e2 = expr
             val1 = abstract_value(env_in, e1)
             val2 = abstract_value(env_in, e2)
-            env_in[var] = meet_val(val1, val2)
+            env_in[var] = self.meet_val(val1, val2)
 
     def step_backward(self, insn, env_in):
         pass

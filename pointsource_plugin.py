@@ -16,7 +16,7 @@ from traceback import format_exc
 #current_filename = getfile(currentframe())
 #print "-----> %s" % current_filename
 #path_to_current_module = os.path.realpath(os.path.dirname(current_filename))
-path_to_current_module = r"z:\home\topo\projects\decompiler\point-source.git"
+path_to_current_module = r"z:\home\oem\projects\decompiler\point-source.git"
 
 if path_to_current_module not in sys_path:
     print "[+] Fixing Python modules path..."

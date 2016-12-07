@@ -167,10 +167,10 @@ class FrontEnd(object):
 
         self.mir_function = MiddleIrFunction.get(self.mir_module, self.lir_function.name)
 
+        # Delete the previously created function and create a new one. This
+        # is what the user requested so do it (definition might have
+        # changed, etc.).
         if self.mir_function is not None:
-            # Delete the previously created function and create a new one. This
-            # is what the user requested so do it (definition might have
-            # changed, etc.).
             if self.mir_function in self.symbols_manager:
                 del self.symbols_manager[self.mir_function.name]
             self.mir_function.delete()
@@ -192,13 +192,19 @@ class FrontEnd(object):
             self.mir_module, self.lir_function.name, return_type, param_regs)
 
         for idx, (param_reg, mir_param) in self.lir_function.param_regs.iteritems():
-            #print "|==> Name : ", self.mir_function.arguments[idx].name,
+            print "|==> Name : ", self.mir_function.arguments[idx].name,
             self.mir_function.arguments[idx].name = "i_arg%d" % idx
+        print ""
 
         # Set the default calling convention.
         #self.mir_function.set_calling_convention(CALL_CONV_C)
 
         self.mir_inst_builder = None
+
+        # Just create a function prototype for an external function so the rest
+        # of the MIR code can invoke it without having to function body.
+        if self.lir_function.is_extern:
+            return
 
         #
         # Iterate through LIR to transfor it into its MIR representation (this
@@ -322,7 +328,7 @@ class FrontEnd(object):
                         "0x%08X (%s) : %s" % (
                             lir_inst.address, lir_inst, err))
 
-                if mir_inst is not None:
+                if mir_inst:
 
                     # Set MIR instruction address equal to the LIR instruction
                     # used to get it,
@@ -398,10 +404,7 @@ class FrontEnd(object):
         return mir_inst
 
     def __propagate_graph_information(self):
-        """
-        Propagate control flow graph information fom LIR to MIR.
-
-        """
+        """Propagate control flow graph information from LIR to MIR."""
         #
         # With all the function instructions and basic blocks created, the
         # information from the basic blocks referencing each other is set.
@@ -431,9 +434,10 @@ class FrontEnd(object):
 
         @func_address : The address of the function to analyze.
         """
-        #print "Current depth is %d" % depth
+        print "Current depth is %d" % depth
 
         try:
+            print "-" * 80
             print "[+] Generating Low level IR for function '%s'" % \
                 self.debugger.get_function_name(func_address)
             self.lir_function = self.debugger.generate_lir(func_address)
@@ -448,6 +452,7 @@ class FrontEnd(object):
                 self.lir_function.instructions_count)
 
         except Exception, err:
+            print format_exc()
             raise FrontEndException(
                 "Unable to generate Low Level IR: %s" % err)
 
@@ -464,8 +469,12 @@ class FrontEnd(object):
             # Step x
             #
             # Invoke the appropriate idiom analyzer for the current architecture.
-            print "[+] Initiating idioms analysis phase 0..."
-            self.idiom_analyzer.perform_phase0_analysis()
+            if self.lir_function.is_extern:
+                print "[+] Skipping idioms analyzer phase 0 for 0x%X" % \
+                    self.lir_function.start_address
+            else:
+                print "[+] Initiating idioms analysis phase 0..."
+                self.idiom_analyzer.perform_phase0_analysis()
 
             #
             # Step x
@@ -473,19 +482,20 @@ class FrontEnd(object):
             # Initialize internal MIR members for further usage.
             #
             print "[+] Creating Middle level IR skeleton..."
+            print "Depth %d" % depth
             self.generate_mir_skeleton()
 
-            #
-            # This is the first milestone on the analysis (depth 1)
-            #
-            if depth == 1:
+            # Exit at this point if the function body cannot be analyzed or this
+            # is the first milestone on the analysis (depth 1)
+            if self.lir_function.is_extern or depth == 1:
+                print "-" * 80
                 return
 
             #
             # Perform live analysis
             #
             old_total = len(self.lir_functions_cache)
-            self.perform_live_variable_analysis(self.lir_function, 1)
+            self.perform_live_variable_analysis(self.lir_function, depth)
 
             print "[+] Total functions added : %d" % (
                 len(self.lir_functions_cache) - old_total)
@@ -503,7 +513,6 @@ class FrontEnd(object):
 
             # Output LIR for debugging purposes.
             self.__dump_lir()
-            raise Exception("ads")
 
             #
             # Step x
@@ -549,12 +558,15 @@ class FrontEnd(object):
         #
         print "[+] Verifying Middle level IR code..."
         self.mir_module.verify()
+        print "-" * 80
 
-    def perform_live_variable_analysis(self, lir_function, depth=None):
+    def perform_live_variable_analysis(self, lir_function, depth):
         """Perform live analysis on variables based on their usage in called
         functions.
 
         """
+        if depth > 0:
+            return
         # Iterate through every instruction present in the function in order to
         # get information about the parameters usage and return values of the
         # called functions.
@@ -571,25 +583,34 @@ class FrontEnd(object):
                 if callee_address in self.lir_functions_cache:
                     continue
 
-                # Recurse into callees until we reach the specified level
-                # (in case it was specified).
-                if depth is None:
-                    continue
-                if depth > 0:
-                    depth -= 1
-                else:
-                    continue
-
+                #print "2 Callee address 0x%X" % callee_address, depth # XXX
                 # Save the context for further usage.
                 cur_lir = self.lir_function 
                 cur_mir = self.mir_function
                 cur_sym = self.current_symbols_table
 
+                # Recurse into callees until we reach the specified level
+                # (in case it was specified).
+                #print "1 Callee address 0x%X" % callee_address, depth # XXX
+                #if depth == 0:
+                #    #continue
+                #    #pass
+                #    depth += 1
+                #elif depth > 0:
+                #    depth -= 1
+                #else:
+                #    continue
+                #depth += 1
+                #if depth > 0:
+                #    return
+                #else:
+                #    depth += 1
+
                 # Analyze the called function in order to obtain parameters and
                 # return registers information. This will procude a new LIR
                 # function and basic function information becuase of the
                 # execution of phase 0 analysis.
-                self.analyze(callee_address, 1)
+                self.analyze(callee_address, depth+1)
 
                 # Restore the context of the main function being analyzed.
                 self.lir_function = cur_lir
@@ -602,6 +623,9 @@ class FrontEnd(object):
                     # Analyse the calle function and its callees (if
                     # appropriate according to the depth level).
                     self.perform_live_variable_analysis(lir_callee, depth)
+                else:
+                    print "[+] Skipping live analysis for callee 0x%X" % \
+                        lir_callee.start_address
 
     @abc.abstractmethod
     def analyze_callee(self, callee_address):
@@ -645,7 +669,7 @@ class FrontEnd(object):
             print "\t0x%(address)08X - %(arch)s %(group)15s " \
                   "(type %(inst_numb)3d) - %(inst_repr)-25s" % vars()
 
-    def _create_local_variable(self, address, update_symbols_table=True):
+    def _create_local_variable(self, address, dest_offset, update_symbols_table=True):
         """Create a local variable for further usage."""
         try:
             mir_inst_builder = \
@@ -653,7 +677,7 @@ class FrontEnd(object):
                     address, False)
 
             var_type_preffix = "i"
-            var_name = "%(var_type_preffix)s_0x%(address)X" % vars()
+            var_name = "%(var_type_preffix)s_0x%(dest_offset)X" % vars()
             #int_ptr = MiddleIrTypePointer(MiddleIrTypeInt())
             int_ptr = MiddleIrTypeInt()
 
@@ -664,7 +688,7 @@ class FrontEnd(object):
                 #print "---> Adding local variable offset %d (%s) : %s" % \
                 #    (address, var_name, mir_var)
                 self.current_symbols_table.add_local_variable(
-                    address, var_name, mir_var)
+                    dest_offset, var_name, mir_var)
 
             return mir_var
 
@@ -788,28 +812,26 @@ class FrontEnd(object):
         if isinstance(mir_type, MiddleIrTypeChar) or \
             isinstance(mir_type, MiddleIrTypeInt) or \
             isinstance(mir_type, MiddleIrTypeFloat) or \
-            isinstance(mir_type, MiddleIrTypeDouble) or \
-            isinstance(mir_type, MiddleIrTypeX86Fp80) or \
-            isinstance(mir_type, MiddleIrTypePpcFp128) or \
-            isinstance(mir_type, MiddleIrTypeFp128):
+            isinstance(mir_type, MiddleIrTypeDouble): 
             return True
         return False
 
     def __is_container_type(self, mir_type):
         if isinstance(mir_type, MiddleIrTypeFunction) or \
-            isinstance(mir_type, MiddleIrTypeOpaque) or \
             isinstance(mir_type, MiddleIrTypeStruct) or \
-            isinstance(mir_type, MiddleIrTypePackedStruct) or \
             isinstance(mir_type, MiddleIrTypeArray) or \
             isinstance(mir_type, MiddleIrTypePointer) or \
-            isinstance(mir_type, MiddleIrTypeVector) or \
-            isinstance(mir_type, MiddleIrTypeLabel) or \
             isinstance(mir_type, MiddleIrTypeVoid):
+            #isinstance(mir_type, MiddleIrTypeOpaque) or \
+            #isinstance(mir_type, MiddleIrTypePackedStruct) or \
+            #isinstance(mir_type, MiddleIrTypeVector) or \
+            #isinstance(mir_type, MiddleIrTypeLabel) or \
             return True
         return False
 
     def _class_name(self, mir_obj):
         """Return the plain MIR class name."""
+        print repr(mir_obj)
         return repr(mir_obj).split(" ")[0].split(".")[-1]
 
     def is_parameter_register(self, lir_inst, op_idx):

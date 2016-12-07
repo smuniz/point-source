@@ -241,8 +241,9 @@ class BaseDebugger(object):
         """
         # Check if the cache already has the requested function and return it
         # in cae it does.
-        if function_address in self._lir_cache:
-            return self._lir_cache[function_address]
+        lir_function = self._lir_cache.get(function_address, None)
+        if lir_function:
+            return lir_function
 
         #
         # Get every instruction with it's operands and basic blocks
@@ -253,23 +254,24 @@ class BaseDebugger(object):
         # Update the cache with the newly created function.
         self._lir_cache[function_address] = lir_function
 
-        #
-        # Perform a basic check on newly generated LIR function.
-        #
-        if lir_function.get_basic_blocks_count() == 0:
-            raise BaseDebuggerException(
-                "No basic blocks found during the analysis.")
+        if not lir_function.is_extern:
+            #
+            # Perform a basic check on newly generated LIR function.
+            #
+            if lir_function.get_basic_blocks_count() == 0:
+                raise BaseDebuggerException(
+                    "No basic blocks found during the analysis.")
 
-        if lir_function.instructions_count == 0:
-            raise BaseDebuggerException(
-                "No instructions found during the analysis.")
+            if lir_function.instructions_count == 0:
+                raise BaseDebuggerException(
+                    "No instructions found during the analysis.")
 
-        try:
-            #print "[+] Generating DU and UD chains for Low level IR..."
-            lir_function.generate_chains()
-        except Exception, err:
-            #print format_exc()
-            raise BaseDebuggerException(err)
+            try:
+                #print "[+] Generating DU and UD chains for Low level IR..."
+                lir_function.generate_chains()
+            except Exception, err:
+                #print format_exc()
+                raise BaseDebuggerException(err)
 
         return lir_function
 

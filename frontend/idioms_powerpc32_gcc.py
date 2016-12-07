@@ -42,7 +42,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         # Set default stack access style for PPC
         lir_function.add_stack_access_register(self.iset.SP)
 
-    def _perform_phase0_analysis(self):
+    def perform_phase0_analysis(self):
         """Execute the most basic idiom analysis on current function previous
         to every other major analysis.
 
@@ -70,7 +70,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         #print "Detecting 4 bytes load idioms."
         self.detect_load_word()
 
-    def _perform_phase2_analysis(self):
+    def perform_phase2_analysis(self):
         """Execute the basic idiom analysis on current function after to MIR
         generation.
 
@@ -266,49 +266,59 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         or not.
 
         """
-        if inst.type == self.iset.PPC_balways:
-            if not ((inst[0].type == self.iset.CRB and \
-                inst[1].type == self.iset.SPR) or \
-                (inst[0].type is self.iset.SPR)):
-                return False
-            return True
-        return False
+        if inst.type != self.iset.PPC_balways:
+            return False
+
+        if not ((inst[0].type == self.iset.CRB and \
+            inst[1].type == self.iset.SPR) or \
+            (inst[0].type is self.iset.SPR)):
+            return False
+        return True
 
     def detect_epilogue(self):
         """Check wheater the function epilogue is present or not."""
         try:
             # Check the last basic block for the prescense of the epilogue.
-            # TODO / FIXME : Check all the ending basic blocks, not just 1.
-            # This is wrong cause the blr could be inside a loop and the last
-            # basic block in the function could be the loop's restart instead
-            # of the blr.
-            bb = self.lir_function[-1]
+            #
+            self.lir_function.ret_to_caller = False
 
-            # STEP 1.A
-            # Check the last instruction for a BLR opcode.
-            inst = bb[-1]
+            ending_bbs = list()
 
-            if inst.type == self.iset.PPC_balways:
-                if not self.__is_valid_return(inst):
-                    #
-                    # In case that the branch instruction is unknown to us then
-                    # we raise an exception becuase we don't know if it's a
-                    # return, a goto of some kind or what it is at all.
-                    #
-                    # This shouldn't happen. In case it does please report.
-                    raise PowerPc32GccIdiomAnalyzerException(
-                        "Unknown branch instruction at 0x%X" % \
-                        inst.address)
+            # Check all the basic blocks because the blr could be inside a loop
+            # and the last basic block in the function could be the loop's
+            # restart instead of the blr.
+            for bb in self.lir_function[-1::-1]:
+                # STEP 1.A
+                # Check the last instruction for a BLR opcode.
+                inst = bb[-1]
 
-                # Do not mark the instruction as analyzed because
-                # we'll use it to create the 'return' instruction
-                # when translating to MIR.
+                #print "---> 0x%X" % inst.address, self.__is_valid_return(inst), \
+                #    inst.type == self.iset.PPC_balways
 
-                self.lir_function.ret_to_caller = True
-                print "    Function returns to caller (return at 0x%08X)." % \
-                    inst.address
+                if inst.type == self.iset.PPC_balways:
+                    if not self.__is_valid_return(inst):
+                        #
+                        # In case that the branch instruction is unknown to us then
+                        # we raise an exception becuase we don't know if it's a
+                        # return, a goto of some kind or what it is at all.
+                        #
+                        # This shouldn't happen. In case it does please report.
+                        raise PowerPc32GccIdiomAnalyzerException(
+                            "Unknown branch instruction at 0x%X" % \
+                            inst.address)
 
-                temp_lr_reg = -1
+                    # Do not mark the instruction as analyzed because
+                    # we'll use it to create the 'return' instruction
+                    # when translating to MIR.
+
+                    if inst.mnemonic == "blr": # TODO Make this right
+                        self.lir_function.ret_to_caller = True
+                        print "    Function returns to caller (return at 0x%08X)." % \
+                            inst.address
+
+                    temp_lr_reg = -1
+                    ending_bbs.append(bb)
+
 
                 # STEP 1.B
                 #
@@ -320,39 +330,43 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 # mtlr    %r0
                 if not self.lir_function.leaf_procedure and self.lir_function.ret_to_caller:
 
-                    # Check the last basic block except blr (last instruction).
                     # TODO / FIXME : Check all the ending basic blocks, not
                     # just 1.
-                    for inst in bb[-2::-1]:
+                    #for inst in bb[-2::-1]:
+                    #for bb in ending_bbs:
+                    if True:
+                        for inst in bb:
 
-                        # Find mtlr instruction to locate the register used
-                        if inst.type == self.iset.PPC_mtlr:
-                            temp_lr_reg = inst[0].value
+                            # Find mtlr instruction to locate the register used
+                            if inst.type == self.iset.PPC_mtlr:
+                                temp_lr_reg = inst[0].value
 
-                            inst.analyzed = True
-                            self.lir_function.add_epilogue_address(inst.address)
+                                inst.analyzed = True
+                                self.lir_function.add_epilogue_address(inst.address)
 
-                        #if inst.type == self.iset.PPC_lwz and \
-                        #    inst[0].is_reg_n(temp_lr_reg):
-                        #    inst.analyzed = True
-                        #    self.lir_function.add_epilogue_address(inst.address)
-                            ud = \
-                                self.lir_function.ud_chain[inst.address][inst[1].value]
-                            du_inst = self.lir_function.get_instruction_by_address(ud)
+                            #if inst.type == self.iset.PPC_lwz and \
+                            #    inst[0].is_reg_n(temp_lr_reg):
+                            #    inst.analyzed = True
+                            #    self.lir_function.add_epilogue_address(inst.address)
+                                ud = \
+                                    self.lir_function.ud_chain[inst.address][inst[1].value]
+                                du_inst = self.lir_function.get_instruction_by_address(ud)
 
-                            if du_inst.is_type(self.iset.PPC_lwz):
-                                du_inst.analyzed = True
-                                self.lir_function.add_epilogue_address(du_inst.address)
-                                print "    Link-register restoration found."
-                                break
-                            else:
-                                print "    Link-register restoration found (incomplete)."
+                                if du_inst.is_type(self.iset.PPC_lwz):
+                                    du_inst.analyzed = True
+                                    self.lir_function.add_epilogue_address(du_inst.address)
+                                    print "    Link-register restoration found at 0x%08X" % inst.address
+                                    break
+                                else:
+                                    print "    Link-register restoration found (incomplete)."
 
-            else:
-                # Indicate that the current function doesn't perform the common
-                # return-to-caller operation.
-                self.lir_function.ret_to_caller = False
-                print "    Warning: Function does NOT return to caller."
+                                break # Stop the link restoration search
+
+                #else:
+                #    # Indicate that the current function doesn't perform the common
+                #    # return-to-caller operation.
+                #    self.lir_function.ret_to_caller = False
+                #    print "    Warning: Function does NOT return to caller."
 
             # STEP 2
             #
@@ -370,138 +384,139 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 #
                 prologue_block = list()
 
-                for inst in bb[-1::-1]:
-                    if inst.analyzed:
-                        continue
+                for bb in ending_bbs:
+                    for inst in bb:
+                        if inst.analyzed:
+                            continue
 
-                    if inst.type == self.iset.PPC_addi and inst[0].is_reg_n(self.iset.SP):
+                        if inst.type == self.iset.PPC_addi and inst[0].is_reg_n(self.iset.SP):
 
-                        prologue_block.append(inst)
+                            prologue_block.append(inst)
 
-                        print "    Stack restoration style: IOS" 
-                        self.lir_function.stack_restore = "IOS"
-                        
-                        # Additional verification
-                        if len(inst) == 3:
-                            restore_size = self.get_signed_value(inst[2].value)
-                            if self.lir_function.stack_size != restore_size:
-                                print "[!] Restore value (%d bytes) does " \
-                                    "NOT match stored value (%d bytes)" % \
-                                    (restore_size, self.lir_function.stack_size)
-                        
+                            print "    Stack restoration style: IOS" 
+                            self.lir_function.stack_restore = "IOS"
+                            
+                            # Additional verification
+                            if len(inst) == 3:
+                                restore_size = self.get_signed_value(inst[2].value)
+                                if self.lir_function.stack_size != restore_size:
+                                    print "[!] Restore value (%d bytes) does " \
+                                        "NOT match stored value (%d bytes)" % \
+                                        (restore_size, self.lir_function.stack_size)
+                            
+                            for inst in prologue_block:
+                                inst.analyzed = True
+                                self.lir_function.add_epilogue_address(inst.address)
+                            return  # Don't keep checking
+
+                    # Check case 2.a (GCC w/Linux)
+                    #
+                    # Find the following epilogue sequence for stack
+                    # restoration:
+                    #
+                    # lwz     %r11, 0(%sp)
+                    # lwz     %r31, -4(%r11)
+                    # mr      %sp,  %r11  ; sp was first copied to r11 
+                    #
+                    restore_sp_reg = None
+                    restore_stages_found = 0
+
+                    prologue_block = list()
+
+                    for inst in bb[-1 : :-1]:
+
+                        if inst.analyzed:
+                            continue
+
+                        elif inst.type == self.iset.PPC_mr and inst[0].is_reg_n(self.iset.SP):
+                            prologue_block.append(inst)
+
+                            restore_sp_reg = inst[1].value
+                            restore_stages_found += 1
+
+                        elif restore_sp_reg:
+
+                            if inst.type == self.iset.PPC_lwz and \
+                                inst[0].is_reg_n(restore_sp_reg):
+
+                                # Found 2nd case of the stack restoration seq
+                                prologue_block.append(inst)
+
+                                restore_stages_found    += 1
+                                self.lir_function.stack_restore       = "Linux"
+
+                                print "    Stack restoration style: linux"
+
+                            elif inst.type == self.iset.PPC_lwz and \
+                                inst[1].is_displ and \
+                                inst[1].value[0] == restore_sp_reg and \
+                                inst[0].value in self.lir_function.stack_access_registers:
+
+                                prologue_block.append(inst)
+
+                                restore_stages_found += 1
+                                print "    Stack access register restoration found"
+
+                    if restore_stages_found == 3:
                         for inst in prologue_block:
                             inst.analyzed = True
                             self.lir_function.add_epilogue_address(inst.address)
-                        return  # Don't keep checking
+                        return
 
-                # Check case 2.a (GCC w/Linux)
-                #
-                # Find the following epilogue sequence for stack
-                # restoration:
-                #
-                # lwz     %r11, 0(%sp)
-                # lwz     %r31, -4(%r11)
-                # mr      %sp,  %r11  ; sp was first copied to r11 
-                #
-                restore_sp_reg = None
-                restore_stages_found = 0
+                    # Check case 2.b (GCC PowerPC-ELF)
+                    #
+                    # Find the following epilogue sequence for stack
+                    # restoration:
+                    #
+                    # addi    %r11, %r31, 0xE0
+                    # lwz     %r31, -4(%r11)
+                    # mr      %sp,  %r11  ; sp was first copied to r11 
+                    #
+                    restore_sp_reg = None
+                    restore_stages_found = 0
 
-                prologue_block = list()
+                    prologue_block = list()
 
-                for inst in bb[-1 : :-1]:
+                    for inst in bb[-1 : :-1]:
+                        if inst.analyzed:
+                            continue
 
-                    if inst.analyzed:
-                        continue
-
-                    elif inst.type == self.iset.PPC_mr and inst[0].is_reg_n(self.iset.SP):
-                        prologue_block.append(inst)
-
-                        restore_sp_reg = inst[1].value
-                        restore_stages_found += 1
-
-                    elif restore_sp_reg:
-
-                        if inst.type == self.iset.PPC_lwz and \
-                            inst[0].is_reg_n(restore_sp_reg):
-
-                            # Found 2nd case of the stack restoration seq
+                        if inst.type == self.iset.PPC_mr and inst[0].is_reg_n(self.iset.SP):
                             prologue_block.append(inst)
 
-                            restore_stages_found    += 1
-                            self.lir_function.stack_restore       = "Linux"
-
-                            print "    Stack restoration style: linux"
-
-                        elif inst.type == self.iset.PPC_lwz and \
-                            inst[1].is_displ and \
-                            inst[1].value[0] == restore_sp_reg and \
-                            inst[0].value in self.lir_function.stack_access_registers:
-
-                            prologue_block.append(inst)
-
+                            restore_sp_reg = inst[1].value
                             restore_stages_found += 1
-                            print "    Stack access register restoration found"
 
-                if restore_stages_found == 3:
-                    for inst in prologue_block:
-                        inst.analyzed = True
-                        self.lir_function.add_epilogue_address(inst.address)
-                    return
+                        elif restore_sp_reg:
 
-                # Check case 2.b (GCC PowerPC-ELF)
-                #
-                # Find the following epilogue sequence for stack
-                # restoration:
-                #
-                # addi    %r11, %r31, 0xE0
-                # lwz     %r31, -4(%r11)
-                # mr      %sp,  %r11  ; sp was first copied to r11 
-                #
-                restore_sp_reg = None
-                restore_stages_found = 0
+                            if inst.type == self.iset.PPC_addi and \
+                                inst[0].is_reg_n(restore_sp_reg) and \
+                                inst[1].value in self.lir_function.stack_access_registers and \
+                                inst[2].value == self.lir_function.stack_size:
 
-                prologue_block = list()
+                                # Found 2nd case of the stack restoration seq
+                                prologue_block.append(inst)
 
-                for inst in bb[-1 : :-1]:
-                    if inst.analyzed:
-                        continue
+                                restore_stages_found    += 1
+                                self.lir_function.stack_restore       = "Linux"
 
-                    if inst.type == self.iset.PPC_mr and inst[0].is_reg_n(self.iset.SP):
-                        prologue_block.append(inst)
+                                print "    Stack restoration style: GCC PowerPC-ELF"
 
-                        restore_sp_reg = inst[1].value
-                        restore_stages_found += 1
+                            elif inst.type == self.iset.PPC_lwz and \
+                                inst[1].is_displ and \
+                                inst[1].value[0] == restore_sp_reg and \
+                                inst[0].value in self.lir_function.stack_access_registers:
 
-                    elif restore_sp_reg:
+                                prologue_block.append(inst)
 
-                        if inst.type == self.iset.PPC_addi and \
-                            inst[0].is_reg_n(restore_sp_reg) and \
-                            inst[1].value in self.lir_function.stack_access_registers and \
-                            inst[2].value == self.lir_function.stack_size:
+                                restore_stages_found += 1
+                                print "    Stack access register restoration found"
 
-                            # Found 2nd case of the stack restoration seq
-                            prologue_block.append(inst)
-
-                            restore_stages_found    += 1
-                            self.lir_function.stack_restore       = "Linux"
-
-                            print "    Stack restoration style: GCC PowerPC-ELF"
-
-                        elif inst.type == self.iset.PPC_lwz and \
-                            inst[1].is_displ and \
-                            inst[1].value[0] == restore_sp_reg and \
-                            inst[0].value in self.lir_function.stack_access_registers:
-
-                            prologue_block.append(inst)
-
-                            restore_stages_found += 1
-                            print "    Stack access register restoration found"
-
-                if restore_stages_found == 3:
-                    for inst in prologue_block:
-                        inst.analyzed = True
-                        self.lir_function.add_epilogue_address(inst.address)
-                    return
+                    if restore_stages_found == 3:
+                        for inst in prologue_block:
+                            inst.analyzed = True
+                            self.lir_function.add_epilogue_address(inst.address)
+                        return
 
         except MiddleIrException, err:
             print format_exc() + '\n'
@@ -728,6 +743,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
             candidates = list(self.iset.ARGUMENT_REGISTERS) # copy the list
             params = list()
 
+            #print self.lir_function
             # Iterate through every instruction in the first basic block
             for lir_inst in self.lir_function[0]:
 
@@ -951,6 +967,12 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
             # lis     %r3, ((sub_80028C04+0x10000)@h)
             # addi    %r3, %r3, -0x73FC # sub_80028C04
             #
+            # or
+            #
+            # lis       r9, mem1@ha
+            # lwz       r9, mem1@l(r9)
+            # lwz       r10, 0x18(r31)
+            #
             if ( lo_inst.type == self.iset.PPC_addi and \
                 hi_inst[0].value == lo_inst[1].value ) \
                 or \
@@ -959,7 +981,7 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                 hi_inst[0].value == lo_inst[1].value[0] ):
 
                 # Obtain the memory address referenced by the idiom.
-                # TODO : Remove Ida Pro specifics.
+                # XXX / FIXME : Remove Ida Pro specifics.
                 dest_address = idaapi.get_first_dref_from(hi_inst.address)
                 idiom_type = idaapi.idc_guess_type(dest_address)
 
@@ -988,13 +1010,15 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                     #
                     data = self.debugger.dword(dest_address)
 
+                    print "$" * 80
                     print "data @ 0x%X = 0x%x" % (lo_inst.address, data)
                     #buffer_size = len(data) + 1 # Add one for the NULL terminator.
                     #array_type = MiddleIrTypeArray(MiddleIrTypeChar(), buffer_size)
                     array_type = MiddleIrTypeInt(32)
 
-                    # Create a global variable referencing the char array.
-                    gvar_str = MiddleIrGlobalVariable.new(
+                    # Create a global variable referencing the char array if it
+                    # doesn't exists.
+                    gvar_str = MiddleIrGlobalVariable.create_if_needed(
                         self.mir_module,
                         array_type,
                         "gi_" + str(data).capitalize())
@@ -1020,9 +1044,12 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
                         self.mir_function.get_instruction_builder_by_address(
                             address, True)
 
-                    name = "psz%s" % str(data).capitalize()
-                    mir_load = mir_inst_builder.load(gvar_str)
+                    name = "gi_%s" % str(data).capitalize()
+                    mir_load = mir_inst_builder.load(gvar_str, name)
 
+                    # Add the address of both instructions (the one that loads
+                    # the higher part and the one for the lower part).
+                    mir_load.add_address(hi_inst.address)
                     mir_load.add_address(address)
 
                     # Add newly created symbol to symbol table.

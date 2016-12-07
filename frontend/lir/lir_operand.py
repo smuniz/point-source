@@ -4,6 +4,8 @@
 # This code is part of point source decompiler
 #
 
+from idc import GetOpnd
+
 #__all__ = ["OPERAND_TYPES", "OPERAND_DESCRIPTION", 
 #    "LowLevelOperandException", "LowLevelOperand"
 #    ]
@@ -78,14 +80,23 @@ class LowLevelOperandException(Exception):
 class LowLevelOperand(object):
     """Operand item optionally used by an instruction."""
 
-    def __init__(self, gpr_names=None, spr_names=None):
+    def __init__(self, address, gpr_names=None, spr_names=None):
         """Initialize instance."""
+        self.address = address
         self.number = 0
         self.value = None
         self.type = O_VOID
         self.analyzed = False
         self.gpr_names = gpr_names
         self.spr_names = spr_names
+
+    @property
+    def address(self):
+        return self._address
+
+    @address.setter
+    def address(self, address):
+        self._address = address
 
     @property
     def value(self):
@@ -194,7 +205,13 @@ class LowLevelOperand(object):
         elif self.is_displ:
             return self.gpr_names.get(self.value[0], None)
         elif self.is_special:
-            return self.spr_names.get(self.value, None)
+            # TODO / FIXME Call architecture specific parsing at this point
+            if self.type == O_SPEC3: # crx
+                rep = GetOpnd(self.address, self.number)
+                val = self.spr_names.get(self.type, None) + rep[2]
+            else:
+                val = self.spr_names.get(self.type, None)
+            return val
         else:
             return None
 

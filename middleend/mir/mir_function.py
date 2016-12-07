@@ -18,9 +18,9 @@ from middleend.mir.mir_module import MiddleIrModule
 #
 # LLVM calling conventions converted to our equivalents.
 #
-from idaapi import *
+#from idaapi import *
 #CALL_CONV_C             = CM_CC_C
-CALL_CONV_FASTCALL      = CM_CC_FASTCALL
+#CALL_CONV_FASTCALL      = CM_CC_FASTCALL
 #CALL_CONV_COLDCALL      = CM_CC_COLDCALL
 #CALL_CONV_X86_STDCALL   = CM_CC_X86_STDCALL
 #CALL_CONV_X86_FASTCALL  = CM_CC_X86_FASTCALL
@@ -35,24 +35,24 @@ CALL_CONV_FASTCALL      = CM_CC_FASTCALL
 #CALL_CONV_MBLAZE_INTR   = CM_CC_MBLAZE_INTR
 #CALL_CONV_MBLAZE_SVOL   = CM_CC_MBLAZE_SVOL
 
-CALLING_CONVENTIONS = {
-     #CALL_CONV_C             : "C",
-     CALL_CONV_FASTCALL      : "Fastcall",
-     #CALL_CONV_COLDCALL      : "Coldcall",
-     #CALL_CONV_X86_STDCALL   : "x86 stdcall",
-     #CALL_CONV_X86_FASTCALL  : "x86 fastcall",
-     #CALL_CONV_GHC           : "GHC",
-     #CALL_CONV_ARM_APCS      : "ARM Procedure Calling Standard",
-     #CALL_CONV_ARM_AAPCS     : "ARM Architecture Procedure Calling Standard",
-     #CALL_CONV_ARM_AAPCS_VFP : "ARM Architecture Procedure Calling Standard - hard floating point ABI",
-     #CALL_CONV_MSP430_INTR   : "MSP430 interrupt routines",
-     #CALL_CONV_X86_THISCALL  : "x86 thiscall",
-     #CALL_CONV_PTX_KERNEL    : "PTX kernel",
-     #CALL_CONV_PTX_DEVICE    : "PTX device",
-     #CALL_CONV_MBLAZE_INTR   : "MBlaze ???",
-     #CALL_CONV_MBLAZE_SVOL   : "MBlaze ???",
-    }
-
+#CALLING_CONVENTIONS = {
+#     #CALL_CONV_C             : "C",
+#     CALL_CONV_FASTCALL      : "Fastcall",
+#     #CALL_CONV_COLDCALL      : "Coldcall",
+#     #CALL_CONV_X86_STDCALL   : "x86 stdcall",
+#     #CALL_CONV_X86_FASTCALL  : "x86 fastcall",
+#     #CALL_CONV_GHC           : "GHC",
+#     #CALL_CONV_ARM_APCS      : "ARM Procedure Calling Standard",
+#     #CALL_CONV_ARM_AAPCS     : "ARM Architecture Procedure Calling Standard",
+#     #CALL_CONV_ARM_AAPCS_VFP : "ARM Architecture Procedure Calling Standard - hard floating point ABI",
+#     #CALL_CONV_MSP430_INTR   : "MSP430 interrupt routines",
+#     #CALL_CONV_X86_THISCALL  : "x86 thiscall",
+#     #CALL_CONV_PTX_KERNEL    : "PTX kernel",
+#     #CALL_CONV_PTX_DEVICE    : "PTX device",
+#     #CALL_CONV_MBLAZE_INTR   : "MBlaze ???",
+#     #CALL_CONV_MBLAZE_SVOL   : "MBlaze ???",
+#    }
+#
 
 class MiddleIrFunctionException(MiddleIrFunctionBaseException):
     """Middle IR function exception."""
@@ -141,7 +141,8 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         self.module = None
 
         # Set the default calling convention.
-        self.calling_convention = CALL_CONV_FASTCALL
+        # FIXME 
+        self.calling_convention = "fastcc"#CALL_CONV_FASTCALL
 
         self._llvm_definition = None
 
@@ -349,9 +350,10 @@ class MiddleIrFunction(MiddleIrFunctionBase):
     @calling_convention.setter
     def calling_convention(self, call_conv):
         """Store the calling convention of the current function."""
-        if call_conv not in CALLING_CONVENTIONS:
-            raise MiddleIrFunctionException(
-                "Invalid calling convention specified (%d)." % call_conv)
+        #FIXME Add calling conventions again
+        #if call_conv not in CALLING_CONVENTIONS:
+        #    raise MiddleIrFunctionException(
+        #        "Invalid calling convention specified (%d)." % call_conv)
 
         self._calling_convention = call_conv
 
@@ -364,7 +366,7 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         function.
         
         """
-        return CALLING_CONVENTIONS[self.calling_convention]
+        return "fastcall"# CALLING_CONVENTIONS[self.calling_convention]
 
     def __repr__(self):
         """Return a string object with the function representation."""
@@ -430,7 +432,7 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         # Make sure that the module exists and it's of the right type.
         if not isinstance(module, MiddleIrModule):
             raise MiddleIrFunctionException(
-                "No module specified to add function '%s'." % name)
+                "No module specified to return function '%s'." % name)
 
         # Return the result whether it's an existing function or not.
         return module.get_function_by_name(name)
@@ -439,7 +441,8 @@ class MiddleIrFunction(MiddleIrFunctionBase):
         """Delete ourselves."""
         self.module.remove_function(self)
 
-        if self._llvm_definition:
-            self._llvm_definition.delete()
+        # FIXME / TODO : Is this right? Check with new testcases
+        #if self._llvm_definition:
+        #    self._llvm_definition.delete()
 
         del self

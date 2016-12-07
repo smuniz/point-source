@@ -56,7 +56,7 @@ class MiddleIrInstructionBuilder(object):
         if len(self.mir_basic_block) == 0:
             llvm_basic_block = self.mir_basic_block._ptr
 
-            self._ptr.position_at_beginning(llvm_basic_block)
+            self._ptr.position_at_start(llvm_basic_block)
             return
 
         for mir_inst in self.mir_basic_block:
@@ -284,8 +284,8 @@ class MiddleIrInstruction(MiddleIrLLVMInstance, Area):
         elif _type in AGGREGATE_OPERATIONS:
             self.group = AGGREGATE_GROUP
 
-        elif _type in CONVERSION_OPERATIONS:
-            self.group = CONVERSION_GROUP
+        elif _type in CONVERTION_OPERATIONS:
+            self.group = CONVERTION_GROUP
 
         elif _type in OTHER_INSTRUCTIONS:
             self.group = OTHER_GROUP
@@ -421,7 +421,7 @@ MEMORY_ACCESS_GROUP = 9
 BITWISE_BINARY_GROUP = 10
 VECTOR_GROUP = 11
 AGGREGATE_GROUP = 12
-CONVERSION_GROUP = 13
+CONVERTION_GROUP = 13
 
 OTHER_GROUP = 14
 UNKNOWN_GROUP = 15
@@ -441,7 +441,7 @@ GROUP_NAMES = {
     BITWISE_BINARY_GROUP    : "bitwise_binary",
     VECTOR_GROUP            : "vector",
     AGGREGATE_GROUP         : "aggregate",
-    CONVERSION_GROUP        : "conversion",
+    CONVERTION_GROUP        : "conversion",
 
     OTHER_GROUP             : "other",
     UNKNOWN_GROUP           : "unknown",
@@ -487,6 +487,38 @@ OPCODE_FENCE = MEMORY_ACCESS_OPERATIONS_BASE + 4
 OPCODE_ATOMICCMPXCHG = MEMORY_ACCESS_OPERATIONS_BASE + 5
 OPCODE_ATOMICRMW = MEMORY_ACCESS_OPERATIONS_BASE + 6
 OPCODE_GETELEMENTPTR = MEMORY_ACCESS_OPERATIONS_BASE + 7
+
+BITWISE_BINARY_OPERATIONS_BASE = 0x500
+OPCODE_SHL = BITWISE_BINARY_OPERATIONS_BASE + 1
+OPCODE_LSHR = BITWISE_BINARY_OPERATIONS_BASE + 2
+OPCODE_ASHR = BITWISE_BINARY_OPERATIONS_BASE + 3
+OPCODE_AND = BITWISE_BINARY_OPERATIONS_BASE + 4
+OPCODE_OR = BITWISE_BINARY_OPERATIONS_BASE + 5
+OPCODE_XOR = BITWISE_BINARY_OPERATIONS_BASE + 6
+
+VECTOR_OPERATIONS_BASE = 0x600
+OPCODE_EXTRACTELEMENT = VECTOR_OPERATIONS_BASE + 1
+OPCODE_INSERTELEMENT = VECTOR_OPERATIONS_BASE + 1
+OPCODE_SHUFFLEVECTOR = VECTOR_OPERATIONS_BASE + 1
+
+AGGREGATE_OPERATIONS_BASE = 0x700
+OPCODE_EXTRACTVALUE = AGGREGATE_OPERATIONS_BASE + 1
+OPCODE_INSERTVALUE = AGGREGATE_OPERATIONS_BASE + 1
+
+CONVERTION_OPERATIONS_BASE = 0x800
+OPCODE_TRUNC = CONVERTION_OPERATIONS_BASE + 1
+OPCODE_ZEXT = CONVERTION_OPERATIONS_BASE + 1
+OPCODE_SEXT = CONVERTION_OPERATIONS_BASE + 1
+OPCODE_FPTRUNC = CONVERTION_OPERATIONS_BASE + 1
+OPCODE_FPEXT = CONVERTION_OPERATIONS_BASE + 1
+OPCODE_FPTOUI = CONVERTION_OPERATIONS_BASE + 1
+OPCODE_FPTOSI = CONVERTION_OPERATIONS_BASE + 1
+OPCODE_UITOFP = CONVERTION_OPERATIONS_BASE + 1
+OPCODE_SITOFP = CONVERTION_OPERATIONS_BASE + 1
+OPCODE_PTRTOINT = CONVERTION_OPERATIONS_BASE + 1
+OPCODE_INTTOPTR = CONVERTION_OPERATIONS_BASE + 1
+OPCODE_BITCAST = CONVERTION_OPERATIONS_BASE + 1
+#OPCODE_ADDRSPACECAST,
 
 #
 # Instructions groups selection.
@@ -536,7 +568,6 @@ MEMORY_ACCESS_OPERATIONS = [
     OPCODE_GETELEMENTPTR,
     ]
 
-"""
 BITWISE_BINARY_OPERATIONS = [
     OPCODE_SHL,
     OPCODE_LSHR,
@@ -557,7 +588,7 @@ AGGREGATE_OPERATIONS = [
     OPCODE_INSERTVALUE,
     ]
 
-CONVERSION_OPERATIONS = [
+CONVERTION_OPERATIONS = [
     OPCODE_TRUNC,
     OPCODE_ZEXT,
     OPCODE_SEXT,
@@ -572,7 +603,6 @@ CONVERSION_OPERATIONS = [
     OPCODE_BITCAST,
     #OPCODE_ADDRSPACECAST,
     ]
-"""
 
 """
 Intrinsic Functions
@@ -873,6 +903,12 @@ class MiddleIrAddInstruction(MiddleIrInstruction):
         self.yields = lhs
 
         self._ptr = builder._ptr.add(lhs._ptr, rhs._ptr, name)
+
+        # XXX FIXME TODO do this for every instruction (decorator?)
+        if isinstance(lhs, MiddleIrInstruction):
+            self.add_address(lhs.start_address)
+        if isinstance(rhs, MiddleIrInstruction):
+            self.add_address(rhs.start_address)
 
     def get_readable_inners(self):
         """..."""

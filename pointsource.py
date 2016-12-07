@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # 
-# Copyright (c) 2014 Sebastian Muniz
+# Copyright (c) 2016 Sebastian Muniz
 # 
 # This code is part of point source decompiler
 #
@@ -246,7 +246,7 @@ class PointSource(object):
 
             if not hasattr(factory, frontend_method):
                 raise PointSourceException(
-                    "Unsupported architecture (%s)." % architecture)
+                    "Unsupported architecture (%s)." % arch_name)
 
             self.front_end_type = getattr(factory, frontend_method)
 

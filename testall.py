@@ -116,24 +116,24 @@ def do_type():
         MiddleIrTypeInt(i)
     MiddleIrTypeFloat()
     MiddleIrTypeDouble()
-    MiddleIrTypeX86Fp80()
-    MiddleIrTypeFp128()
-    MiddleIrTypePpcFp128()
+    #MiddleIrTypeX86Fp80()
+    #MiddleIrTypeFp128()
+    #MiddleIrTypePpcFp128()
     MiddleIrTypeFunction(ti, [ti]*100, True)
     MiddleIrTypeFunction(ti, [ti]*100, False)
     MiddleIrTypeStruct([ti]*100)
-    MiddleIrTypePackedStruct([ti]*100)
+    #MiddleIrTypePackedStruct([ti]*100)
     MiddleIrTypeArray(ti, 100)
     ptr = MiddleIrTypePointer(ti, 4)
     pte = ptr.type
-    MiddleIrTypeVector(ti, 100)
+    #MiddleIrTypeVector(ti, 100)
     MiddleIrTypeVoid()
-    MiddleIrTypeLabel()
+    #MiddleIrTypeLabel()
 
-    MiddleIrTypeOpaque('an_opaque_type')
+    #MiddleIrTypeOpaque('an_opaque_type')
     s = str(ti)
     s = ti == MiddleIrTypeFloat()
-    MiddleIrTypeOpaque('whatever').set_body([MiddleIrTypeInt()])
+    #MiddleIrTypeOpaque('whatever').set_body([MiddleIrTypeInt()])
     s = ti.width
     ft = MiddleIrTypeFunction(ti, [ti]*10)
 #    ft.return_type
@@ -153,7 +153,7 @@ def do_type():
 #    s = at.count
     pt = MiddleIrTypePointer(ti, 10)
 #    pt.address_space
-    vt = MiddleIrTypeVector(ti, 100)
+    #vt = MiddleIrTypeVector(ti, 100)
 #    s = vt.element
 #    s = vt.count
     MiddleIrTypeInt(32) == MiddleIrTypeInt(64)
@@ -206,14 +206,14 @@ def do_constant():
     MiddleIrConstantIntSignExtend(ti, 10)
     MiddleIrConstantReal(MiddleIrTypeFloat(), "10.0")
     MiddleIrConstantReal(MiddleIrTypeFloat(), 3.14)
-    MiddleIrConstantString("test")
+    #MiddleIrConstantString("test")
     MiddleIrConstantStringZ("test2")
     MiddleIrConstantArray(ti, [MiddleIrConstantInt(ti,42)]*10)
     MiddleIrConstantStruct([MiddleIrConstantInt(ti,42)]*10)
-    MiddleIrConstantPackedStruct([MiddleIrConstantInt(ti,42)]*10)
-    MiddleIrConstantVector([MiddleIrConstantInt(ti,42)]*10)
+    #MiddleIrConstantPackedStruct([MiddleIrConstantInt(ti,42)]*10)
+    #MiddleIrConstantVector([MiddleIrConstantInt(ti,42)]*10)
 
-    MiddleIrConstantSizeof(ti)
+    #MiddleIrConstantSizeof(ti)
 
     k = MiddleIrConstantInt(ti, 10)
     f = MiddleIrConstantReal(MiddleIrTypeFloat(), 3.1415)
@@ -222,8 +222,8 @@ def do_constant():
 #    k.srem(k).and_(k).or_(k).xor(k).icmp(IPRED_ULT, k)
 #    f.fdiv(f).frem(f).fcmp(RPRED_ULT, f)
 #    f.fadd(f).fmul(f).fsub(f)
-    vi = MiddleIrConstantVector([MiddleIrConstantInt(ti,42)]*10)
-    vf = MiddleIrConstantVector([MiddleIrConstantReal(MiddleIrTypeFloat(), 3.14)]*10)
+    #vi = MiddleIrConstantVector([MiddleIrConstantInt(ti,42)]*10)
+    #vf = MiddleIrConstantVector([MiddleIrConstantReal(MiddleIrTypeFloat(), 3.14)]*10)
 #    k.shl(k).lshr(k).ashr(k)
     return
     # TODO gep
@@ -250,7 +250,7 @@ def do_global_value():
     print("    Testing class GlobalValue")
     m = MiddleIrModule.new('a')
     gv = MiddleIrGlobalVariable.new(m, MiddleIrTypeInt(), 'b')
-    s = gv.is_declaration
+    #s = gv.is_declaration
     m = gv.module
 #    gv.linkage = LINKAGE_EXTERNAL
 #    s = gv.linkage
@@ -267,7 +267,7 @@ def do_global_variable():
     m = MiddleIrModule.new('a')
     gv = MiddleIrGlobalVariable.new(m, MiddleIrTypeInt(), 'b')
     gv = MiddleIrGlobalVariable.get(m, 'b')
-    gv.delete()
+    #gv.delete()
     gv = MiddleIrGlobalVariable.new(m, MiddleIrTypeInt(), 'c')
     gv.initializer = MiddleIrConstantInt( ti, 10 )
     s = gv.initializer
@@ -303,7 +303,7 @@ def do_function():
 #    f.does_not_throw = True
 #    f2 = MiddleIrFunction.intrinsic(m, INTR_COS, [ti])
 #    g = f.intrinsic_id
-    f.calling_convenion = CC_FASTCALL
+    f.calling_convenion = "fastcc"
     g = f.calling_convention
 #    f.collector = 'a'
 #    c = f.collector
@@ -531,9 +531,9 @@ def do_llvm_core():
     do_function()
     do_instruction()
     do_callorinvokeinstruction()
-#    do_phinode()
-#    do_switchinstruction()
-#    do_basicblock()
+#   do_phinode()
+#   do_switchinstruction()
+#   do_basicblock()
     do_builder()
 
 

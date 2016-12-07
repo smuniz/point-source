@@ -1,5 +1,5 @@
 # 
-# Copyright (c) 2014 Sebastian Muniz
+# Copyright (c) 2016 Sebastian Muniz
 # 
 # This code is part of point source decompiler
 #
@@ -69,17 +69,18 @@ class MiddleIrConstantInt(MiddleIrBaseConstant):
     def get_readable_inners(self):
         return self.value
 
-class MiddleIrConstantString(MiddleIrBaseConstant):
-    """Middle level intermediate representation class of non-null-terminated
-    string constant.
-    
-    """
-
-    def __init__(self, value):
-        """Initialize the instance."""
-        super(MiddleIrConstantString, self).__init__(Constant.string(value))
-
-        self.value = repr(value).replace("'", "\"")
+# XXX Only StringZ exists.
+#class MiddleIrConstantString(MiddleIrBaseConstant):
+#    """Middle level intermediate representation class of non-null-terminated
+#    string constant.
+#    
+#    """
+#
+#    def __init__(self, value):
+#        """Initialize the instance."""
+#        super(MiddleIrConstantString, self).__init__(ir.Constant(value))
+#
+#        self.value = repr(value).replace("'", "\"")
 
 class MiddleIrConstantStringZ(MiddleIrBaseConstant):
     """Middle level intermediate representation class of null-terminated string
@@ -89,7 +90,12 @@ class MiddleIrConstantStringZ(MiddleIrBaseConstant):
 
     def __init__(self, value):
         """Initialize the instance."""
-        super(MiddleIrConstantStringZ, self).__init__(Constant.stringz(value))
+        n = (len(value) + 2)
+        buf = bytearray((' ' * n).encode('ascii'))
+        buf[-1] = 0
+        buf[:-1] = value.encode('utf-8')
+        super(MiddleIrConstantStringZ, self).__init__(
+            ir.Constant(ir.ArrayType(ir.IntType(8), n), value))
 
         self.value = repr(value).replace("'", "\"")
 
@@ -99,7 +105,7 @@ class MiddleIrConstantNull(MiddleIrBaseConstant):
 
     def __init__(self, _type):
         """Initialize the instance."""
-        super(MiddleIrConstantNull, self).__init__(Constant.null(_type._ptr))
+        super(MiddleIrConstantNull, self).__init__(ir.Constant(_type._ptr, None))
 
 
 class MiddleIrConstantAllOnes(MiddleIrBaseConstant):
@@ -107,8 +113,13 @@ class MiddleIrConstantAllOnes(MiddleIrBaseConstant):
 
     def __init__(self, _type):
         """Initialize the instance."""
-        super(MiddleIrConstantAllOnes, self).__init__(
-            Constant.all_ones(_type._ptr))
+        if isinstance(_type._ptr, ir.IntType):
+            super(MiddleIrConstantAllOnes, self).__init__(
+                ir.Constant(_type._ptr, int('1' * _type._ptr.width, 2)))
+                #ir.Constant.all_ones(_type._ptr, None))
+        else:
+            raise MiddleIrException(
+                "Cannot create 'all ones' type from non-integer")
 
 
 class MiddleIrConstantUndef(MiddleIrBaseConstant):
@@ -116,7 +127,7 @@ class MiddleIrConstantUndef(MiddleIrBaseConstant):
 
     def __init__(self, _type):
         """Initialize the instance."""
-        super(MiddleIrConstantUndef, self).__init__(Constant.undef(_type._ptr))
+        super(MiddleIrConstantUndef, self).__init__(ir.Constant(_type._ptr, ir.Undefined))
 
 
 class MiddleIrConstantIntSignExtend(MiddleIrBaseConstant):
@@ -128,7 +139,7 @@ class MiddleIrConstantIntSignExtend(MiddleIrBaseConstant):
     def __init__(self, _type, value):
         """Initialize the instance."""
         super(MiddleIrConstantIntSignExtend, self).__init__(
-            Constant.int_signextend(_type._ptr, value))
+            ir.Constant(_type._ptr, value))
 
 
 class MiddleIrConstantReal(MiddleIrBaseConstant):
@@ -140,7 +151,7 @@ class MiddleIrConstantReal(MiddleIrBaseConstant):
     def __init__(self, _type, value):
         """Initialize the instance."""
         super(MiddleIrConstantReal, self).__init__(
-            Constant.real(_type._ptr, value))
+            ir.Constant(_type._ptr, value))
 
 
 class MiddleIrConstantArray(MiddleIrBaseConstant):
@@ -149,8 +160,8 @@ class MiddleIrConstantArray(MiddleIrBaseConstant):
     def __init__(self, _type, elements):
         """Initialize the instance."""
         super(MiddleIrConstantArray, self).__init__(
-            Constant.array(
-                _type._ptr,
+            ir.Constant(
+                ir.ArrayType(_type._ptr, len(elements)), 
                 [element._ptr for element in elements]))
 
 class MiddleIrConstantStruct(MiddleIrBaseConstant):
@@ -161,40 +172,41 @@ class MiddleIrConstantStruct(MiddleIrBaseConstant):
 
     def __init__(self, elements):
         """Initialize the instance."""
-        super(MiddleIrConstantStruct, self).__init__(Constant.struct(
-            [element._ptr for element in elements]))
+        super(MiddleIrConstantStruct, self).__init__(
+            ir.Constant.literal_struct(
+                [element._ptr for element in elements]))
 
 
-class MiddleIrConstantPackedStruct(MiddleIrBaseConstant):
-    """Middle level intermediate representation class of a packed-structure of
-    constants.
+#class MiddleIrConstantPackedStruct(MiddleIrBaseConstant):
+#    """Middle level intermediate representation class of a packed-structure of
+#    constants.
+#
+#    """
+#
+#    def __init__(self, elements):
+#        """Initialize the instance."""
+#        super(MiddleIrConstantPackedStruct,
+#        self).__init__(ir.Constant.packed_struct(
+#            [element._ptr for element in elements]))
+#
 
-    """
+#class MiddleIrConstantVector(MiddleIrBaseConstant):
+#    """Middle level intermediate representation class of a vector of constants.
+#
+#    """
+#
+#    def __init__(self, elements):
+#        """Initialize the instance."""
+#        super(MiddleIrConstantVector, self).__init__(ir.Constant.vector(
+#            [element._ptr for element in elements]))
+#
 
-    def __init__(self, elements):
-        """Initialize the instance."""
-        super(MiddleIrConstantPackedStruct,
-        self).__init__(Constant.packed_struct(
-            [element._ptr for element in elements]))
-
-
-class MiddleIrConstantVector(MiddleIrBaseConstant):
-    """Middle level intermediate representation class of a vector of constants.
-
-    """
-
-    def __init__(self, elements):
-        """Initialize the instance."""
-        super(MiddleIrConstantVector, self).__init__(Constant.vector(
-            [element._ptr for element in elements]))
-
-
-class MiddleIrConstantSizeof(MiddleIrBaseConstant):
-    """Middle level intermediate representation class of a sizeof() constant.
-    
-    """
-
-    def __init__(self, _type):
-        """Initialize the instance."""
-        super(MiddleIrConstantSizeof, self).__init__(Constant.sizeof(
-            _type._ptr))
+#class MiddleIrConstantSizeof(MiddleIrBaseConstant):
+#    """Middle level intermediate representation class of a sizeof() constant.
+#    
+#    """
+#
+#    def __init__(self, _type):
+#        """Initialize the instance."""
+#        super(MiddleIrConstantSizeof, self).__init__(ir.Constant.sizeof(
+#            _type._ptr))

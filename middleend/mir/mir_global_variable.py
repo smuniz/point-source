@@ -78,6 +78,18 @@ class MiddleIrGlobalVariable(MiddleIrGlobalValue):
         self._name = name
 
     @staticmethod
+    def create_if_needed(module, _type, name):
+        """Create a new global variable if it doesn't exists yet. Otherwise
+        return the existing one.
+        
+        """
+        try:
+            gvar = MiddleIrGlobalVariable.get(module, name)
+        except MiddleIrGlobalVariableException, err:
+            gvar = MiddleIrGlobalVariable.new(module, _type, name)
+        return gvar
+
+    @staticmethod
     def new(module, _type, name):
         """Create a new global vairable."""
         new_gvar = MiddleIrGlobalVariable(_type, name)
@@ -94,26 +106,32 @@ class MiddleIrGlobalVariable(MiddleIrGlobalValue):
         """Store the module of the variable."""
         self._module = module
 
-    @property
-    def is_declaration(self):
-        return self._ptr.is_declaration
+    # TODO Confirm it does not exists in LVMLite
+    #@property
+    #def is_declaration(self):
+    #    return self._ptr.is_declaration
 
     @property
     def alignment(self):
+        """Return the alignment property of a global variable."""
         return self._ptr.alignment
 
     @alignment.setter
     def alignment(self, value):
+        """Store the alignment property of a global variable."""
         self._ptr.alignment = value
 
     @staticmethod
     def get(module, name):
-        gv = module._ptr.get_global_variable_named(name)
+        """Return an existing global variable based on its name."""
+        #gv = module._ptr.globals.get(name, None)
+        gv = module.get_global_variable_by_name(name)
         if not gv:
-            MiddleIrGlobalVariableException("No global named `%s`" % name)
+            raise MiddleIrGlobalVariableException("No global named '%s'" % name)
         return gv
 
     def delete(self):
+        """Remove an existing global variable based on its name."""
         if self in self.module.global_variables:
             self.module.global_variables.discard(self)
 
@@ -123,7 +141,6 @@ class MiddleIrGlobalVariable(MiddleIrGlobalValue):
     @property
     def initializer(self):
         """Return the global variable initializer."""
-        #return self._ptr.initializer
         return self._initializer
 
     @initializer.setter

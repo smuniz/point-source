@@ -91,7 +91,6 @@ class LowLevelInstruction(object):
     def __str__(self):
         """Return the instructions string representation."""
         inst_repr = "%s" % self.mnemonic
-
         #
         # Get all (if any) the operands involved in this instruction.
         #

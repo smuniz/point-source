@@ -52,7 +52,7 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
 
         self.target = None
 
-        self.global_variables = set()
+        self.global_variables = dict()
 
         # Update the modules cache to keep it updated.
         global modules_cache
@@ -80,7 +80,8 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
 
     def create_intrinsic_function(self, name):
         """Add the specified intrinsic function to the current module."""
-        return MiddleIrIntrinsicFunction(name, self)
+        #return MiddleIrIntrinsicFunction(name, self)
+        raise MiddleIrModuleException("Should validate this is working")
 
     def create_function(self, name):
         """Add the specified function to the current module."""
@@ -96,7 +97,7 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
         name = global_variable.name
         address_space = 0
 
-        global_variable._ptr = GlobalVariable.new(
+        global_variable._ptr = ir.GlobalVariable(
             self._ptr,
             ty,
             name,
@@ -108,17 +109,15 @@ class MiddleIrModule(MiddleIrLLVMInstance, Area):
 
         global_variable.module = self
 
-        self.global_variables.add(global_variable)
+        # Add the newly created global variable to the list of existing ones.
+        self.global_variables[global_variable.name] = global_variable
 
     def get_global_variable_by_name(self, name):
         """Iterate through every global variable and return the one matching
         the specified name.
         
         """
-        for gvar in self.global_variables:
-            if gvar.name is name:
-                return gvar
-        return None
+        return self.global_variables.get(name, None)
 
     def get_function_by_name(self, name):
         """Iterate through every function and return the one matching the

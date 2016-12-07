@@ -111,18 +111,21 @@ class HirTextOutput(TextOutputMedia):
 
     def colorize(self):
         """Fill the recently created window with the text."""
-        line_number = 0
-
         #
         # Generate function prologue.
         #
+        line_number = 0 # Track the relation between the line number in the
+                        # source code and corresponding disassembly address.
+
         func_opening = self.generate_function_opening()
 
         self.add_lines(func_opening)
 
         # Map function opening source code to the corresponding assembly lines.
         for index in xrange(len(func_opening)):
-            #print "prologue : index %d - line_number %d" % (index, line_number)
+            print "prologue : index %d - line_number %d - %s" % (
+                    index, line_number, ", ".join(
+                        ["0x%08X" % x for x in self.hir.prologue_addresses]))
             self.address_map[line_number] = self.hir.prologue_addresses
             line_number += 1 # Move forward line number index.
 
@@ -131,7 +134,9 @@ class HirTextOutput(TextOutputMedia):
         indent_level = 1
         indent = " " * (indent_level * 4)
 
+        #
         # Add local variables to the source code output.
+        #
         address = self.hir.start_address
         local_vars = self.hir.symbols_manager.symbols(address).variables
 
@@ -144,9 +149,11 @@ class HirTextOutput(TextOutputMedia):
 
             _str = "%(indent)s%(var_type)s %(var_name)s;\n" % vars()
             self.add_line(self.as_identifier(_str))
+            line_number += 1
 
-        # Add an empty line but don't count it in the source mapping.
+        # Add an empty line and count it in the source mapping.
         self.add_line("")
+        line_number += 1
 
         #
         # Generate function body.
@@ -158,6 +165,7 @@ class HirTextOutput(TextOutputMedia):
                 s = self.as_string("%(indent)s%(label)s" % vars())
 
                 self.add_line(s)
+                line_number += 1
 
             block_repr = ""
             for index, stmt in enumerate(block.statements):
@@ -170,8 +178,12 @@ class HirTextOutput(TextOutputMedia):
                 stmt_fmt = "%-40s" % stmt_fmt
                 self.__colorize_line(stmt_fmt)
 
+                # Map the source code to the disassembly for the current
+                # statement.
                 self.address_map[line_number] = stmt.addresses
-                #print "statement : index %d - line_number %d" % (index, line_number)
+                print "statement : index %d - line_number %d - %s" % (
+                    index, line_number, ", ".join(
+                        ["0x%08X" % x for x in stmt.addresses]))
                 line_number += 1 # Move forward line number index.
 
         #
@@ -184,7 +196,9 @@ class HirTextOutput(TextOutputMedia):
         # Map the function clousure source code to the corresponding assembly
         # lines.
         for index in xrange(len(func_closure)):
-            #print "epilogue : index %d - line_number %d" % (index, line_number)
+            print "epilogue : index %d - line_number %d - %s" % (
+                    index, line_number, ", ".join(
+                        ["0x%08X" % x for x in self.hir.epilogue_addresses]))
             self.address_map[line_number] = self.hir.epilogue_addresses
             line_number += 1 # Move forward line number index.
 
@@ -310,7 +324,7 @@ class HirTextOutput(TextOutputMedia):
 
         ret_type = self.as_identifier(self.hir.return_type)
 
-        if not self.hir.is_calling_convention_c:
+        if not self.hir.is_calling_convention_fastcall:
             call_conv = "%s " % \
                 self.as_identifier(self.hir.calling_convention_name)
         else:
@@ -372,10 +386,6 @@ class HirTextOutput(TextOutputMedia):
         cur_line_number = self.GetLineNo()
         addresses = self.address_map.get(cur_line_number, None)
 
-        if not addresses:
-            #print "No address(es) for line number %d" % cur_line_number
-            return
-
         # First we restablish the previously coloured lines.
         for address, colour in self.coloured_addresses.iteritems():
             #print "Setting color 0x%X for address 0x%X" % (
@@ -383,7 +393,14 @@ class HirTextOutput(TextOutputMedia):
             self.set_colour(address, colour)
 
         self.coloured_addresses.clear()
-            
+
+        if not addresses:
+            #print "No address(es) for line number %d" % cur_line_number
+            return
+
+        print "-----------> Line %d -> %s" % (
+            cur_line_number, ", ".join(["0x%08X" % x for x in addresses]))
+
         for address in addresses:
             #print "Getting color for address 0x%X" % (address)
             self.coloured_addresses[address] = self.get_colour(address)

@@ -117,6 +117,9 @@ class FrontEndPowerPc(FrontEnd):
                     self.current_symbols_table.symbols[op_address_2].item,
                     name)
 
+                mir_inst.add_address(op_address_1)
+                mir_inst.add_address(op_address_2)
+
             mir_inst.add_address(address)
 
             lir_inst.analyzed = True
@@ -163,7 +166,7 @@ class FrontEndPowerPc(FrontEnd):
                 if not op_address in self.current_symbols_table.symbols:
                     raise FrontEndPowerPcException(
                         "No symbol found for op n.%d at 0x%X for instruction at 0x%X" % (
-                        1, op_address, lir_inst.address))
+                        op1.number, op_address, lir_inst.address))
 
                 name = ""
 
@@ -171,6 +174,10 @@ class FrontEndPowerPc(FrontEnd):
                     self.current_symbols_table.symbols[op_address].item,
                     MiddleIrConstantInt(MiddleIrTypeInt(32), op2.value),
                     name)
+
+                mir_inst.add_address(op_address)# Add the address where the
+                                                # register being returned is
+                                                # defined.
 
             mir_inst.add_address(address)
 
@@ -191,25 +198,23 @@ class FrontEndPowerPc(FrontEnd):
             #
             # Instruction : compare word inmediate
             #
+
+            op0 = lir_inst[0]
+            op1 = lir_inst[1]
+            op2 = lir_inst[2]
+
             op_address = self.lir_function.ud_chain[address][op1.value]
+
+            op1_mir = self.current_symbols_table.symbols[op_address].item,
 
             if not op_address in self.current_symbols_table.symbols:
                 raise FrontEndPowerPcException(
                     "No symbol found for op n.%d at 0x%X for instruction at 0x%X" % (
-                    1, op_address, lir_inst.address))
+                    op1.number, op_address, lir_inst.address))
 
-            op1 = self.current_symbols_table.symbols[op_address].item,
+            op2_mir = self.current_symbols_table.symbols[op_address].item,
 
-            op_address = self.lir_function.ud_chain[address][op1.value]
-
-            if not op_address in self.current_symbols_table.symbols:
-                raise FrontEndPowerPcException(
-                    "No symbol found for op n.%d at 0x%X for instruction at 0x%X" % (
-                    1, op_address, lir_inst.address))
-
-            op2 = self.current_symbols_table.symbols[op_address].item,
-
-            mir_inst = self.mir_inst_builder.icmp(cond, op1, op2)
+            mir_inst = self.mir_inst_builder.icmp(cond, op1_mir, op2_mir)
 
             mir_inst.add_address(address)
 
@@ -219,7 +224,6 @@ class FrontEndPowerPc(FrontEnd):
             # Add newly created symbol to symbol table.
             self.current_symbols_table.add_symbol(
                 address, name, None, None, mir_inst)
-
 
         elif lir_inst.is_type(self.iset.PPC_lbz):
             #
@@ -231,10 +235,10 @@ class FrontEndPowerPc(FrontEnd):
             #
             # Instruction : load inmediate
             #
-
+            # TODO use the mir_inst_builder
             # Add symbol to the symbols table.
             self.current_symbols_table.add_symbol(
-                address, None, None, None,
+                address, None, None, None, 
                 MiddleIrConstantInt(MiddleIrTypeInt(32), lir_inst[1].value))
 
         elif lir_inst.is_type(self.iset.PPC_lis):
@@ -267,6 +271,8 @@ class FrontEndPowerPc(FrontEnd):
                         lir_inst.address)
 
                 mir_inst = self.mir_inst_builder.load(mir_var)
+
+                #mir_inst.add_address(address) # Add the asm counterpart address
 
                 # Add symbol to the symbols table.
                 self.current_symbols_table.add_symbol(
@@ -326,7 +332,7 @@ class FrontEndPowerPc(FrontEnd):
                     mir_var = \
                         self.current_symbols_table.variables[dest_offset].item
                 else:
-                    mir_var = self._create_local_variable(dest_offset)
+                    mir_var = self._create_local_variable(address, dest_offset)
 
                 # Use the newly created MIR viariable in the store
                 # operation to fully represent the instruction.
@@ -472,6 +478,8 @@ class FrontEndPowerPc(FrontEnd):
             # a GOTO statement.
             branch_address = lir_inst[0].value
 
+            print "!" * 80
+            print "--->", hex(branch_address)
             # Check if the unconditional jump is a GOTO to an offset into the
             # current function or a call to a another function.
             # Determine that checking the jump destination address against the
@@ -497,10 +505,11 @@ class FrontEndPowerPc(FrontEnd):
 
                 if lir_callee is None:
                     raise FrontEndPowerPcException(
-                        "Unable to locate callee function at 0x%08X" % \
+                        "Unable to locate callee LIR function at 0x%08X" % \
                         branch_address)
 
                 mir_callee = MiddleIrFunction.get(self.mir_module, lir_callee.name)
+                print "!############################@@@@@@@@@", mir_callee
 
                 if mir_callee is None:
                     raise FrontEndPowerPcException(
@@ -508,10 +517,25 @@ class FrontEndPowerPc(FrontEnd):
                         " '%s' at 0x%08X" % (
                         lir_callee.name, lir_callee.start_address))
 
-                du_chain_regs = lir_callee.du_chain[lir_callee.start_address].keys()
+                # In case we're biuding a call to an external function then the
+                # parameters passing part must be skipped (for now) becuase we
+                # don't have any Use-Def chains available.
+                if not lir_callee.is_extern:
+                #if True:
+                    print "A" * 80, hex(lir_callee.start_address)
+                    du_chain_regs = lir_callee.du_chain[lir_callee.start_address].keys()
+                    print "XXXXX====>", du_chain_regs, hex(lir_inst.address)
 
-                self.lir_function.update_chains(
-                    du_chain_regs, lir_inst.address, forward=False)
+                    self.lir_function.update_chains(
+                        du_chain_regs, lir_inst.address, forward=False)
+
+                    # XXX FIXME Make dataflow analysis right! This won't work
+                    # otherwise.
+                    ud_chain_regs = lir_callee.ud_chain[lir_callee.start_address].keys()
+                    print "XXXXX====>", du_chain_regs, hex(lir_inst.address)
+
+                    self.lir_function.update_chains(
+                        ud_chain_regs, lir_inst.address, forward=True)
 
                 # TODO : Enhance this code.
                 # Process every parameter for the callee and add it to a list
@@ -520,14 +544,14 @@ class FrontEndPowerPc(FrontEnd):
 
                 for arg_idx, (reg_arg, reg_arg_address) in \
                     enumerate(self.lir_function.ud_chain[address].iteritems()):
-                    #print "arg %d (0x%08X) reg %d" % (
-                    #    arg_idx, reg_arg_address, reg_arg)
+                    print "arg %d (0x%08X) reg %d" % (
+                        arg_idx, reg_arg_address, reg_arg)
                     
                     mir_callee_args.append(
                         self.current_symbols_table.symbols[reg_arg_address].item
                         )
 
-                print "[+] About to create call with %d parameters" % \
+                print "[+] About to create function call with %d parameters" % \
                     len(lir_callee.param_regs)
 
                 # Display arguments matching (debugging purposes).
@@ -573,10 +597,14 @@ class FrontEndPowerPc(FrontEnd):
                 if not op_address in self.current_symbols_table.symbols:
                     raise FrontEndPowerPcException(
                         "No symbol found at 0x%X for instruction at 0x%X" % \
-                        (op_address, lir_inst.address))
+                        (op_address, address))
 
                 mir_inst = self.mir_inst_builder.ret(
                     self.current_symbols_table.symbols[op_address].item)
+
+                mir_inst.add_address(op_address)# Add the address where the
+                                                # register being returned is
+                                                # defined.
 
             else:  # 2 or more (types bigger than built-ins)
                 raise FrontEndPowerPcException(
@@ -630,6 +658,7 @@ class FrontEndPowerPc(FrontEnd):
 
     def analyze_callee(self, callee_address):
         """Analyze the callee function by performing a live analysis on it."""
+        print "-=-==-=-=-=-=-=--=>>>>>>> 0x%X" % callee_address
         lir_function = self.debugger.generate_lir(callee_address)
         #print lir_function
         return lir_function

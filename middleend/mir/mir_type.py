@@ -12,17 +12,17 @@ __all__ = [ "MiddleIrTypeChar",
             "MiddleIrTypeInt",
             "MiddleIrTypeFloat",
             "MiddleIrTypeDouble",
-            "MiddleIrTypeX86Fp80",
-            "MiddleIrTypePpcFp128",
-            "MiddleIrTypeFp128",
+            #"MiddleIrTypeX86Fp80",
+            #"MiddleIrTypePpcFp128",
+            #"MiddleIrTypeFp128",
             "MiddleIrTypeFunction",
-            "MiddleIrTypeOpaque",
+            #"MiddleIrTypeOpaque",
             "MiddleIrTypeStruct",
-            "MiddleIrTypePackedStruct",
+            #"MiddleIrTypePackedStruct",
             "MiddleIrTypeArray",
             "MiddleIrTypePointer",
-            "MiddleIrTypeVector",
-            "MiddleIrTypeLabel",
+            #"MiddleIrTypeVector",
+            #"MiddleIrTypeLabel",
             "MiddleIrTypeVoid",
             "MiddleIrBaseType",
             ]
@@ -86,37 +86,37 @@ class MiddleIrTypeDouble(MiddleIrBaseType):
         super(MiddleIrTypeDouble, self).__init__(Type.double())
 
 
-class MiddleIrTypeX86Fp80(MiddleIrBaseType):
-    """Middle level intermediate representation class of 80-bit x86 floating
-    point type.
-    
-    """
-
-    def __init__(self):
-        """Initialize the instance."""
-        super(MiddleIrTypeX86Fp80, self).__init__(Type.x86_fp80())
-
-
-class MiddleIrTypeFp128(MiddleIrBaseType):
-    """Middle level intermediate representation class of 128-bit floating
-    point type (112-bit mantissa).
-    
-    """
-
-    def __init__(self):
-        """Initialize the instance."""
-        super(MiddleIrTypeFp128, self).__init__(Type.fp128())
-
-
-class MiddleIrTypePpcFp128(MiddleIrBaseType):
-    """Middle level intermediate representation class of 128-bit floating
-    point type (two 64-bits).
-    
-    """
-
-    def __init__(self):
-        """Initialize the instance."""
-        super(MiddleIrTypePpcFp128, self).__init__(Type.ppc_fp128())
+#class MiddleIrTypeX86Fp80(MiddleIrBaseType):
+#    """Middle level intermediate representation class of 80-bit x86 floating
+#    point type.
+#    
+#    """
+#
+#    def __init__(self):
+#        """Initialize the instance."""
+#        super(MiddleIrTypeX86Fp80, self).__init__(Type.x86_fp80())
+#
+#
+#class MiddleIrTypeFp128(MiddleIrBaseType):
+#    """Middle level intermediate representation class of 128-bit floating
+#    point type (112-bit mantissa).
+#    
+#    """
+#
+#    def __init__(self):
+#        """Initialize the instance."""
+#        super(MiddleIrTypeFp128, self).__init__(Type.fp128())
+#
+#
+#class MiddleIrTypePpcFp128(MiddleIrBaseType):
+#    """Middle level intermediate representation class of 128-bit floating
+#    point type (two 64-bits).
+#    
+#    """
+#
+#    def __init__(self):
+#        """Initialize the instance."""
+#        super(MiddleIrTypePpcFp128, self).__init__(Type.ppc_fp128())
 
 
 class MiddleIrTypeFunction(MiddleIrBaseType):
@@ -136,19 +136,19 @@ class MiddleIrTypeFunction(MiddleIrBaseType):
             )
 
 
-class MiddleIrTypeOpaque(MiddleIrBaseType):
-    """Middle level intermediate representation class of opaque struct type."""
-
-    def __init__(self, name):
-        """Initialize the instance."""
-        super(MiddleIrTypeOpaque, self).__init__(Type.opaque(name))
-
-    def set_body(self, body):
-        """Store opaque type body definition."""
-        self._ptr.set_body([body_element._ptr for body_element in body])
-
-        self.type = list(body)
-
+#class MiddleIrTypeOpaque(MiddleIrBaseType):
+#    """Middle level intermediate representation class of opaque struct type."""
+#
+#    def __init__(self, name):
+#        """Initialize the instance."""
+#        super(MiddleIrTypeOpaque, self).__init__(Type.opaque(name))
+#
+#    def set_body(self, body):
+#        """Store opaque type body definition."""
+#        self._ptr.set_body([body_element._ptr for body_element in body])
+#
+#        self.type = list(body)
+#
 class MiddleIrTypeStruct(MiddleIrBaseType):
     """Middle level intermediate representation class of unpacked struct type.
     
@@ -158,23 +158,23 @@ class MiddleIrTypeStruct(MiddleIrBaseType):
         """Initialize the instance."""
         element_types = [element._ptr for element in elements]
         super(MiddleIrTypeStruct, self).__init__(
-            Type.struct(element_types, name))
+            Type.struct(element_types))#, name)) #FIXME name is unused in LLVMLite?
 
         self.type = list(elements)
 
 
-class MiddleIrTypePackedStruct(MiddleIrBaseType):
-    """Middle level intermediate representation class of packed struct type."""
-
-    def __init__(self, elements, name=''):
-        """Initialize the instance."""
-        super(MiddleIrTypePackedStruct, self).__init__(
-            Type.packed_struct(
-                [element._ptr for element in elements],
-                name
-                )
-            )
-        self.type = list(elements)
+#class MiddleIrTypePackedStruct(MiddleIrBaseType):
+#    """Middle level intermediate representation class of packed struct type."""
+#
+#    def __init__(self, elements, name=''):
+#        """Initialize the instance."""
+#        super(MiddleIrTypePackedStruct, self).__init__(
+#            Type.packed_struct(
+#                [element._ptr for element in elements],
+#                name
+#                )
+#            )
+#        self.type = list(elements)
 
 
 class MiddleIrTypeArray(MiddleIrBaseType):
@@ -201,22 +201,22 @@ class MiddleIrTypePointer(MiddleIrBaseType):
             Type.pointer(pointee_type._ptr, addr_space))
 
 
-class MiddleIrTypeVector(MiddleIrBaseType):
-    """Middle level intermediate representation class of vector type."""
-
-    def __init__(self, element_ty, count):
-        """Initialize the instance."""
-        element_type = element_ty._ptr
-        super(MiddleIrTypeVector, self).__init__(Type.vector(element_type, count))
-
-
-class MiddleIrTypeLabel(MiddleIrBaseType):
-    """Middle level intermediate representation class of label type."""
-
-    def __init__(self):
-        """Initialize the instance."""
-        super(MiddleIrTypeLabel, self).__init__(Type.label())
-
+#class MiddleIrTypeVector(MiddleIrBaseType):
+#    """Middle level intermediate representation class of vector type."""
+#
+#    def __init__(self, element_ty, count):
+#        """Initialize the instance."""
+#        element_type = element_ty._ptr
+#        super(MiddleIrTypeVector, self).__init__(Type.vector(element_type, count))
+#
+#
+#class MiddleIrTypeLabel(MiddleIrBaseType):
+#    """Middle level intermediate representation class of label type."""
+#
+#    def __init__(self):
+#        """Initialize the instance."""
+#        super(MiddleIrTypeLabel, self).__init__(Type.label())
+#
 
 class MiddleIrTypeVoid(MiddleIrBaseType):
     """Middle level intermediate representation class of void type."""
