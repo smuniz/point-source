@@ -13,7 +13,7 @@ define i32 @test59(i32 %param1, i32 %param2) #0 {
   br label %3
 
 ; <label>:3                                       ; preds = %8, %0
-  %4 = load i32* %2, align 4
+  %4 = load i32, i32* %2, align 4
   %5 = icmp eq i32 %4, 5
   br i1 %5, label %6, label %7
 
@@ -25,19 +25,19 @@ define i32 @test59(i32 %param1, i32 %param2) #0 {
   br label %8
 
 ; <label>:8                                       ; preds = %7
-  %9 = load i32* %2, align 4
+  %9 = load i32, i32* %2, align 4
   %10 = icmp ne i32 %9, 0
   br i1 %10, label %3, label %11
 
 ; <label>:11                                      ; preds = %8, %6
-  %12 = load i32* %1, align 4
-  %13 = load i32* %2, align 4
+  %12 = load i32, i32* %1, align 4
+  %13 = load i32, i32* %2, align 4
   %14 = add nsw i32 %12, %13
   ret i32 %14
 }
 
-attributes #0 = { nounwind "less-precise-fpmad"="false" "no-frame-pointer-elim"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-realign-stack" "stack-protector-buffer-size"="8" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #0 = { nounwind "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "stack-protector-buffer-size"="8" "target-features"="+mmx,+sse,+sse2" "unsafe-fp-math"="false" "use-soft-float"="false" }
 
 !llvm.ident = !{!0}
 
-!0 = !{!"Ubuntu clang version 3.6.2-1 (tags/RELEASE_362/final) (based on LLVM 3.6.2)"}
+!0 = !{!"clang version 3.8.0-2ubuntu4 (tags/RELEASE_380/final)"}

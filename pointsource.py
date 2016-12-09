@@ -304,6 +304,7 @@ class PointSource(object):
             self.middle_end.perform_data_flow_analysis()
 
             self.middle_end.generate_output()
+            return
 
             #
             # C Back-end phase

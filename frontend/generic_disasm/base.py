@@ -160,15 +160,15 @@ class BaseDebugger(object):
         """Return the label for the specified address."""
         return
 
-    @abc.abstractmethod
-    def get_function_instructions_addresses(self, address):
-        """Obtain the list of every instruction address inside the current
-        function.
-        This includes addresses from instructions on chunk tails.
-
-        """
-        return
-
+#    @abc.abstractmethod
+#    def get_function_instructions_addresses(self, address):
+#        """Obtain the list of every instruction address inside the current
+#        function.
+#        This includes addresses from instructions on chunk tails.
+#
+#        """
+#        return
+#
     @abc.abstractmethod
     def get_instruction(self, address):
         """Return the instruction at the specified address."""
@@ -210,22 +210,16 @@ class BaseDebugger(object):
         return
 
     @abc.abstractmethod
-    def set_instruction_info(self, lir_inst, instruction):
-        """Obtain instruction and operand information from the current debugger
-        instance.
-
-        """
-        return
-
-    @abc.abstractmethod
     def log(self, message):
         """Display a line of text in the log window."""
         return
 
     @abc.abstractmethod
-    def _generate_lir(self, function_address):
+    def perform_control_flow_graph(self, function_address):
         """Analyze every instruction and operand and it's references in the
-        current function and generate a low level IR equivalent with them.
+        current function and generate a Low Level IR equivalent with them. Add
+        every instruction to the generated flow chart as part of the initial
+        CFG.
 
         This is specific to the disassembler engine where the decompiler is run
         into.
@@ -249,9 +243,11 @@ class BaseDebugger(object):
         # Get every instruction with it's operands and basic blocks
         # information and generate the Low level IR (aka LIR).
         #
-        lir_function = self._generate_lir(function_address)
+        lir_function = self.perform_control_flow_graph(function_address)
 
+        #
         # Update the cache with the newly created function.
+        #
         self._lir_cache[function_address] = lir_function
 
         if not lir_function.is_extern:

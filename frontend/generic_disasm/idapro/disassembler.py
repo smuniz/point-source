@@ -224,42 +224,42 @@ class Disassembler(BaseDebugger):
         """Return the label for the specified address."""
         return get_name(address, address)
 
-    def get_function_instructions_addresses(self, address):
-        """Obtain the list of every instruction address inside the current
-        function.
-
-        This includes addresses from instructions on chunk tails.
-
-        :param address: An address pertaining to the function.
-        """
-        function_instructions = list()  # Collecting function chunks
-
-        # Get the tail iterator
-        func_iter = func_tail_iterator_t(get_func(address))
-
-        # While the iterator status is valid
-        status = func_iter.main()
-
-        while status:
-            # Get the chunk
-            chunk = func_iter.chunk()
-
-            # Go through all instructions in the basic block
-            # and add their addresses to our list.
-            for head in Heads(chunk.startEA, chunk.endEA):
-                if isCode(getFlags(head)):
-                    function_instructions.append(head)
-
-            # Get the last status
-            status = func_iter.next()
-
-        return function_instructions
+#    def get_function_instructions_addresses(self, address):
+#        """Obtain the list of every instruction address inside the current
+#        function.
+#
+#        This includes addresses from instructions on chunk tails.
+#
+#        :param address: An address pertaining to the function.
+#        """
+#        function_instructions = list()  # Collecting function chunks
+#
+#        # Get the tail iterator
+#        func_iter = func_tail_iterator_t(get_func(address))
+#
+#        # While the iterator status is valid
+#        status = func_iter.main()
+#
+#        while status:
+#            # Get the chunk
+#            chunk = func_iter.chunk()
+#
+#            # Go through all instructions in the basic block
+#            # and add their addresses to our list.
+#            for head in Heads(chunk.startEA, chunk.endEA):
+#                if isCode(getFlags(head)):
+#                    function_instructions.append(head)
+#
+#            # Get the last status
+#            status = func_iter.next()
+#
+#        return function_instructions
 
     def get_instruction_length(self, address):
         """Return the length of the instruction at the specified address."""
         return decode_insn(address)
 
-    def set_operand_info(self, lir_op, op):
+    def __set_operand_info(self, lir_op, op):
         """Store operand information from the operands at the current
         instruction.
 
@@ -299,52 +299,57 @@ class Disassembler(BaseDebugger):
 
         return True
 
-    def get_instruction_operand(self, address, operand_index):
-        """Return the operand information in an instruction for the spedified
-        operand number.
-        
-        """
-        try:
-            inslen = decode_insn(address)
+    #def get_instruction_operand(self, address, operand_index):
+    #    """Return the operand information in an instruction for the spedified
+    #    operand number.
+    #    
+    #    """
+    #    try:
+    #        inslen = decode_insn(address)
 
-            if inslen == 0:
-                return None
+    #        if inslen == 0:
+    #            return None
 
-            #insn = get_current_instruction() # <- deprecated? comment by topo 2013
-            insn = cvar.cmd
+    #        #insn = get_current_instruction() # <- deprecated? comment by topo 2013
+    #        insn = cvar.cmd
 
-            if not insn:
-                return None
+    #        if not insn:
+    #            return None
 
-            op = get_instruction_operand(insn, operand_index)
+    #        op = get_instruction_operand(insn, operand_index)
 
-        except Exception, err:
-            inslen = decode_insn(address)
-            # inslen = decode_insn(lir_inst.ea) # Commented by topo 2013
+    #    except Exception, err:
+    #        inslen = decode_insn(address)
+    #        # inslen = decode_insn(lir_inst.ea) # Commented by topo 2013
 
-            if inslen == 0:
-                return None
+    #        if inslen == 0:
+    #            return None
 
-            op = cmd.Operands[operand_index]
+    #        op = cmd.Operands[operand_index]
 
-        return op
+    #    return op
 
-    def set_instruction_info(self, lir_inst, instruction):
+    def __set_instruction_info(self, lir_inst, raw_inst):
         """Obtain instruction and operand information from the current debugger
         instance.
 
         """
-        #lir_inst.is_macro = False #instruction.is_macro()
-        lir_inst.address = instruction.ea
-        lir_inst.type = instruction.itype
-        lir_inst.mnemonic = self.get_mnemonic(instruction.ea) if self._debug else None
+        # Make sure that both the LIR instruction and the decoded assembly
+        # instruction have the necessary information to proceed.
+        if not raw_inst or lir_inst is None:
+            return False
+
+        #lir_inst.is_macro = False #raw_inst.is_macro()
+        lir_inst.address = raw_inst.ea
+        lir_inst.type = raw_inst.itype
+        lir_inst.mnemonic = self.get_mnemonic(raw_inst.ea)
         lir_inst.group = self.get_group(lir_inst.type)
-        lir_inst._aux = instruction.auxpref
+        lir_inst._aux = raw_inst.auxpref
         lir_inst.features = [f_v for f_k, f_v in self.FEATURES_TRANSLATION.iteritems() \
-                    if f_k & instruction.get_canon_feature() == f_k]
+                    if f_k & raw_inst.get_canon_feature() == f_k]
 
         # Display instruction information obtained form IDA internals.
-        if False:
+        if self._debug:
             feature_str = ", ".join(
                 [f_v for f_k, f_v in self.FEATURES_STR.iteritems() \
                     if f_k in lir_inst.features])
@@ -353,18 +358,18 @@ class Disassembler(BaseDebugger):
                 lir_inst.address,
                 lir_inst.type,
                 lir_inst.mnemonic,
-                instruction.auxpref,
-                instruction.segpref,
-                instruction.insnpref,
-                instruction.flags,
+                raw_inst.auxpref,
+                raw_inst.segpref,
+                raw_inst.insnpref,
+                raw_inst.flags,
                 feature_str)
             print inst_str
 
         # Parse every operand present in the instruction being analyzed
         for operand_index in xrange(UA_MAXOP):
             #inst_operand = \
-            #    self.get_instruction_operand(instruction.ea, operand_index)
-            inst_operand = instruction.Operands[operand_index]
+            #    self.get_raw_inst_operand(raw_inst.ea, operand_index)
+            inst_operand = raw_inst.Operands[operand_index]
 
             if not inst_operand or inst_operand.type is o_void:
                 break
@@ -379,7 +384,7 @@ class Disassembler(BaseDebugger):
             #    (operand_index, inst_operand.n,
             #    inst_operand.type, inst_operand.value)
 
-            if not self.set_operand_info(lir_op, inst_operand):
+            if not self.__set_operand_info(lir_op, inst_operand):
                 break
 
             lir_inst.operands.append(lir_op)
@@ -388,7 +393,17 @@ class Disassembler(BaseDebugger):
 
     def get_instruction(self, address):
         """Return the instruction at the specified address."""
-        return DecodeInstruction(address)
+
+        raw_inst = DecodeInstruction(address)
+
+        lir_inst = LowLevelInstruction()
+
+        if not self.__set_instruction_info(lir_inst, raw_inst):
+            raise DisassemblerExceptior(
+                "Unable to store information for instruction at 0x%08X" % \
+                address)
+
+        return lir_inst
 
     def get_string(self, ea, length=None, strtype=STRING_TYPE_C):
         """Get string contents.
@@ -438,9 +453,11 @@ class Disassembler(BaseDebugger):
         """Display a line of text in the log window."""
         print str(message)
 
-    def _generate_lir(self, func_address):
+    def perform_control_flow_graph(self, func_address):
         """Analyze every instruction and operand and it's references in the
-        current function and generate a low level IR equivalent with them.
+        current function and generate a Low Level IR equivalent with them. Add
+        every instruction to the generated flow chart as part of the initial
+        CFG.
 
         """
         # Obtain function scope if available.
@@ -467,21 +484,24 @@ class Disassembler(BaseDebugger):
             lir_function.is_extern = True
             return lir_function
 
-        dones = {}
+        #
+        # Generate the CFG based on IDAs flow chart information.
+        #
         for basic_block in FlowChart(func):
+            #print dir(basic_block)
+            #print basic_block.succs()
+            #print basic_block.preds()
 
+            # Step 1 - Create a new basic block to host the corresponding
+            # instructions.
             ea = basic_block.startEA
             current_basic_block = LowLevelBasicBlock(ea)
 
             lir_function.add_basic_block(current_basic_block)
 
             for inst_ea in list(Heads(basic_block.startEA, basic_block.endEA)):
-                lir_inst = LowLevelInstruction()
 
-                if not self.set_instruction_info(lir_inst, self.get_instruction(inst_ea)):
-                    raise DisassemblerExceptior(
-                        "Unable to store information for instruction at 0x%08X" %
-                        ea)
+                lir_inst = self.get_instruction(inst_ea)
 
                 current_basic_block.add_instruction(inst_ea, lir_inst)
 

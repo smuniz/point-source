@@ -31,7 +31,6 @@ class MiddleEnd(object):
     def mir(self):
         """Return the intermediate level presentation ofthe current function
         being decompiled.
-        
         """
         return self.mir_module
 
@@ -39,16 +38,15 @@ class MiddleEnd(object):
     def mir(self, mir_module):
         """Store the intermediate level presentation ofthe current function
         being decompiled.
-        
         """
         self.mir_module = mir_module
 
     def perform_control_flow_analysis(self):
+        """Execute the Control Flow analysis and any post-analysis depending on
+        it.
         """
-        ...
-        """
-        # TODO: implement this
         print "[+] Initiating control flow analysis..."
+        # TODO: implement this
 
     def perform_data_flow_analysis(self):
         """
@@ -108,7 +106,6 @@ class MiddleEnd(object):
     def extract_registers_from_expression(self, expr):
         """Given the current expression, analyze it to obtain the operands in
         use.
-
         """
         """
         r_ops = []
@@ -137,8 +134,8 @@ class MiddleEnd(object):
     def generate_output(self):
         """Generate a debugging output with the UD and DU chains."""
         print "[+] Generating MIR representation..."
-        print self.mir
-        return
+        #print self.mir
+        #return
         # Create an output instance to display the current LLVM IR
         # representation hosted inside the MIR.
         mir_output = MirTextOutput(self.mir)
