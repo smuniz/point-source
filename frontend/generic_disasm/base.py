@@ -215,7 +215,7 @@ class BaseDebugger(object):
         return
 
     @abc.abstractmethod
-    def perform_control_flow_graph(self, function_address):
+    def perform_control_flow_graph_recovery(self, function_address):
         """Analyze every instruction and operand and it's references in the
         current function and generate a Low Level IR equivalent with them. Add
         every instruction to the generated flow chart as part of the initial
@@ -243,7 +243,7 @@ class BaseDebugger(object):
         # Get every instruction with it's operands and basic blocks
         # information and generate the Low level IR (aka LIR).
         #
-        lir_function = self.perform_control_flow_graph(function_address)
+        lir_function = self.perform_control_flow_graph_recovery(function_address)
 
         #
         # Update the cache with the newly created function.

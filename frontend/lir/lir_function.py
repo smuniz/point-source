@@ -340,7 +340,7 @@ class LowLevelFunction(MultiDiGraph):
         specified address.
         
         """
-
+        # TODO Fix this entire method
         #for lir_inst in self.__iterate_instructions():
         if forward:
             iterable_bb = self

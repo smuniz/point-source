@@ -453,7 +453,7 @@ class Disassembler(BaseDebugger):
         """Display a line of text in the log window."""
         print str(message)
 
-    def perform_control_flow_graph(self, func_address):
+    def perform_control_flow_graph_recovery(self, func_address):
         """Analyze every instruction and operand and it's references in the
         current function and generate a Low Level IR equivalent with them. Add
         every instruction to the generated flow chart as part of the initial
@@ -487,23 +487,47 @@ class Disassembler(BaseDebugger):
         #
         # Generate the CFG based on IDAs flow chart information.
         #
-        for basic_block in FlowChart(func):
-            #print dir(basic_block)
-            #print basic_block.succs()
-            #print basic_block.preds()
-
+        for bb_idx, basic_block in enumerate(FlowChart(func)):
             # Step 1 - Create a new basic block to host the corresponding
             # instructions.
-            ea = basic_block.startEA
-            current_basic_block = LowLevelBasicBlock(ea)
+            lir_basic_block = LowLevelBasicBlock(basic_block.startEA)
 
-            lir_function.add_basic_block(current_basic_block)
+            lir_function.add_basic_block(lir_basic_block)
 
+        for bb_idx, basic_block in enumerate(FlowChart(func)):
+            if self._debug:
+                print "-" * 20,
+                print "processing BB %d (type %d - ID %d) - 0x%08X" % (
+                        bb_idx, basic_block.type, basic_block.id,
+                        basic_block.startEA),
+                print "-" * 20
+                print "  Succs => %s" % [
+                    "0x%08X" % x.startEA for x in basic_block.succs()]
+                print "  Preds => %s" % [
+                    "0x%08X" % x.startEA for x in basic_block.preds()]
+
+            lir_basic_block = lir_function[basic_block.id]
+
+            # Step 2 - Add predecessors and successors information for dominance
+            # calculation later on.
+            if bb_idx > 0:
+                for bb_succ in basic_block.succs():
+                    # Let's take advantage of IDA's id matching our index.
+                    succ_lir_basic_block = lir_function[bb_succ.id]
+                    lir_basic_block.add_successor(succ_lir_basic_block)
+
+                for bb_pred in basic_block.preds():
+                    # Let's take advantage of IDA's id matching our index.
+                    pred_lir_basic_block = lir_function[bb_pred.id]
+                    lir_basic_block.add_predessor(pred_lir_basic_block)
+
+            # Step 3 - Iterate through every instruction present in the basic
+            # block and convert it to a LIR instruction for further processing.
             for inst_ea in list(Heads(basic_block.startEA, basic_block.endEA)):
 
                 lir_inst = self.get_instruction(inst_ea)
 
-                current_basic_block.add_instruction(inst_ea, lir_inst)
+                lir_basic_block.add_instruction(inst_ea, lir_inst)
 
         return lir_function
 

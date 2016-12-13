@@ -8,7 +8,7 @@ from multidigrah import MultiDiGraph, MultiDiGraphException
 
 
 class LowLevelBasicBlockException(MultiDiGraphException):
-    """Generic exceptino for the low-level basic block IR."""
+    """Generic exception for the low-level basic block IR."""
     pass
 
 
@@ -34,6 +34,25 @@ class LowLevelBasicBlock(MultiDiGraph):
         self.current = 0  # iterator counter
 
         self.function = None
+
+        self._successors = list() # List of successors
+        self._predecessors = list() # List of predecessors
+
+    def add_successor(self, bb):
+        """Add a successor basic block to the current one."""
+        if not isinstance(bb, LowLevelBasicBlock):
+            raise LowLevelBasicBlockException(
+                "Unable to add successor basic block of type %r" % \
+                type(bb))
+        self._successors.append(bb)
+
+    def add_predecessor(self, bb):
+        """Add a predecessor basic block to the current one."""
+        if not isinstance(bb, LowLevelBasicBlock):
+            raise LowLevelBasicBlockException(
+                "Unable to add predecessor basic block of type %r" % \
+                type(bb))
+        self._predecessors.append(bb)
 
     @property
     def function(self):
