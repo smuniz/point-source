@@ -28,7 +28,7 @@ class GraphOutputMedia(OutputMediaBase, idaapi.GraphViewer):
         self.ir = ir
 
     def OnRefresh(self):
-        self.Clear()
+        idaapi.GraphViewer.OnRefresh(self)
 
         try:
             line = 0
@@ -63,28 +63,16 @@ class GraphOutputMedia(OutputMediaBase, idaapi.GraphViewer):
                         idaapi.COLSTR(str(inst), idaapi.SCOLOR_INSN)
 
                     instructions_block.append(
-                        "%(str_address)s    %(str_inst)s" % vars())
+                        "%(str_address)s %(str_inst)s" % vars())
                     line += 1
 
                 nodes[block] = self.AddNode("\n".join(instructions_block))
 
-            #for block_key in nodes:
-            #    for edge in block_key.getInEdges():
-            #        self.AddEdge(edge, nodes[block_key])
-            #for bb, node in nodes.iteritems():
-            #    break
-            #    print type(bb), type(node)
-            #    print dir(bb)
-            #    self.AddEdge(1, 2)
-            print "@" * 80
             for idx, bb in enumerate(self.ir):
-                print idx, "*" * 80
-                #if idx == 0:
-                #    continue
                 for succ in bb.successors():
                     node_a = nodes[bb]
                     node_b = nodes[succ]
-                    print "Adding %s ---> %s" % (node_a, node_b)
+                    #print "Adding %s ---> %s" % (node_a, node_b)
                     self.AddEdge(node_a, node_b)
 
         except Exception, err:
