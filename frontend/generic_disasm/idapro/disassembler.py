@@ -1,5 +1,5 @@
 # 
-# Copyright (c) 2013 Sebastian Muniz
+# Copyright (c) 2017 Sebastian Muniz
 # 
 # This code is part of point source decompiler
 #
@@ -497,7 +497,7 @@ class Disassembler(BaseDebugger):
         for bb_idx, basic_block in enumerate(FlowChart(func)):
             if self._debug:
                 print "-" * 20,
-                print "processing BB %d (type %d - ID %d) - 0x%08X" % (
+                print "Processing BB %d (type %d - ID %d) - 0x%08X" % (
                         bb_idx, basic_block.type, basic_block.id,
                         basic_block.startEA),
                 print "-" * 20
