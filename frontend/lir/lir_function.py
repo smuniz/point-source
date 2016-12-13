@@ -206,6 +206,8 @@ class LowLevelFunction(MultiDiGraph):
         #
         #function_repr += "\n".join([str(basic_block) for basic_block in self])
         for basic_block in self:
+            bb_id = "# Basic Block : %d" % basic_block.id
+            function_repr += bb_id + "\n"
             for inst in basic_block:
 
                 if inst.address in self.prologue_addresses:

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # 
-# Copyright (c) 2016 Sebastian Muniz
+# Copyright (c) 2017 Sebastian Muniz
 # 
 # This code is part of point source decompiler
 #
@@ -293,6 +293,9 @@ class PointSource(object):
 
             self.front_end.analyze(self.function_address)
 
+            #self.front_end.generate_output()
+            return
+
             #
             # Middle-end phase
             #
@@ -304,7 +307,6 @@ class PointSource(object):
             self.middle_end.perform_data_flow_analysis()
 
             self.middle_end.generate_output()
-            return
 
             #
             # C Back-end phase

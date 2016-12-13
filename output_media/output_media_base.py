@@ -1,5 +1,5 @@
 # 
-# Copyright (c) 2013 Sebastian Muniz
+# Copyright (c) 2017 Sebastian Muniz
 # 
 # This code is part of point source decompiler
 #
@@ -14,6 +14,9 @@ class OutputMediaBaseException(Exception):
 class OutputMediaBase(object):
     """Base class for all the outputting classes for every supported media."""
     __metaclass__ = abc.ABCMeta
+
+    def __init__(self):
+        self.debug = True
 
     @abc.abstractmethod
     def generate_output(self, title):

@@ -3,10 +3,13 @@
 # 
 # This code is part of point source decompiler
 #
-
+from traceback import format_exc
 from output_media.output_media_base import OutputMediaBase
 
-import idaapi
+try:
+    import idaapi
+except ImportError, err:
+    raise OutputMediaBaseException("TextOutputMedia only available under IDA")
 
 
 class GraphOutputMediaException(Exception):
@@ -19,64 +22,119 @@ class GraphOutputMedia(OutputMediaBase, idaapi.GraphViewer):
     appropiately and perform callbacks if applicable.
     """
 
-    def __init__(self):
+    def __init__(self, ir):
         OutputMediaBase.__init__(self)
-        idaapi.GraphViewer.__init__(self, "Decompiled function call graph")
+        idaapi.GraphViewer.__init__(self, "Function Graph")
+        self.ir = ir
 
     def OnRefresh(self):
         self.Clear()
 
         try:
-            line        = 0
-            nodes       = dict()
+            line = 0
+            nodes = dict()
 
             for block in self.ir:
 
-                instructions_block = ""
+                instructions_block = list()
 
-                if block.hasLabel():
-                    instructions_block += "%s\n\n" % block.getLabel()
+                #if block.hasLabel():
+                #    instructions_block.append("%s\n\n" % block.getLabel()
 
-                if self.ir.getBlockIndex(block) == 0:
-                    instructions_block += self.generateFunctionOpening()
+                #if self.ir.getBlockIndex(block) == 0:
+                #    instructions_block.append(self.generateFunctionOpening()
 
-                for stmt in block:
+                #for stmt in block:
+                for inst in block:
 
-                    if stmt.wasRemoved():
-                        continue
+                    inst_line = ""
+                    #if stmt.wasRemoved():
+                    #    continue
 
-                    inst = stmt.get()
-                    if isinstance(inst, GotoStatement):
-                        continue
+                    #inst = stmt.get()
+                    #if isinstance(inst, GotoStatement):
+                    #    continue
 
-                    line                += 1
-                    instructions_block  += "%(line)2d: %(inst)s;\n" % vars()
+                    str_address = "%08X:%03X" % (inst.address, line)
+                    str_address = \
+                        idaapi.COLSTR(str_address, idaapi.SCOLOR_ASMDIR)
 
-                nodes[block] = self.AddNode(instructions_block)
+                    str_inst = \
+                        idaapi.COLSTR(str(inst), idaapi.SCOLOR_INSN)
 
-            for block_key in nodes:
-                for edge in block_key.getInEdges():
-                    self.AddEdge(edge, nodes[block_key])
+                    instructions_block.append(
+                        "%(str_address)s    %(str_inst)s" % vars())
+                    line += 1
+
+                nodes[block] = self.AddNode("\n".join(instructions_block))
+
+            #for block_key in nodes:
+            #    for edge in block_key.getInEdges():
+            #        self.AddEdge(edge, nodes[block_key])
+            #for bb, node in nodes.iteritems():
+            #    break
+            #    print type(bb), type(node)
+            #    print dir(bb)
+            #    self.AddEdge(1, 2)
+            print "@" * 80
+            for idx, bb in enumerate(self.ir):
+                print idx, "*" * 80
+                #if idx == 0:
+                #    continue
+                for succ in bb.successors():
+                    node_a = nodes[bb]
+                    node_b = nodes[succ]
+                    print "Adding %s ---> %s" % (node_a, node_b)
+                    self.AddEdge(node_a, node_b)
 
         except Exception, err:
-            from traceback      import format_exc
-            print format_exc() + "\n"
-            pass
+            if self.debug:
+                print format_exc()
 
         return True
 
     def OnGetText(self, node_id):
         return str(self[node_id])
 
-    def generate_output(self):
-        """
-        Generate C-like readble output in a graph window.
-        """
-        #self._title = "Call graph of %s" % self.getMir().getName()
-        self.Show()
+    def generate_output(self, title):
+        """Generate graph output in a new IDA view window."""
+        self.title = title
+
+        crea = self.create()
+
+        if not crea:
+            self.clear()
+            #self.add_line("hola manola")
+            #self.show()
+        else:
+            #print "1 OK..."
+            pass
+
+        self.show()
+
         #self.cmd_id = self.AddCommand("matanga", "r")
         #print "----->", self.cmd_id
         return True
+
+    def close(self):
+        """Close the current window."""
+        self.Close()
+
+    def create(self):
+        """Create the new window with the specified title."""
+        #if not self.Create(self.title):
+        #    #raise TextOutputMediaException("Unable to create custom viewer")
+        #    return False
+        #return True
+        return False
+
+    def clear(self):
+        """Clear the window content."""
+        self.Clear()
+
+    def show(self):
+        """Display the window inside the current application."""
+        self.Show()
 
     def OnCommand(self, cmd_id):
         """
@@ -88,24 +146,24 @@ class GraphOutputMedia(OutputMediaBase, idaapi.GraphViewer):
         print "clicked on", self[node_id]
 
     def OnSelect(self, node_id):
-        """
-        Triggered when a node is being selected
+        """Triggered when a node is being selected
+
         @return: Return True to allow the node to be selected or False to disallow node selection change
         """
         # allow selection change
         print "selected node", node_id
         return True
 
-    def generateFunctionOpening(self):
-
-        ret_type    = self.ir.getReturnType()
-        call_conv   = self.ir.getCallingConvention()
-        func_name   = self.ir.getName()
-        params      = ",".join( \
-                        [" ".join(param) for param in self.ir.getParamter()])
-
-        func_opening  = "%(ret_type)s %(call_conv)s %(func_name)s ( %(params)s)\n\n"
-        func_opening %= vars()
-
-        return func_opening
-
+#    def generateFunctionOpening(self):
+#
+#        ret_type    = self.ir.getReturnType()
+#        call_conv   = self.ir.getCallingConvention()
+#        func_name   = self.ir.getName()
+#        params      = ",".join( \
+#                        [" ".join(param) for param in self.ir.getParamter()])
+#
+#        func_opening  = "%(ret_type)s %(call_conv)s %(func_name)s ( %(params)s)\n\n"
+#        func_opening %= vars()
+#
+#        return func_opening
+#

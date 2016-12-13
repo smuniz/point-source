@@ -490,7 +490,8 @@ class Disassembler(BaseDebugger):
         for bb_idx, basic_block in enumerate(FlowChart(func)):
             # Step 1 - Create a new basic block to host the corresponding
             # instructions.
-            lir_basic_block = LowLevelBasicBlock(basic_block.startEA)
+            lir_basic_block = LowLevelBasicBlock(
+                basic_block.startEA, _id=basic_block.id)
 
             lir_function.add_basic_block(lir_basic_block)
 

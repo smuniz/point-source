@@ -1,16 +1,18 @@
 # 
-# Copyright (c) 2013 Sebastian Muniz
+# Copyright (c) 2017 Sebastian Muniz
 # 
 # This code is part of point source decompiler
 #
-
-import idaapi
 
 import abc
 from traceback import format_exc
 from output_media.output_media_base import OutputMediaBase, \
     OutputMediaBaseException
 
+try:
+    import idaapi
+except ImportError, err:
+    raise OutputMediaBaseException("TextOutputMedia only available under IDA")
 
 class TextOutputMediaException(OutputMediaBaseException):
     """Generic exception for text output media."""
@@ -59,7 +61,8 @@ class TextOutputMedia(OutputMediaBase, idaapi.simplecustviewer_t):
             #self.refresh()
 
         except Exception, err:
-            print format_exc()
+            if self.debug:
+                print format_exc()
             self.close()
             raise TextOutputMediaException(
                 "Error creating viewer called \"%s\"" % title)

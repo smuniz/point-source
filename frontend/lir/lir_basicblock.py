@@ -18,7 +18,7 @@ class LowLevelBasicBlock(MultiDiGraph):
 
     """
 
-    def __init__(self, start_address=None, end_address=None):
+    def __init__(self, start_address=None, end_address=None, _id=None):
         """Instance initialization."""
         # Initialize graph.
         super(LowLevelBasicBlock, self).__init__()
@@ -37,6 +37,26 @@ class LowLevelBasicBlock(MultiDiGraph):
 
         self._successors = list() # List of successors
         self._predecessors = list() # List of predecessors
+
+        self.id = _id
+
+    @property
+    def id(self):
+        """Indicate the current basic block ID."""
+        return self._id
+
+    @id.setter
+    def id(self, _id):
+        """Store the current basic block ID."""
+        self._id = _id
+
+    def successors(self):
+        """"Return a list of every successor stored."""
+        return self._successors
+
+    def predecessors(self):
+        """"Return a list of every predecessor stored."""
+        return self._predecessors
 
     def add_successor(self, bb):
         """Add a successor basic block to the current one."""

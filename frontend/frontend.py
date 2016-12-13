@@ -12,6 +12,10 @@ from idioms import IdiomAnalyzerException
 
 from misc.prerequisites import require
 
+#reload(output_media.graph_output_media)
+require("output_media.graph_output_media.graph_output_media")
+from output_media.graph_output_media.graph_output_media import GraphOutputMedia
+
 ##reload(frontend.generic_disasm.base)
 #require("frontend.generic_disasm.base")
 #from frontend.generic_disasm.base import BaseDebuggerException
@@ -423,10 +427,6 @@ class FrontEnd(object):
 
                 self.mir_function[lir_bb_idx].add_in_edge(bblock_index)
 
-    def __dump_lir(self):
-        """Dump the current LIR function to the debugger output."""
-        print "[+] LIR representation:\n%s" % self.lir_function
-
     def analyze(self, func_address, depth=0):
         """Start the analysis phase by gathering information about all the
         instructions contained inside the function being analyzed and also
@@ -512,7 +512,7 @@ class FrontEnd(object):
                 self.lir_function, self.mir_function, self.symbols_manager)
 
             # Output LIR for debugging purposes.
-            self.__dump_lir()
+            self.generate_output(True)
 
             #
             # Step x
@@ -854,3 +854,15 @@ class FrontEnd(object):
             print "X" * 80
             print format_exc()
         return False
+
+    def generate_output(self, graph_view=False):
+        """Dump the current LIR function to the debugger output."""
+        print "[+] Generating LIR representation..."
+        if not graph_view:
+            print self.lir_function
+        else:
+            print self.lir_function
+            lir_output = GraphOutputMedia(self.lir_function)
+            lir_output.generate_output("Low Level IR output")
+
+
