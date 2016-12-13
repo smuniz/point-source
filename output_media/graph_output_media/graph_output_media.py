@@ -131,7 +131,7 @@ class GraphOutputMedia(OutputMediaBase, idaapi.GraphViewer):
         print "command:", cmd_id
 
     def OnClick(self, node_id):
-        print "clicked on", self[node_id]
+        print "clicked on node %d" % node_id
 
     def OnSelect(self, node_id):
         """Triggered when a node is being selected
@@ -141,17 +141,3 @@ class GraphOutputMedia(OutputMediaBase, idaapi.GraphViewer):
         # allow selection change
         print "selected node", node_id
         return True
-
-#    def generateFunctionOpening(self):
-#
-#        ret_type    = self.ir.getReturnType()
-#        call_conv   = self.ir.getCallingConvention()
-#        func_name   = self.ir.getName()
-#        params      = ",".join( \
-#                        [" ".join(param) for param in self.ir.getParamter()])
-#
-#        func_opening  = "%(ret_type)s %(call_conv)s %(func_name)s ( %(params)s)\n\n"
-#        func_opening %= vars()
-#
-#        return func_opening
-#
