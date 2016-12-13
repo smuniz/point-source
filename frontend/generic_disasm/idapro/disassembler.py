@@ -510,16 +510,15 @@ class Disassembler(BaseDebugger):
 
             # Step 2 - Add predecessors and successors information for dominance
             # calculation later on.
-            if bb_idx > 0:
-                for bb_succ in basic_block.succs():
-                    # Let's take advantage of IDA's id matching our index.
-                    succ_lir_basic_block = lir_function[bb_succ.id]
-                    lir_basic_block.add_successor(succ_lir_basic_block)
+            for bb_succ in basic_block.succs():
+                # Let's take advantage of IDA's id matching our index.
+                succ_lir_basic_block = lir_function[bb_succ.id]
 
-                for bb_pred in basic_block.preds():
-                    # Let's take advantage of IDA's id matching our index.
-                    pred_lir_basic_block = lir_function[bb_pred.id]
-                    lir_basic_block.add_predessor(pred_lir_basic_block)
+                lir_basic_block.add_successor(succ_lir_basic_block)
+
+                # Now add the basic blocks in inverted order to set the
+                # predecessor relation between nodes.
+                succ_lir_basic_block.add_predecessor(lir_basic_block)
 
             # Step 3 - Iterate through every instruction present in the basic
             # block and convert it to a LIR instruction for further processing.
