@@ -627,10 +627,10 @@ class FrontEnd(object):
                     print "[+] Skipping live analysis for callee 0x%X" % \
                         lir_callee.start_address
 
-    @abc.abstractmethod
-    def analyze_callee(self, callee_address):
-        """Analyze the callee function by performing a live analysis on it."""
-        return
+    #@abc.abstractmethod
+    #def analyze_callee(self, callee_address):
+    #    """Analyze the callee function by performing a live analysis on it."""
+    #    return
 
     @abc.abstractmethod
     def _extract_callee_address(self, lir_inst):

@@ -198,16 +198,19 @@ class LowLevelFunction(MultiDiGraph):
 
     def __str__(self):
         """Return the function string representation."""
-        function_repr = "# " + " S U B R O U T I N E ".center(70, "=")
+        function_repr = "# " + " S U B R O U T I N E ".center(80, "=")
         function_repr += "\n        .globl %s\n\n" % self.name
 
         #
-        # Get all the basic blocks inside this function.
+        # Process all the basic blocks and their corresponging instructions
+        # inside the current function.
         #
-        #function_repr += "\n".join([str(basic_block) for basic_block in self])
         for basic_block in self:
-            bb_id = "# Basic Block : %d" % basic_block.id
-            function_repr += bb_id + "\n"
+            # Create a small separation between basic blocks
+            str_head = " Basic Block : %d " % basic_block.id
+            function_repr += "#" + str_head.center(78, "-") + "\n"
+
+            # Print every instruction in the basic block.
             for inst in basic_block:
 
                 if inst.address in self.prologue_addresses:
@@ -235,7 +238,7 @@ class LowLevelFunction(MultiDiGraph):
                     )
             function_repr += "\n"
 
-        function_repr += "\n# " + ("=" * 70)
+        function_repr += "\n# " + ("=" * 78)
 
         return function_repr
 

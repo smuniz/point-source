@@ -46,16 +46,22 @@ class FrontEndMips(FrontEnd):
 
     def _extract_callee_address(self, lir_inst):
         """Return the callee address from a call instruction, if any."""
-        if not self.is_call_instruction(lir_inst):
+        if not self.idiom_analyzer.is_call_instruction(lir_inst):
             return None
 
-        if len(lir_inst) == 1:
-            return lir_inst[0].value
+        # FIXME This was copied from PPC without any testing... check it
+        #if len(lir_inst) == 1:
+        #    return lir_inst[0].value
 
         return None
 
-    def analyze_callee(self, callee_address):
-        """Analyze the callee function by performing a live analysis on it."""
-        lir_function = self.debugger.generate_lir(callee_address)
-        #print lir_function
-        return lir_function
+    #def analyze_callee(self, callee_address):
+    #    """Analyze the callee function by performing a live analysis on it."""
+    #    lir_function = self.debugger.generate_lir(callee_address)
+    #    #print lir_function
+    #    return lir_function
+
+    def _is_stack_destination(self, lir_inst):
+        """Check that destination of the operation is the stack."""
+        # TODO
+        return False

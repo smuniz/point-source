@@ -28,6 +28,13 @@ class MipsGccIdiomAnalyzer(IdiomAnalyzer):
         super(MipsGccIdiomAnalyzer, self).init(
             lir_function, mir_function, symbol_tables)
 
+    def perform_phase0_analysis(self):
+        """Execute the most basic idiom analysis on current function previous
+        to every other major analysis.
+
+        """
+        print "[-] Warning: perform_phase0_analysis() is empty"
+
     def perform_phase1_analysis(self):
         """
         Execute the basic idiom analysis on current function previous to MIR
@@ -43,3 +50,33 @@ class MipsGccIdiomAnalyzer(IdiomAnalyzer):
 
         """
         print "[-] Warning: perform_phase2_analysis() is empty"
+
+    def detect_epilogue(self):
+        """Check wheater the function epilogue is present or not."""
+        # FIXME
+        pass
+
+    def detect_prologue(self):
+        # FIXME
+        pass
+
+    def detect_unoptimized_code_sequences(self):
+        # FIXME
+        pass
+
+    def guess_compiler_type(self):
+        # FIXME
+        return False
+
+    def is_call_instruction(self, lir_inst):
+        # FIXME
+        return False
+
+    def detect_calling_convention(self):
+        """Obtain the calling convention detected by the compiler."""
+        # FIXME: Detect calling convention.
+        print "    Calling convention: %s" % \
+            self.mir_function.calling_convention_name
+
+        return True
+

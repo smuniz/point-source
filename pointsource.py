@@ -243,10 +243,11 @@ class PointSource(object):
             arch_name = self.debugger.architecture_name
             factory = FrontEndFactory(self.debugger)
             frontend_method = "create_%(arch_name)s" % vars()
+            print "->", frontend_method
 
             if not hasattr(factory, frontend_method):
                 raise PointSourceException(
-                    "Unsupported architecture (%s)." % arch_name)
+                    "Front-end unavailable for %s architecture." % arch_name)
 
             self.front_end_type = getattr(factory, frontend_method)
 

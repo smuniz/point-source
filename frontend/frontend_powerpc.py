@@ -656,12 +656,12 @@ class FrontEndPowerPc(FrontEnd):
 
         return None
 
-    def analyze_callee(self, callee_address):
-        """Analyze the callee function by performing a live analysis on it."""
-        print "-=-==-=-=-=-=-=--=>>>>>>> 0x%X" % callee_address
-        lir_function = self.debugger.generate_lir(callee_address)
-        #print lir_function
-        return lir_function
+    #def analyze_callee(self, callee_address):
+    #    """Analyze the callee function by performing a live analysis on it."""
+    #    print "-=-==-=-=-=-=-=--=>>>>>>> 0x%X" % callee_address
+    #    lir_function = self.debugger.generate_lir(callee_address)
+    #    #print lir_function
+    #    return lir_function
 
     def _is_stack_destination(self, lir_inst):
         """Check that destination of the operation is the stack."""
