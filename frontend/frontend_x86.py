@@ -1,4 +1,4 @@
-# 
+#nux-gnu-gcc src/test0.c -c -o x86 
 # Copyright (c) 2017 Sebastian Muniz
 # 
 # This code is part of point source decompiler

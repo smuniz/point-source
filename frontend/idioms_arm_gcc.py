@@ -17,7 +17,7 @@ class ArmGccIdiomAnalyzerException(IdiomAnalyzerException):
 
 
 class ArmGccIdiomAnalyzer(IdiomAnalyzer):
-    """Support for arm specific idioms analyzer."""
+    """Support for ARM GCC specific idioms analyzer."""
 
     def __init__(self, debugger):
         """Initialize idiom analyzer for the ARM architecture."""

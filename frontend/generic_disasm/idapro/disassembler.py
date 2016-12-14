@@ -147,8 +147,14 @@ class Disassembler(BaseDebugger):
         elif architecture is ARM_ARCH:
             import arm as current_arch
 
+        elif architecture is AARCH64_ARCH:
+            import aarch64 as current_arch
+
         elif architecture is X86_ARCH:
             import x86 as current_arch
+
+        elif architecture is X86_64_ARCH:
+            import x86_64 as current_arch
 
         self.current_arch = current_arch
         self.instruction_set = current_arch.InstructionSet()
@@ -177,6 +183,15 @@ class Disassembler(BaseDebugger):
     @property
     def architecture(self):
         """Return the current architecture in use."""
+        info = get_inf_structure()
+
+        if info.is_64bit():
+            bits = 64
+        elif info.is_32bit():
+            bits = 32
+        else:
+            bits = 16
+
         processor_name = get_idp_name()
 
         # Convert IDA architectures IDs to our own.
@@ -185,12 +200,18 @@ class Disassembler(BaseDebugger):
         elif processor_name == "mips":
             return MIPS_ARCH
         elif processor_name == "arm":
-            return ARM_ARCH
+            if bits == 64:
+                return AARCH64_ARCH
+            elif bits == 32:
+                return ARM_ARCH
         elif processor_name == "pc":
-            return X86_ARCH
+            if bits == 64:
+                return X86_64_ARCH
+            elif bits == 32:
+                return X86_ARCH
 
         raise DisassemblerException(
-            "Unsupported architecture %s" % processor_name)
+            "Unsupported architecture %s %dbits" % (processor_name, bits))
 
     def get_input_file(self):
         """Return the name of the file being disassembled."""
@@ -399,7 +420,7 @@ class Disassembler(BaseDebugger):
         lir_inst = LowLevelInstruction()
 
         if not self.__set_instruction_info(lir_inst, raw_inst):
-            raise DisassemblerExceptior(
+            raise DisassemblerException(
                 "Unable to store information for instruction at 0x%08X" % \
                 address)
 

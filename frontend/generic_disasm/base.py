@@ -11,14 +11,16 @@ __all__ = ["BaseDebugger",
            "PPC_ARCH",
            "MIPS_ARCH",
            "ARM_ARCH",
+           "AARCH64_ARCH",
            "X86_ARCH",
            "X86_64_ARCH"]
 
 PPC_ARCH = 0
 MIPS_ARCH = 1
 ARM_ARCH = 2
-X86_ARCH = 3
-X86_64_ARCH = 4
+AARCH64_ARCH = 3
+X86_ARCH = 4
+X86_64_ARCH = 5
 
 #
 # Keep track of every LIR function represented in LIR form so when one is
