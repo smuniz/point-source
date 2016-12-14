@@ -11,22 +11,29 @@ from idioms import IdiomAnalyzer, IdiomAnalyzerException
 from middleend.mir import *
 
 
-class AArh64GccIdiomAnalyzerException(IdiomAnalyzerException):
-    """Generic exception for idioms analyzer on AArh64 architecture."""
+class AArch64GccIdiomAnalyzerException(IdiomAnalyzerException):
+    """Generic exception for idioms analyzer on AArch64 architecture."""
     pass
 
 
-class AArh64GccIdiomAnalyzer(IdiomAnalyzer):
+class AArch64GccIdiomAnalyzer(IdiomAnalyzer):
     """Support for AArch64 (ARM 64-bits) GCC specific idioms analyzer."""
 
     def __init__(self, debugger):
         """Initialize idiom analyzer for the AArch64 architecture."""
-        super(AArh64GccIdiomAnalyzer, self).__init__(debugger)
+        super(AArch64GccIdiomAnalyzer, self).__init__(debugger)
 
     def init(self, lir_function, mir_function, symbol_tables):
         """Clean any internal state and setup everything for new analysis."""
-        super(AArh64GccIdiomAnalyzer, self).init(
+        super(AArch64GccIdiomAnalyzer, self).init(
             lir_function, mir_function, symbol_tables)
+
+    def perform_phase0_analysis(self):
+        """Execute the most basic idiom analysis on current function previous
+        to every other major analysis.
+
+        """
+        print "[-] Warning: perform_phase0_analysis() is empty"
 
     def perform_phase1_analysis(self):
         """
@@ -43,3 +50,33 @@ class AArh64GccIdiomAnalyzer(IdiomAnalyzer):
 
         """
         print "[-] Warning: perform_phase2_analysis() is empty"
+
+    def detect_epilogue(self):
+        """Check wheater the function epilogue is present or not."""
+        # FIXME
+        pass
+
+    def detect_prologue(self):
+        # FIXME
+        pass
+
+    def detect_unoptimized_code_sequences(self):
+        # FIXME
+        pass
+
+    def guess_compiler_type(self):
+        # FIXME
+        return False
+
+    def is_call_instruction(self, lir_inst):
+        # FIXME
+        return False
+
+    def detect_calling_convention(self):
+        """Obtain the calling convention detected by the compiler."""
+        # FIXME: Detect calling convention.
+        print "    Calling convention: %s" % \
+            self.mir_function.calling_convention_name
+
+        return True
+

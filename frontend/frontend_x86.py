@@ -6,10 +6,9 @@
 
 from frontend import FrontEnd
 
-#import idioms_x86_gcc
-#reload(idioms_x86_gcc)
+import idioms_x86_gcc
+reload(idioms_x86_gcc)
 from idioms_x86_gcc import X86GccIdiomAnalyzer
-from misc.prerequisites import require
 
 # Import MIR related modules
 from middleend.mir import *
@@ -45,3 +44,25 @@ class FrontEndX86(FrontEnd):
     def on_unknown(self, lir_inst):
         """Handle unknown Low level IR instructions."""
         return None
+
+    def _extract_callee_address(self, lir_inst):
+        """Return the callee address from a call instruction, if any."""
+        if not self.idiom_analyzer.is_call_instruction(lir_inst):
+            return None
+
+        # FIXME This was copied from PPC without any testing... check it
+        #if len(lir_inst) == 1:
+        #    return lir_inst[0].value
+
+        return None
+
+    #def analyze_callee(self, callee_address):
+    #    """Analyze the callee function by performing a live analysis on it."""
+    #    lir_function = self.debugger.generate_lir(callee_address)
+    #    #print lir_function
+    #    return lir_function
+
+    def _is_stack_destination(self, lir_inst):
+        """Check that destination of the operation is the stack."""
+        # TODO
+        return False
