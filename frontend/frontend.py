@@ -764,7 +764,7 @@ class FrontEnd(object):
 
         avail_conversions = self.conversion_table.get(dest_type_key, None)
 
-        print "Convertion available (key %s) for %s -> %s: %s" % (
+        print "Conversion available (key %s) for %s -> %s: %s" % (
             dest_type_key,
             self._class_name(mir_src_param), 
             self._class_name(mir_dst_param), 
