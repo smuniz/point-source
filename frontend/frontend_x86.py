@@ -1,14 +1,10 @@
-#nux-gnu-gcc src/test0.c -c -o x86 
+#
 # Copyright (c) 2017 Sebastian Muniz
 # 
 # This code is part of point source decompiler
 #
 
 from frontend import FrontEnd
-
-import idioms_x86_gcc
-reload(idioms_x86_gcc)
-from idioms_x86_gcc import X86GccIdiomAnalyzer
 
 # Import MIR related modules
 from middleend.mir import *
@@ -27,7 +23,7 @@ class FrontEndX86(FrontEnd):
 
     def __init__(self, debugger):
         """Perform X86 front-end instance initialization."""
-        FrontEnd.__init__(self, X86GccIdiomAnalyzer, debugger)
+        super(FrontEndX86, self).__init__(debugger)
 
     def on_assignment(self, lir_inst):
         """Handle Low level IR assignment instructions."""

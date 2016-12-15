@@ -6,6 +6,8 @@
 import abc
 from traceback import format_exc
 
+import actionplan
+reload(actionplan)
 from actionplan import Action, ActionPlan, ActionPlanException
 
 from idioms import IdiomAnalyzerException
@@ -19,6 +21,14 @@ from output_media.graph_output_media.graph_output_media import GraphOutputMedia
 ##reload(frontend.generic_disasm.base)
 #require("frontend.generic_disasm.base")
 #from frontend.generic_disasm.base import BaseDebuggerException
+
+#reload(frontend.idioms_factory)
+require("frontend.idioms_factory")
+from idioms_factory import IdiomsFactory, IdiomsFactoryException
+
+#
+# ############################# Middle-End ####################################
+#
 
 #reload(middleend.mir_exception)
 require("middleend.mir_exception")
@@ -74,7 +84,7 @@ class FrontEnd(object):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, idiom_analyzer_type, debugger):
+    def __init__(self, debugger):
         """Perform base front-end instance initialization."""
         # Debug flag for verbose output (useful during development).
         self.debug = True
@@ -108,11 +118,6 @@ class FrontEnd(object):
         #
         self.mir_module = MiddleIrModule.new(self.debugger.get_input_file())
 
-        # Set the module in charge of idiom analysis.
-        # Invoke the appropriate idiom analyzer for the current architecture.
-        #
-        self.idiom_analyzer = idiom_analyzer_type(self.debugger)
-
         # Setup symbol table for local/global variables references, etc..
         self.symbols_manager = None
 
@@ -125,6 +130,105 @@ class FrontEnd(object):
         # This dictionary contains all the LIR function analyzed during this
         # run to avoid wasting resources by analyzing the same function twice.
         self.lir_functions_cache = dict()
+
+        # And last but not least set the module in charge of idiom analysis.
+        # Invoke the appropriate idiom analyzer for the current architecture
+        # based on the detected compiler.
+        #
+        if not self.detect_compiler():
+            raise FrontEndException(
+                "Unable to detect current compiler to initialize idiom analyzer.")
+
+        compiler_name = self.debugger.get_compiler_name(self.compiler)
+        compiler_name = "GCC"
+        print "    Compiler detected: %s" % compiler_name
+
+        # Now if the current compiler was detected then we instantiate the
+        # specific idiom analyzer for it.
+        try:
+            arch_name = self.debugger.architecture_name
+            factory = IdiomsFactory(self.debugger)
+            idioms_method = "create_%(compiler_name)s_%(arch_name)s" % vars()
+
+            if not hasattr(factory, idioms_method):
+                raise FrontEndException(
+                    "Idioms unavailable for compiler %s under %s architecture." % (
+                    compiler_name, arch_name))
+
+            print "@" * 80
+            print idioms_method
+            idiom_analyzer_type = getattr(factory, idioms_method)
+
+        except IdiomsFactoryException, err :
+            raise FrontEndException(
+                "Unable to detect architecture (%(arch_name)s) : %(err)s" % \
+                vars())
+
+            #raise FrontEndException("Non-GNU compilers not supported.")
+
+        self.idiom_analyzer = idiom_analyzer_type(self.debugger)
+
+    def detect_compiler(self):
+        """Obtain the name and type of the compiler used to generate the code
+        being analyzed.
+
+        In case the compiler is unknown to the debugger, try to guess it.
+
+        """
+        print "Detecting compiler..."
+
+        # Let the debugger try first and check if the compiler was successfully
+        # detected.
+        self.compiler = self.debugger.get_default_compiler()
+
+        if not self.is_compiler_unknown:
+            return True
+
+        # Try to guess the compiler when the debugger cannot provide such
+        # information.
+        return self.guess_compiler_type()
+
+    @property
+    def is_compiler_gcc(self):
+        """Indicate if the compiler used to generate the current binary code is
+        GCC or not.
+
+        """
+        return self.compiler == self.debugger.COMPILER_GNU
+
+    @property
+    def is_compiler_unknown(self):
+        """Indicate if the compiler used to generate the current binary code is
+        unknown or not.
+
+        """
+        return self.compiler == self.debugger.COMPILER_UNK
+
+    def guess_compiler_type(self):
+        """Try to determine the compiler."""
+        # TODO / FIXME: Improve this "analysis".
+        print "    Guessing compiler...",
+
+        if self.lir_function.stack_restore in ["IOS", "Linux"]:
+            self.compiler = self.debugger.COMPILER_GNU
+            return True
+
+        return False
+
+    @property
+    def compiler(self):
+        """Return the compiler type."""
+        return self._compiler
+
+    @compiler.setter
+    def compiler(self, compiler):
+        """Store the compiler type."""
+        self._compiler = compiler
+
+    @property
+    def architecture_name(self):
+        """Return the name of the current architecture.""" 
+        return self.TARGET_ARCH
 
     @property
     def name(self):
@@ -437,7 +541,8 @@ class FrontEnd(object):
 
         @func_address : The address of the function to analyze.
         """
-        print "Current depth is %d" % depth
+        if self.debug:
+            print "Current depth is %d" % depth
 
         try:
             print "-" * 80
@@ -485,7 +590,8 @@ class FrontEnd(object):
             # Initialize internal MIR members for further usage.
             #
             print "[+] Creating Middle level IR skeleton..."
-            print "Depth %d" % depth
+            if self.debug:
+                print "Depth %d" % depth
             self.generate_mir_skeleton()
 
             # Exit at this point if the function body cannot be analyzed or this

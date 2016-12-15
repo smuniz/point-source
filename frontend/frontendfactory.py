@@ -63,7 +63,7 @@ class FrontEndFactory(object):
         _args = [constructor]
         _args.extend(args)
         setattr(self, methodName,apply(Functor,_args, kargs))
-        
+
     def unregister(self, methodName):
         """unregister a constructor"""
         delattr(self, methodName)
@@ -74,7 +74,7 @@ class Functor:
         self._function = function
         self._args = args
         self._kargs = kargs
-        
+
     def __call__(self, *args, **kargs):
         """call function"""
         _args = list(self._args)

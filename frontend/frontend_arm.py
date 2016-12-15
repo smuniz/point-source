@@ -6,10 +6,6 @@
 
 from frontend import FrontEnd
 
-import idioms_arm_gcc
-reload(idioms_arm_gcc)
-from idioms_arm_gcc import ArmGccIdiomAnalyzer
-
 # Import MIR related modules
 from middleend.mir import *
 
@@ -22,11 +18,11 @@ class FrontEndArmException(Exception):
 class FrontEndArm(FrontEnd):
     """Front-end support for the ARM architecture."""
 
-    TARGET_ARCH = "arm"
+    TARGET_ARCH = "ARM"
 
     def __init__(self, debugger):
         """Perform ARM front-end instance initialization."""
-        FrontEnd.__init__(self, ArmGccIdiomAnalyzer, debugger)
+        super(FrontEndArm, self).__init__(debugger)
 
     def on_assignment(self, lir_inst):
         """Handle Low level IR assignment instructions."""

@@ -6,10 +6,6 @@
 
 from frontend import FrontEnd
 
-import idioms_aarch64_gcc
-reload(idioms_aarch64_gcc)
-from idioms_aarch64_gcc import AArch64GccIdiomAnalyzer
-
 # Import MIR related modules
 from middleend.mir import *
 
@@ -22,11 +18,11 @@ class FrontEndAArch64Exception(Exception):
 class FrontEndAArch64(FrontEnd):
     """Front-end support for the AArch (ARM 64-bits) architecture."""
 
-    TARGET_ARCH = "aarch64"
+    TARGET_ARCH = "AArch64"
 
     def __init__(self, debugger):
         """Perform ARM front-end instance initialization."""
-        FrontEnd.__init__(self, AArch64GccIdiomAnalyzer, debugger)
+        super(FrontEndAArch64, self).__init__(debugger)
 
     def on_assignment(self, lir_inst):
         """Handle Low level IR assignment instructions."""

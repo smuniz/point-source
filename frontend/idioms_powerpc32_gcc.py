@@ -1195,20 +1195,6 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
             print format_exc() + '\n'
             raise PowerPc32GccIdiomAnalyzerException(err)
 
-    def guess_compiler_type(self):
-        """Try to determine the compiler."""
-        # TODO / FIXME: Improve this "analisys".
-        print "    Guessing compiler...",
-
-        if self.lir_function.stack_restore in ["IOS", "Linux"]:
-
-            compiler_type = self.debugger.COMPILER_GNU
-            self.set_compiler_type(compiler_type)
-
-            return True
-
-        return False
-
     def is_call_instruction(self, lir_inst):
         """Determine if the specified instruction is a call instruction or
         not.

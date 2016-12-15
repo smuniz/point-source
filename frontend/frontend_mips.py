@@ -6,10 +6,6 @@
 
 from frontend import FrontEnd
 
-import idioms_mips_gcc
-reload(idioms_mips_gcc)
-from idioms_mips_gcc import MipsGccIdiomAnalyzer
-
 # Import MIR related modules
 from middleend.mir import *
 
@@ -22,11 +18,11 @@ class FrontEndMipsException(Exception):
 class FrontEndMips(FrontEnd):
     """Front-end support for the MIPS architecture."""
 
-    TARGET_ARCH = "mips"
+    TARGET_ARCH = "MIPS"
 
     def __init__(self, debugger):
         """Perform MIPS front-end instance initialization."""
-        super(FrontEndMips, self).__init__(MipsGccIdiomAnalyzer, debugger)
+        super(FrontEndMips, self).__init__(debugger)
 
     def on_assignment(self, lir_inst):
         """Handle Low level IR assignment instructions."""

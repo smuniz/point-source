@@ -6,10 +6,6 @@
 
 from frontend import FrontEnd
 
-import idioms_x86_64_gcc
-reload(idioms_x86_64_gcc)
-from idioms_x86_64_gcc import X86_64GccIdiomAnalyzer
-
 # Import MIR related modules
 from middleend.mir import *
 
@@ -27,7 +23,7 @@ class FrontEndX86_64(FrontEnd):
 
     def __init__(self, debugger):
         """Perform X86_64 front-end instance initialization."""
-        FrontEnd.__init__(self, X86_64GccIdiomAnalyzer, debugger)
+        super(FrontEndX86_64, self).__init__(debugger)
 
     def on_assignment(self, lir_inst):
         """Handle Low level IR assignment instructions."""

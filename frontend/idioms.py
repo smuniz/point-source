@@ -147,51 +147,6 @@ class IdiomAnalyzer(object):
         else:
             return None
 
-    def is_compiler_unknown(self):
-        """Return a boolean indicating if the compiler used to generate the
-        current binary code is unknown or not.
-
-        """
-        return self.lir_function.compiler_type == self.debugger.COMPILER_UNK
-
-    def detect_compiler(self):
-        """Obtain the name and type of the compiler used to generate the code
-        being analyzed.
-
-        In case the compiler is unknown to the debugger, try to guess it.
-
-        """
-        # Let the debugger try first and check if the compiler was successfully
-        # detected.
-        self.lir_function.compiler_type = self.debugger.get_default_compiler()
-
-        if self.is_compiler_unknown():
-            # Try to guess the compiler
-            if not self.guess_compiler_type():
-                print "Unsupported %s compiler" % \
-                    self.debugger.get_compiler_name(self.lir_function.compiler_type)
-                return False
-
-        print "    Compiler detected: %s" % \
-            self.debugger.get_compiler_name(self.lir_function.compiler_type)
-
-        return True
-
-    @property
-    def compiler_type(self):
-        """Return the compiler type."""
-        return self.compiler
-
-    @compiler_type.setter
-    def compiler_type(self, comp):
-        """Store the compiler type."""
-        self.compiler = comp
-
-    @abc.abstractmethod
-    def guess_compiler_type(self):
-        """Determine the compiler for the current binary."""
-        return
-
     @abc.abstractmethod
     def is_call_instruction(self, lir_inst):
         """Determine if the specified instruction is a call instruction or

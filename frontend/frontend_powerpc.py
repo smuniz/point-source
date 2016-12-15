@@ -6,14 +6,6 @@
 
 from frontend import FrontEnd
 
-import idioms_powerpc32_gcc
-reload(idioms_powerpc32_gcc)
-from idioms_powerpc32_gcc import PowerPc32GccIdiomAnalyzer
-
-import actionplan
-reload(actionplan)
-from actionplan import Action, ActionPlan, ActionPlanException
-
 #from frontend.lir.lir_operand import *
 from lir.lir_operand import *
 
@@ -37,8 +29,7 @@ class FrontEndPowerPc(FrontEnd):
 
     def __init__(self, debugger):
         """Perform PowerPC front-end instance initialization."""
-        super(FrontEndPowerPc, self).__init__(
-            PowerPc32GccIdiomAnalyzer, debugger)
+        super(FrontEndPowerPc, self).__init__(debugger)
 
     def calculate_stack_buffer_limits(self):
         """Determine the size of the stack with taking into account

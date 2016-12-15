@@ -64,10 +64,6 @@ class MipsGccIdiomAnalyzer(IdiomAnalyzer):
         # FIXME
         pass
 
-    def guess_compiler_type(self):
-        # FIXME
-        return False
-
     def is_call_instruction(self, lir_inst):
         # FIXME
         return False
