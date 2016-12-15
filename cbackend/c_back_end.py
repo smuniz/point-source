@@ -256,14 +256,14 @@ class CBackEnd(object):
         """
         #
         # First we check if the instruction at the current address was
-        # previously analyzed and marked for convertion by the idiom analyzer.
+        # previously analyzed and marked for conversion by the idiom analyzer.
         #
         #if self.action_plan.has_plan_for_address(mir_inst.address):
         #    pass
 
         #
         # Dispatch the current MIR instruction to be appropriate type
-        # convertion routine to be transformed into its equivalent HIR
+        # conversion routine to be transformed into its equivalent HIR
         # statement(s).
         #
         hir_stmt = None

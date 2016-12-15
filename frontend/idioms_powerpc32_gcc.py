@@ -81,9 +81,6 @@ class PowerPc32GccIdiomAnalyzer(IdiomAnalyzer):
         #print "Detecting function calling convention."
         self.detect_calling_convention()
 
-        #print "Detecting compiler."
-        self.detect_compiler()
-
         #print "Detecting unoptimized code idioms."
         self.detect_unoptimized_code_sequences()
 

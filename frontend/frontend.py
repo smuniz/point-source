@@ -76,6 +76,9 @@ class FrontEnd(object):
 
     def __init__(self, idiom_analyzer_type, debugger):
         """Perform base front-end instance initialization."""
+        # Debug flag for verbose output (useful during development).
+        self.debug = True
+
         self.action_plan = ActionPlan()
 
         # Current debugger application
@@ -110,7 +113,7 @@ class FrontEnd(object):
         #
         self.idiom_analyzer = idiom_analyzer_type(self.debugger)
 
-        # Setup symbol table for local/global variables refrences, etc..
+        # Setup symbol table for local/global variables references, etc..
         self.symbols_manager = None
 
         # Development flags
@@ -211,7 +214,7 @@ class FrontEnd(object):
             return
 
         #
-        # Iterate through LIR to transfor it into its MIR representation (this
+        # Iterate through LIR to transform it into its MIR representation (this
         # is a first pass, so just the basic skeleton will be created and
         # further passes will create the rest).
         #
@@ -280,7 +283,7 @@ class FrontEnd(object):
         """
         # Propagate addresses by adding each prologue and epilogue address to
         # the list of addresses in the MIR function in order to keep track of
-        # assembly->MIR addrresses during translation.
+        # assembly->MIR addresses during translation.
         print "[+] Propagating LIR-to-MIR prologue and epilogue addresses."
 
         for address in self.lir_function.prologue_addresses:
@@ -364,14 +367,14 @@ class FrontEnd(object):
         """
         #
         # First we check if the instruction at the current address was
-        # previously analyzed and marked for convertion by the idiom analyzer.
+        # previously analyzed and marked for conversion by the idiom analyzer.
         #
         if self.action_plan.has_plan_for_address(lir_inst.address):
             pass
 
         #
         # Dispatch the current LIR instruction to be appropriate type
-        # convertion routine to be transformed into its equivalent MIR
+        # conversion routine to be transformed into its equivalent MIR
         # instruction(s).
         #
         mir_inst = None
@@ -589,7 +592,8 @@ class FrontEnd(object):
                 cur_mir = self.mir_function
                 cur_sym = self.current_symbols_table
 
-                # Recurse into callees until we reach the specified level
+                # FIXME This should go
+                # Recursively move into callees until we reach the specified level
                 # (in case it was specified).
                 #print "1 Callee address 0x%X" % callee_address, depth # XXX
                 #if depth == 0:
@@ -607,8 +611,8 @@ class FrontEnd(object):
                 #    depth += 1
 
                 # Analyze the called function in order to obtain parameters and
-                # return registers information. This will procude a new LIR
-                # function and basic function information becuase of the
+                # return registers information. This will produce a new LIR
+                # function and basic function information because of the
                 # execution of phase 0 analysis.
                 self.analyze(callee_address, depth+1)
 
@@ -620,7 +624,7 @@ class FrontEnd(object):
                 lir_callee = self.lir_functions_cache.get(callee_address, None)
 
                 if lir_callee:
-                    # Analyse the calle function and its callees (if
+                    # Analyse the callee function and its callees (if
                     # appropriate according to the depth level).
                     self.perform_live_variable_analysis(lir_callee, depth)
                 else:
@@ -709,8 +713,8 @@ class FrontEnd(object):
         #print "--> CST : %s" % mir_inst
         return mir_inst
 
-    # TODO / FIXME : Complete all the possible convertion combinations.
-    convertion_table = {
+    # TODO / FIXME : Complete all the possible conversion combinations.
+    conversion_table = {
             #MiddleIrTypeChar : {
             #    #MiddleIrTypeChar : None,
             #    #MiddleIrTypeInt : None,
@@ -739,7 +743,7 @@ class FrontEnd(object):
             #MiddleIrTypeVoid : {},
         }
 
-    def _argument_requires_convertion(self, mir_src_param, mir_dst_param):
+    def _argument_requires_conversion(self, mir_src_param, mir_dst_param):
         """..."""
         inner_type = self.__get_inner_type(mir_src_param)
 
@@ -758,20 +762,20 @@ class FrontEnd(object):
         dest_type_key = "conv_%s_to_%s" % (
             self._class_name(mir_dst_param), inner_type_k)
 
-        avail_convertions = self.convertion_table.get(dest_type_key, None)
+        avail_conversions = self.conversion_table.get(dest_type_key, None)
 
         print "Convertion available (key %s) for %s -> %s: %s" % (
             dest_type_key,
             self._class_name(mir_src_param), 
             self._class_name(mir_dst_param), 
-            str(bool(avail_convertions is not None)).upper())
+            str(bool(avail_conversions is not None)).upper())
 
-        if avail_convertions is None:
+        if avail_conversions is None:
             return None
 
-        #conv_func = avail_convertions.get(inner_type, False)
+        #conv_func = avail_conversions.get(inner_type, False)
         #return conv_func
-        return avail_convertions
+        return avail_conversions
 
     def __get_inner_type(self, mir_obj, indent=0):
         """..."""
@@ -798,7 +802,7 @@ class FrontEnd(object):
 
         else:
             raise FrontEndException(
-                "Unimplemented convertion evaluation type : %r (%s)" % (
+                "Unimplemented conversion evaluation type : %r (%s)" % (
                 mir_obj, mir_obj))
 
         print "%s+---> Src (%s) : %s" % (("    " * indent), src, self._class_name(mir_obj))

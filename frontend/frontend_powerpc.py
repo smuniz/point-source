@@ -560,12 +560,12 @@ class FrontEndPowerPc(FrontEnd):
                         idx, self._class_name(mir_callee_args[idx]), 
                         self._class_name(mir_func_arg))
 
-                    # Perform any cast/convertion if appropriate.
-                    convertion_routine = self._argument_requires_convertion(
+                    # Perform any cast/conversion if appropriate.
+                    conversion_routine = self._argument_requires_conversion(
                         mir_callee_args[idx], mir_func_arg)
-                    if convertion_routine is not None:
-                        print "    Argument %d required convertion" % arg_idx
-                        new_mir_inst = convertion_routine(self, mir_callee_args[idx], mir_func_arg)
+                    if conversion_routine is not None:
+                        print "    Argument %d required conversion" % arg_idx
+                        new_mir_inst = conversion_routine(self, mir_callee_args[idx], mir_func_arg)
                         if new_mir_inst is None:
                             raise FrontEndPowerPcException(
                                 "Unable to perform argument %d conversion: "
