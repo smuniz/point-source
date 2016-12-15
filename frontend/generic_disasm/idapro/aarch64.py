@@ -469,7 +469,6 @@ class InstructionSet:
     ARM_vuzp = idaapi.ARM_vuzp               # Vector Unzip
     ARM_vzip = idaapi.ARM_vzip               # Vector Zip
 
-
     R0    = 0
     R1    = 1
     R2    = 2

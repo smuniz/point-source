@@ -531,6 +531,8 @@ class InstructionSet(object):
         """Return the name of the specified register."""
         return self.GPR_NAMES.get(reg, None)
 
+    # Taken from idc.py
+
     #
     # Special purpose registers in PowerPC
     #

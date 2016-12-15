@@ -53,28 +53,28 @@ class ArmGccIdiomAnalyzer(IdiomAnalyzer):
 
     def detect_epilogue(self):
         """Check wheater the function epilogue is present or not."""
-        # FIXME
+        # FIXME TODO
         pass
 
     def detect_prologue(self):
-        # FIXME
+        # FIXME TODO
         pass
 
     def detect_unoptimized_code_sequences(self):
-        # FIXME
+        # FIXME TODO
         pass
 
     def guess_compiler_type(self):
-        # FIXME
+        # FIXME TODO
         return False
 
     def is_call_instruction(self, lir_inst):
-        # FIXME
+        # FIXME TODO
         return False
 
     def detect_calling_convention(self):
         """Obtain the calling convention detected by the compiler."""
-        # FIXME: Detect calling convention.
+        # FIXME TODO: Detect calling convention.
         print "    Calling convention: %s" % \
             self.mir_function.calling_convention_name
 

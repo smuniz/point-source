@@ -49,7 +49,7 @@ class FrontEndArm(FrontEnd):
         if not self.idiom_analyzer.is_call_instruction(lir_inst):
             return None
 
-        # FIXME This was copied from PPC without any testing... check it
+        # FIXME TODO This was copied from PPC without any testing... check it
         #if len(lir_inst) == 1:
         #    return lir_inst[0].value
 
@@ -63,5 +63,5 @@ class FrontEndArm(FrontEnd):
 
     def _is_stack_destination(self, lir_inst):
         """Check that destination of the operation is the stack."""
-        # TODO
+        # FIXME TODO
         return False

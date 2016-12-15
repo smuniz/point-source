@@ -45,7 +45,12 @@ class FrontEndFactory(object):
 
     def __init__(self, debugger):
         """Perform factory instance initialization."""
+        #
         # Register known front-ends for further creation.
+        #
+        # This is where any new architecture should be added (appart from its
+        # support under the current debugger).
+        #
         self.register("create_x86", FrontEndX86, debugger)
         self.register("create_x86_64", FrontEndX86_64, debugger)
         self.register("create_ARM", FrontEndArm, debugger)

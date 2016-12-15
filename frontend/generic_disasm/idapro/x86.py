@@ -1314,6 +1314,18 @@ class InstructionSet:
     NN_vfnmsubsd = idaapi.NN_vfnmsubsd,         # Negative Multiply and Subtract Double Single-Precision Floating-Point
 
 
+    # Taken from idc.py
+
+    #
+    # Special purpose registers in x86
+    #
+    o_trreg  =       idaapi.o_idpspec0      # trace register
+    o_dbreg  =       idaapi.o_idpspec1      # debug register
+    o_crreg  =       idaapi.o_idpspec2      # control register
+    o_fpreg  =       idaapi.o_idpspec3      # floating point register
+    o_mmxreg  =      idaapi.o_idpspec4      # mmx register
+    o_xmmreg  =      idaapi.o_idpspec5      # xmm register
+
 
 ASSIGNMENT_TYPES = [
 ]

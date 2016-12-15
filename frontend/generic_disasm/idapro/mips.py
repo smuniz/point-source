@@ -1775,24 +1775,8 @@ class InstructionSet(object):
         RA : "$ra",
         }
 
-
-    #
-    # Special purpose registers in PowerPC
-    #
-    #SPR       = idaapi.o_idpspec0     # Special purpose register
-    #TWOFPR    = idaapi.o_idpspec1     # Two FPPR_s
-    #SHMBME    = idaapi.o_idpspec2     # SH & MB & ME
-    #CRF       = idaapi.o_idpspec3     # crfield      x.reg
-    #CRB       = idaapi.o_idpspec4     # crbit        x.reg
-    #DCR       = idaapi.o_idpspec5     # Device control register
-
     SPR_NAMES = {
-        #SPR       : "SPR",
-        #TWOFPR    : "TWOFPR",
-        #SHMBME    : "SHMBME",
-        #CRF       : "CRF",
-        #CRB       : "CRB",
-        #DCR       : "DCR",
+        # MIPS does not have any of those in IDA-Python according to idc.py
     }
 
     ARGUMENT_REGISTERS = [A0, A1, A2, A3]

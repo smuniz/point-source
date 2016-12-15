@@ -44,6 +44,9 @@ class PointSourcePlugin(idaapi.plugin_t):
 
     def init(self):
         """Initialize the plugin."""
+        # Set debugging flag during development
+        self.debug = True
+
         self.print_banner()
         try:
             #
@@ -56,16 +59,16 @@ class PointSourcePlugin(idaapi.plugin_t):
             # Registering shortcuts.
             #
             new_menu = idaapi.add_menu_item("Edit/Plugins", "-", None, 0, self.do_nothing, ())
-            if new_menu is None:
+            if not new_menu:
                 #print "[-] Unable to add menu separator."
                 del new_menu
             new_menu = idaapi.add_menu_item("Edit/Plugins", "PointSource : Decompile function", self.DECOMPILE_HOTKEY, 0, self.decompile_function, ())
-            if new_menu is None:
+            if not new_menu:
                 #print "[-] Unable to add menu item."
                 del new_menu
             
             new_hotkey = idaapi.add_hotkey(self.DECOMPILE_HOTKEY, self.decompile_function)
-            if new_hotkey is None:
+            if not new_hotkey:
                 #print "[-] Unable to add hotkey."
                 del new_hotkey
 
@@ -74,10 +77,9 @@ class PointSourcePlugin(idaapi.plugin_t):
             return idaapi.PLUGIN_KEEP
 
         except PointSourceException, err:
-            print "Unable to initialize decompiler : %s" % err
+            print "[-] Unable to initialize decompiler : %s" % err
 
         # This architecture is unsupported so we unload ourselves and leave.
-        print "A" * 40
         return idaapi.PLUGIN_UNL
 
     def run(self, argument):
@@ -95,11 +97,12 @@ class PointSourcePlugin(idaapi.plugin_t):
             idaapi.set_script_timeout(old)
 
         except PointSourceException, err:
-            print "Unable to run decompiler : %s" % err
+            print "[-] Unable to run decompiler : %s" % err
 
         except Exception, err:
-            print format_exc()
-            print "Exception : %s" % err
+            if self.debug:
+                print format_exc()
+            print "[-] Exception : %s" % err
 
     def term(self):
         """Terminate the plugin."""
@@ -109,8 +112,8 @@ class PointSourcePlugin(idaapi.plugin_t):
         banner = [
           "%s has been loaded (v%s)" % (__description__, __version__),
           "  The hotkeys are : %s -> decompile" % self.DECOMPILE_HOTKEY,
-          "  Please check the Edit/Plugins menu for more information.",
-          "  The Point Source Team <pointsource@googlegroups.com>",
+          "  Additional options available in the Edit/Plugins menu.",
+          "  contact Point Source Team on Slack at: point-source.slack.com",
         ]
         sepline = '-' * (max([len(s) for s in banner])+1)
 

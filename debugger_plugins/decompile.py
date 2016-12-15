@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 
-(c) Sebastian Muniz 2014
+(c) Sebastian Muniz 2017
 
 Point Source decompiler init script for Immunity Debugger
 
