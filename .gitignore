@@ -1,5 +1,6 @@
 # IDA Pro backup files
 *.id[b012]
+*.i64
 *.idb
 *.id0
 *.id1

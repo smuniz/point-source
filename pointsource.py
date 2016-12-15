@@ -243,7 +243,6 @@ class PointSource(object):
             arch_name = self.debugger.architecture_name
             factory = FrontEndFactory(self.debugger)
             frontend_method = "create_%(arch_name)s" % vars()
-            print "->", frontend_method
 
             if not hasattr(factory, frontend_method):
                 raise PointSourceException(

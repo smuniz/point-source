@@ -22,7 +22,7 @@ def main():
     print "\n    GPR_NAMES = {"
 
     for i, reg in enumerate(regs):
-        print "        %-5s = \"%s\"" % (reg.upper(), reg)
+        print "        %-5s : \"%s\"," % (reg.upper(), reg)
 
     print "\n    }"
 

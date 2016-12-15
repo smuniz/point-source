@@ -669,211 +669,223 @@ class InstructionSet:
     TOTAL_GPR = 195
 
     GPR_NAMES = {
-        R0    = "R0"
-        R1    = "R1"
-        R2    = "R2"
-        R3    = "R3"
-        R4    = "R4"
-        R5    = "R5"
-        R6    = "R6"
-        R7    = "R7"
-        R8    = "R8"
-        R9    = "R9"
-        R10   = "R10"
-        R11   = "R11"
-        R12   = "R12"
-        SP    = "SP"
-        LR    = "LR"
-        PC    = "PC"
-        CPSR  = "CPSR"
-        CPSR_FLG = "CPSR_flg"
-        SPSR  = "SPSR"
-        SPSR_FLG = "SPSR_flg"
-        T     = "T"
-        CS    = "CS"
-        DS    = "DS"
-        ACC0  = "acc0"
-        FPSID = "FPSID"
-        FPSCR = "FPSCR"
-        FPEXC = "FPEXC"
-        FPINST = "FPINST"
-        FPINST2 = "FPINST2"
-        MVFR0 = "MVFR0"
-        MVFR1 = "MVFR1"
-        APSR  = "APSR"
-        IAPSR = "IAPSR"
-        EAPSR = "EAPSR"
-        XPSR  = "XPSR"
-        IPSR  = "IPSR"
-        EPSR  = "EPSR"
-        IEPSR = "IEPSR"
-        MSP   = "MSP"
-        PSP   = "PSP"
-        PRIMASK = "PRIMASK"
-        BASEPRI = "BASEPRI"
-        BASEPRI_MAX = "BASEPRI_MAX"
-        FAULTMASK = "FAULTMASK"
-        CONTROL = "CONTROL"
-        Q0    = "Q0"
-        Q1    = "Q1"
-        Q2    = "Q2"
-        Q3    = "Q3"
-        Q4    = "Q4"
-        Q5    = "Q5"
-        Q6    = "Q6"
-        Q7    = "Q7"
-        Q8    = "Q8"
-        Q9    = "Q9"
-        Q10   = "Q10"
-        Q11   = "Q11"
-        Q12   = "Q12"
-        Q13   = "Q13"
-        Q14   = "Q14"
-        Q15   = "Q15"
-        D0    = "D0"
-        D1    = "D1"
-        D2    = "D2"
-        D3    = "D3"
-        D4    = "D4"
-        D5    = "D5"
-        D6    = "D6"
-        D7    = "D7"
-        D8    = "D8"
-        D9    = "D9"
-        D10   = "D10"
-        D11   = "D11"
-        D12   = "D12"
-        D13   = "D13"
-        D14   = "D14"
-        D15   = "D15"
-        D16   = "D16"
-        D17   = "D17"
-        D18   = "D18"
-        D19   = "D19"
-        D20   = "D20"
-        D21   = "D21"
-        D22   = "D22"
-        D23   = "D23"
-        D24   = "D24"
-        D25   = "D25"
-        D26   = "D26"
-        D27   = "D27"
-        D28   = "D28"
-        D29   = "D29"
-        D30   = "D30"
-        D31   = "D31"
-        S0    = "S0"
-        S1    = "S1"
-        S2    = "S2"
-        S3    = "S3"
-        S4    = "S4"
-        S5    = "S5"
-        S6    = "S6"
-        S7    = "S7"
-        S8    = "S8"
-        S9    = "S9"
-        S10   = "S10"
-        S11   = "S11"
-        S12   = "S12"
-        S13   = "S13"
-        S14   = "S14"
-        S15   = "S15"
-        S16   = "S16"
-        S17   = "S17"
-        S18   = "S18"
-        S19   = "S19"
-        S20   = "S20"
-        S21   = "S21"
-        S22   = "S22"
-        S23   = "S23"
-        S24   = "S24"
-        S25   = "S25"
-        S26   = "S26"
-        S27   = "S27"
-        S28   = "S28"
-        S29   = "S29"
-        S30   = "S30"
-        S31   = "S31"
-        CF    = "CF"
-        ZF    = "ZF"
-        NF    = "NF"
-        VF    = "VF"
-        X0    = "X0"
-        X1    = "X1"
-        X2    = "X2"
-        X3    = "X3"
-        X4    = "X4"
-        X5    = "X5"
-        X6    = "X6"
-        X7    = "X7"
-        X8    = "X8"
-        X9    = "X9"
-        X10   = "X10"
-        X11   = "X11"
-        X12   = "X12"
-        X13   = "X13"
-        X14   = "X14"
-        X15   = "X15"
-        X16   = "X16"
-        X17   = "X17"
-        X18   = "X18"
-        X19   = "X19"
-        X20   = "X20"
-        X21   = "X21"
-        X22   = "X22"
-        X23   = "X23"
-        X24   = "X24"
-        X25   = "X25"
-        X26   = "X26"
-        X27   = "X27"
-        X28   = "X28"
-        X29   = "X29"
-        X30   = "X30"
-        XZR   = "XZR"
-        SP    = "SP"
-        PC    = "PC"
-        V0    = "V0"
-        V1    = "V1"
-        V2    = "V2"
-        V3    = "V3"
-        V4    = "V4"
-        V5    = "V5"
-        V6    = "V6"
-        V7    = "V7"
-        V8    = "V8"
-        V9    = "V9"
-        V10   = "V10"
-        V11   = "V11"
-        V12   = "V12"
-        V13   = "V13"
-        V14   = "V14"
-        V15   = "V15"
-        V16   = "V16"
-        V17   = "V17"
-        V18   = "V18"
-        V19   = "V19"
-        V20   = "V20"
-        V21   = "V21"
-        V22   = "V22"
-        V23   = "V23"
-        V24   = "V24"
-        V25   = "V25"
-        V26   = "V26"
-        V27   = "V27"
-        V28   = "V28"
-        V29   = "V29"
-        V30   = "V30"
-        V31   = "V31"
+        R0    : "R0",
+        R1    : "R1",
+        R2    : "R2",
+        R3    : "R3",
+        R4    : "R4",
+        R5    : "R5",
+        R6    : "R6",
+        R7    : "R7",
+        R8    : "R8",
+        R9    : "R9",
+        R10   : "R10",
+        R11   : "R11",
+        R12   : "R12",
+        SP    : "SP",
+        LR    : "LR",
+        PC    : "PC",
+        CPSR  : "CPSR",
+        CPSR_FLG : "CPSR_flg",
+        SPSR  : "SPSR",
+        SPSR_FLG : "SPSR_flg",
+        T     : "T",
+        CS    : "CS",
+        DS    : "DS",
+        ACC0  : "acc0",
+        FPSID : "FPSID",
+        FPSCR : "FPSCR",
+        FPEXC : "FPEXC",
+        FPINST : "FPINST",
+        FPINST2 : "FPINST2",
+        MVFR0 : "MVFR0",
+        MVFR1 : "MVFR1",
+        APSR  : "APSR",
+        IAPSR : "IAPSR",
+        EAPSR : "EAPSR",
+        XPSR  : "XPSR",
+        IPSR  : "IPSR",
+        EPSR  : "EPSR",
+        IEPSR : "IEPSR",
+        MSP   : "MSP",
+        PSP   : "PSP",
+        PRIMASK : "PRIMASK",
+        BASEPRI : "BASEPRI",
+        BASEPRI_MAX : "BASEPRI_MAX",
+        FAULTMASK : "FAULTMASK",
+        CONTROL : "CONTROL",
+        Q0    : "Q0",
+        Q1    : "Q1",
+        Q2    : "Q2",
+        Q3    : "Q3",
+        Q4    : "Q4",
+        Q5    : "Q5",
+        Q6    : "Q6",
+        Q7    : "Q7",
+        Q8    : "Q8",
+        Q9    : "Q9",
+        Q10   : "Q10",
+        Q11   : "Q11",
+        Q12   : "Q12",
+        Q13   : "Q13",
+        Q14   : "Q14",
+        Q15   : "Q15",
+        D0    : "D0",
+        D1    : "D1",
+        D2    : "D2",
+        D3    : "D3",
+        D4    : "D4",
+        D5    : "D5",
+        D6    : "D6",
+        D7    : "D7",
+        D8    : "D8",
+        D9    : "D9",
+        D10   : "D10",
+        D11   : "D11",
+        D12   : "D12",
+        D13   : "D13",
+        D14   : "D14",
+        D15   : "D15",
+        D16   : "D16",
+        D17   : "D17",
+        D18   : "D18",
+        D19   : "D19",
+        D20   : "D20",
+        D21   : "D21",
+        D22   : "D22",
+        D23   : "D23",
+        D24   : "D24",
+        D25   : "D25",
+        D26   : "D26",
+        D27   : "D27",
+        D28   : "D28",
+        D29   : "D29",
+        D30   : "D30",
+        D31   : "D31",
+        S0    : "S0",
+        S1    : "S1",
+        S2    : "S2",
+        S3    : "S3",
+        S4    : "S4",
+        S5    : "S5",
+        S6    : "S6",
+        S7    : "S7",
+        S8    : "S8",
+        S9    : "S9",
+        S10   : "S10",
+        S11   : "S11",
+        S12   : "S12",
+        S13   : "S13",
+        S14   : "S14",
+        S15   : "S15",
+        S16   : "S16",
+        S17   : "S17",
+        S18   : "S18",
+        S19   : "S19",
+        S20   : "S20",
+        S21   : "S21",
+        S22   : "S22",
+        S23   : "S23",
+        S24   : "S24",
+        S25   : "S25",
+        S26   : "S26",
+        S27   : "S27",
+        S28   : "S28",
+        S29   : "S29",
+        S30   : "S30",
+        S31   : "S31",
+        CF    : "CF",
+        ZF    : "ZF",
+        NF    : "NF",
+        VF    : "VF",
+        X0    : "X0",
+        X1    : "X1",
+        X2    : "X2",
+        X3    : "X3",
+        X4    : "X4",
+        X5    : "X5",
+        X6    : "X6",
+        X7    : "X7",
+        X8    : "X8",
+        X9    : "X9",
+        X10   : "X10",
+        X11   : "X11",
+        X12   : "X12",
+        X13   : "X13",
+        X14   : "X14",
+        X15   : "X15",
+        X16   : "X16",
+        X17   : "X17",
+        X18   : "X18",
+        X19   : "X19",
+        X20   : "X20",
+        X21   : "X21",
+        X22   : "X22",
+        X23   : "X23",
+        X24   : "X24",
+        X25   : "X25",
+        X26   : "X26",
+        X27   : "X27",
+        X28   : "X28",
+        X29   : "X29",
+        X30   : "X30",
+        XZR   : "XZR",
+        SP    : "SP",
+        PC    : "PC",
+        V0    : "V0",
+        V1    : "V1",
+        V2    : "V2",
+        V3    : "V3",
+        V4    : "V4",
+        V5    : "V5",
+        V6    : "V6",
+        V7    : "V7",
+        V8    : "V8",
+        V9    : "V9",
+        V10   : "V10",
+        V11   : "V11",
+        V12   : "V12",
+        V13   : "V13",
+        V14   : "V14",
+        V15   : "V15",
+        V16   : "V16",
+        V17   : "V17",
+        V18   : "V18",
+        V19   : "V19",
+        V20   : "V20",
+        V21   : "V21",
+        V22   : "V22",
+        V23   : "V23",
+        V24   : "V24",
+        V25   : "V25",
+        V26   : "V26",
+        V27   : "V27",
+        V28   : "V28",
+        V29   : "V29",
+        V30   : "V30",
+        V31   : "V31",
 
     }
 
+    # Taken from idc.py
+
+    #
+    # Special purpose registers in ARM
+    #
+    REGLIST  =     idaapi.o_idpspec1      # Register list (for LDM/STM)
+    CREGLIST  =    idaapi.o_idpspec2      # Coprocessor register list (for CDP)
+    CREG  =        idaapi.o_idpspec3      # Coprocessor register (for LDC/STC)
+    FPREG_ARM  =   idaapi.o_idpspec4      # Floating point register
+    FPREGLIST  =   idaapi.o_idpspec5      # Floating point register list
+    TEXT  =        (idaapi.o_idpspec5+1)  # Arbitrary text stored in the operand
+
     SPR_NAMES = {
-        REGLIST  =     idaapi.o_idpspec1      # Register list (for LDM/STM)
-        CREGLIST  =    idaapi.o_idpspec2      # Coprocessor register list (for CDP)
-        CREG  =        idaapi.o_idpspec3      # Coprocessor register (for LDC/STC)
-        FPREG_ARM  =   idaapi.o_idpspec4      # Floating point register
-        FPREGLIST  =   idaapi.o_idpspec5      # Floating point register list
-        TEXT  =        (idaapi.o_idpspec5+1)  # Arbitrary text stored in the operand
+        REGLIST  :     "REGLIST",
+        CREGLIST  :    "CREGLIST",
+        CREG  :        "CREG",
+        FPREG_ARM  :   "FPREG_ARM",
+        FPREGLIST  :   "FPREGLIST",
+        TEXT  :        "TEXT",
     }
 
     ARGUMENT_REGISTERS = []
@@ -882,6 +894,19 @@ class InstructionSet:
 
     VOLATILE_REGISTERS = ARGUMENT_REGISTERS + RETURN_REGISTERS + [
     ]
+
+    #
+    #  Helper methods
+    #
+
+    def is_branch(self, inst_type):
+        """Indicate if the specified instruction is some kind of branch
+        instruction.
+
+        """
+        return inst_type in CONDITIONAL_BRANCH_TYPES or \
+            inst_type in UNCONDITIONAL_BRANCH_TYPES
+
 
 ASSIGNMENT_TYPES = [
 ]

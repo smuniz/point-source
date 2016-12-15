@@ -47,6 +47,7 @@ class BaseDebugger(object):
     SUPPORTED_ARCHITECTURES_NAMES = {PPC_ARCH: "PowerPC",
                                      MIPS_ARCH: "MIPS",
                                      ARM_ARCH: "ARM",
+                                     AARCH64_ARCH: "AArch64",
                                      X86_ARCH: "x86",
                                      X86_64_ARCH: "x86_64"}
 
@@ -131,11 +132,12 @@ class BaseDebugger(object):
     @property
     def architecture_name(self):
         """Return the name of the current architecture in use."""
-        try:
-            return self.SUPPORTED_ARCHITECTURES_NAMES[self.architecture]
-        except IndexError, err:
-            raise BaseDebuggerException(
-                "Current architecture not supported: %s" % err)
+        arch = self.SUPPORTED_ARCHITECTURES_NAMES.get(self.architecture, None)
+        if arch:
+            return arch
+
+        raise BaseDebuggerException(
+            "Current architecture not supported: %s" % self.architecture)
 
     @abc.abstractmethod
     def debugger_name(self):
