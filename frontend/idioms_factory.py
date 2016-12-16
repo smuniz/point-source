@@ -3,6 +3,7 @@
 # 
 # This code is part of point source decompiler
 #
+from misc.factory import Factory, FactoryException
 
 import idioms_mips_gcc
 reload(idioms_mips_gcc)
@@ -31,19 +32,19 @@ from idioms_aarch64_gcc import AArch64GccIdiomAnalyzer
 __all__ = ["IdiomsFactory", "IdiomsFactoryException"]
 
 
-class IdiomsFactoryException(Exception):
-    """Front-end factory base exception class."""
+class IdiomsFactoryException(FactoryException):
+    """Idioms factory base exception class."""
     pass
 
 
-class IdiomsFactory(object):
+class IdiomsFactory(Factory):
     """
-    Factory for different front-ends to support multiple decompilable
-    architectures.
+    Factory for different idioms to support multiple compilers under multiple
+    CPU architectures.
 
     """
 
-    def __init__(self, debugger):
+    def __init__(self):
         """Perform factory instance initialization."""
         #
         # Register known idioms for further creation.
@@ -58,27 +59,3 @@ class IdiomsFactory(object):
         self.register("create_GCC_MIPS", MipsGccIdiomAnalyzer)
         self.register("create_GCC_PowerPC", PowerPc32GccIdiomAnalyzer)
 
-    def register(self, methodName, constructor, *args, **kargs):
-        """register a constructor"""
-        _args = [constructor]
-        _args.extend(args)
-        setattr(self, methodName,apply(Functor,_args, kargs))
-
-    def unregister(self, methodName):
-        """unregister a constructor"""
-        delattr(self, methodName)
-
-class Functor:
-    def __init__(self, function, *args, **kargs):
-        assert callable(function), "function should be a callable obj"
-        self._function = function
-        self._args = args
-        self._kargs = kargs
-
-    def __call__(self, *args, **kargs):
-        """call function"""
-        _args = list(self._args)
-        _args.extend(args)
-        _kargs = self._kargs.copy()
-        _kargs.update(kargs)
-        return apply(self._function,_args,_kargs)

@@ -74,6 +74,10 @@ require("frontend.symbols")
 require("frontend.frontend")
 from frontend.frontend import FrontEndException
 
+#reload(misc.factory)
+require("misc.factory")
+#from misc.factory import Factory
+
 #import frontend.frontendfactory
 #reload(frontend.frontendfactory)
 require("frontend.frontendfactory")
@@ -155,7 +159,6 @@ class PointSource(object):
 
         # Front-end holders.
         self.front_end = None
-        self.determine_front_end()
 
         #
         # Only one instance is required to store all the symbolic information
@@ -237,30 +240,18 @@ class PointSource(object):
         """
         self.output = None
 
-    def determine_front_end(self):
-        """Determine the right front-end for the current architecture."""
-        try:
-            arch_name = self.debugger.architecture_name
-            factory = FrontEndFactory(self.debugger)
-            frontend_method = "create_%(arch_name)s" % vars()
-
-            if not hasattr(factory, frontend_method):
-                raise PointSourceException(
-                    "Front-end unavailable for %s architecture." % arch_name)
-
-            self.front_end_type = getattr(factory, frontend_method)
-
-        except FrontEndFactory, err :
-            raise PointSourceException(
-                "Unable to detect architecture (%(arch_name)s) : %(err)s" % \
-                vars())
-
     def init_front_end(self):
         """Initialize the front-end of the decompiler."""
         try:
-            self.front_end = self.front_end_type()
+            # Determine the right front-end for the current architecture.
+            arch_name = self.debugger.architecture_name
+            self.front_end = FrontEndFactory.build(
+                (arch_name, ), (self.debugger, ))
+
+            # Initialize front-end's symbol manager for variable's tracking,
+            # global names, etc..
             self.front_end.symbols_manager = self.symbols_manager
-        except FrontEndFactory, err :
+        except FrontEndFactoryException, err :
             raise PointSourceException(
                 "Unable to initialize front-end : %(err)s" % vars())
 

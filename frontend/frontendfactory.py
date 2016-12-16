@@ -3,6 +3,7 @@
 # 
 # This code is part of point source decompiler
 #
+from misc.factory import Factory, FactoryException
 
 import frontend_x86
 reload(frontend_x86)
@@ -31,19 +32,19 @@ from frontend_mips import FrontEndMips, FrontEndMipsException
 __all__ = ["FrontEndFactory", "FrontEndFactoryException"]
 
 
-class FrontEndFactoryException(Exception):
+class FrontEndFactoryException(FactoryException):
     """Front-end factory base exception class."""
     pass
 
 
-class FrontEndFactory(object):
+class FrontEndFactory(Factory):
     """
     Factory for different front-ends to support multiple decompilable
     architectures.
 
     """
 
-    def __init__(self, debugger):
+    def __init__(self):
         """Perform factory instance initialization."""
         #
         # Register known front-ends for further creation.
@@ -51,34 +52,9 @@ class FrontEndFactory(object):
         # This is where any new architecture should be added (appart from its
         # support under the current debugger).
         #
-        self.register("create_x86", FrontEndX86, debugger)
-        self.register("create_x86_64", FrontEndX86_64, debugger)
-        self.register("create_ARM", FrontEndArm, debugger)
-        self.register("create_AArch64", FrontEndAArch64, debugger)
-        self.register("create_MIPS", FrontEndMips, debugger)
-        self.register("create_PowerPC", FrontEndPowerPc, debugger)
-
-    def register(self, methodName, constructor, *args, **kargs):
-        """register a constructor"""
-        _args = [constructor]
-        _args.extend(args)
-        setattr(self, methodName,apply(Functor,_args, kargs))
-
-    def unregister(self, methodName):
-        """unregister a constructor"""
-        delattr(self, methodName)
-
-class Functor:
-    def __init__(self, function, *args, **kargs):
-        assert callable(function), "function should be a callable obj"
-        self._function = function
-        self._args = args
-        self._kargs = kargs
-
-    def __call__(self, *args, **kargs):
-        """call function"""
-        _args = list(self._args)
-        _args.extend(args)
-        _kargs = self._kargs.copy()
-        _kargs.update(kargs)
-        return apply(self._function,_args,_kargs)
+        self.register("create_x86", FrontEndX86)
+        self.register("create_x86_64", FrontEndX86_64)
+        self.register("create_ARM", FrontEndArm)
+        self.register("create_AArch64", FrontEndAArch64)
+        self.register("create_MIPS", FrontEndMips)
+        self.register("create_PowerPC", FrontEndPowerPc)

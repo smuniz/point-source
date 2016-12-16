@@ -147,26 +147,13 @@ class FrontEnd(object):
         # specific idiom analyzer for it.
         try:
             arch_name = self.debugger.architecture_name
-            factory = IdiomsFactory(self.debugger)
-            idioms_method = "create_%(compiler_name)s_%(arch_name)s" % vars()
-
-            if not hasattr(factory, idioms_method):
-                raise FrontEndException(
-                    "Idioms unavailable for compiler %s under %s architecture." % (
-                    compiler_name, arch_name))
-
-            print "@" * 80
-            print idioms_method
-            idiom_analyzer_type = getattr(factory, idioms_method)
+            self.idiom_analyzer = IdiomsFactory.build(
+                (compiler_name, arch_name), (self.debugger, ))
 
         except IdiomsFactoryException, err :
             raise FrontEndException(
                 "Unable to detect architecture (%(arch_name)s) : %(err)s" % \
                 vars())
-
-            #raise FrontEndException("Non-GNU compilers not supported.")
-
-        self.idiom_analyzer = idiom_analyzer_type(self.debugger)
 
     def detect_compiler(self):
         """Obtain the name and type of the compiler used to generate the code
