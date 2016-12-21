@@ -16,7 +16,8 @@ from misc.prerequisites import require
 
 #reload(output_media.graph_output_media)
 require("output_media.graph_output_media.graph_output_media")
-from output_media.graph_output_media.graph_output_media import GraphOutputMedia
+from output_media.graph_output_media.graph_output_media import \
+    BasicBlockGraphOutput, BasicBlockGraphOutputException
 
 ##reload(frontend.generic_disasm.base)
 #require("frontend.generic_disasm.base")
@@ -959,7 +960,7 @@ class FrontEnd(object):
             print self.lir_function
         else:
             print self.lir_function
-            lir_output = GraphOutputMedia(self.lir_function)
+            lir_output = BasicBlockGraphOutput(self.lir_function)
             lir_output.generate_output("Low Level IR output")
 
 
