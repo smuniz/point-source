@@ -243,17 +243,16 @@ class BaseDebugger(object):
         for lir_bb in lir_function[1 : ]:
             lir_bb.dom = set(copy(lir_function.basic_blocks))
 
-        #for n in lir_function[1:]:
         succ_list = list()
         cur_node = lir_function[0]
-        #succ_list.add(cur_node)
 
+        #
+        # FIXME : I know this code is a piece of crap but I'm tired and coffee ain't
+        # helping so it'll be fixed in the future (hopefully).
+        #
         def get_successors_list(cur_node, level):
-
-            #print "%s ID : %d - successors %d" % (
-            #    "  " * level, cur_node.id, len(cur_node.successors()))
+            """Return the successors list of the specified node."""
             if cur_node.visited:
-                #print "ALREADY visited", cur_node.id
                 return list()
 
             cur_node.visited = True
@@ -264,17 +263,13 @@ class BaseDebugger(object):
 
             for succ in cur_node.successors():
                 cur_list.append(succ)
-                #print "%s +---> succ node : %d (0x%X)" % (
-                #    "  " * level, succ.id, succ.start_address)
                 cur_list += get_successors_list(succ, level)
 
-            #print "level %d - %s" % (level, [x.id for x in cur_list])
             level -= 1
             return cur_list
 
         level = 0
         succ_list += get_successors_list(cur_node, level)
-        #raise Exception("blablabla")
 
         purged_succ_list = list()
         for x in succ_list:
@@ -282,32 +277,23 @@ class BaseDebugger(object):
                 purged_succ_list.append(x)
 
         while change is True:
-
-            print "purged_succ_list = ", [x.id for x in purged_succ_list]
+            #print "purged_succ_list = ", [x.id for x in purged_succ_list]
             for n in purged_succ_list[1:]:
 
-                #T = set(copy(lir_function.basic_blocks))
-                #T = sorted(succ_list)
-                #T = succ_list
                 T = set(purged_succ_list)
-                print "T = ", [x.id for x in sorted(T)]
-
-                #print "n = ", n.id
-                #print "   preds = ", [x.id for x in n.predecessors()]
+                #print "T = ", [x.id for x in sorted(T)]
 
                 for i, p in enumerate(n.predecessors()):
-                    print "p (n.pred #%d) = %d" % (i, p.id)
-                    #print "n --->", [x.id for x in n.dom]
-                    print "p --->", [x.id for x in p.dom]
-                    print "----> intersection = ", [x.id for x in T.intersection(p.dom)]
-                    #break
+                    #print "p (n.pred #%d) = %d" % (i, p.id)
+                    #print "p --->", [x.id for x in p.dom]
+                    #print "----> intersection = ", [x.id for x in T.intersection(p.dom)]
                     T.intersection_update(p.dom)
 
                 D = set()
                 D.add(n)
                 D.update(T)
 
-                print " D :=", [x.id for x in D]
+                #print " D :=", [x.id for x in D]
 
                 if D != n.dom:
                     change = True
@@ -319,10 +305,9 @@ class BaseDebugger(object):
         print "      i                Domin(i)"
         print "---------------------------------------------"
         for lir_bb in lir_function:
-            print "    0x%08X {%2d}    {%s}" % (
+            print "    0x%08X (%2d)    {%s}" % (
                 lir_bb.start_address, lir_bb.id, ", ".join(
                 [str(x.id) for x in lir_bb.dom]))
-
 
     def generate_lir(self, function_address):
         """
