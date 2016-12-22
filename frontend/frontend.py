@@ -949,7 +949,6 @@ class FrontEnd(object):
                 print "Op %d Xrefd and NOT defined at 0x%08X" % (op, du_address[op])
                 return True
         except Exception, err:
-            print "X" * 80
             print format_exc()
         return False
 

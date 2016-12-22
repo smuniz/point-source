@@ -41,6 +41,60 @@ class LowLevelBasicBlock(MultiDiGraph):
         self.id = _id
 
         self.dom = set()
+        self.visited = False # FIXME horrible kludge
+
+    def __eq__(self, other):
+        """Override the default Equals behavior"""
+        #print "=== eq (%d)" % self.id
+        if isinstance(other, self.__class__):
+            #return self.id == other.id
+            return self.id == other.id
+        return NotImplemented
+
+    def __ne__(self, other):
+        """Define a non-equality test"""
+        #print "=== ne (%d)" % self.id
+        if isinstance(other, self.__class__):
+            return not self.__eq__(other)
+        return NotImplemented
+
+    def __lt__(self, other):
+      # return comparison
+        #print "=== lt (%d) < %d" % (self.id, other.id)
+        if isinstance(other, self.__class__):
+            return self.id < other.id
+        return NotImplemented
+
+    def __le__(self, other):
+      # return comparison
+        #print "=== le (%d)" % self.id
+        if isinstance(other, self.__class__):
+            return self.id <= other.id
+        return NotImplemented
+
+    #def __eq__(self, other)
+    #  # return comparison
+    #def __ne__(self, other)
+    #  # return comparison
+    def __gt__(self, other):
+      # return comparison
+        #print "=== gt (%d)" % self.id
+        if isinstance(other, self.__class__):
+            return self.id > other.id
+        return NotImplemented
+
+    def __ge__(self, other):
+      # return comparison
+        #print "=== ge (%d)" % self.id
+        if isinstance(other, self.__class__):
+            return self.id >= other.id
+        return NotImplemented
+
+
+    def __hash__(self):
+        """Override the default hash behavior (that returns the id or the object)"""
+        #return hash(tuple(sorted(self.__dict__.items())))
+        return hash(self.start_address)
 
     @property
     def id(self):
