@@ -35,10 +35,12 @@ class LowLevelBasicBlock(MultiDiGraph):
 
         self.function = None
 
-        self._successors = list() # List of successors
-        self._predecessors = list() # List of predecessors
+        self._successors = set() # List of successors
+        self._predecessors = set() # List of predecessors
 
         self.id = _id
+
+        self.dom = set()
 
     @property
     def id(self):
@@ -64,7 +66,7 @@ class LowLevelBasicBlock(MultiDiGraph):
             raise LowLevelBasicBlockException(
                 "Unable to add successor basic block of type %r" % \
                 type(bb))
-        self._successors.append(bb)
+        self._successors.add(bb)
 
     def add_predecessor(self, bb):
         """Add a predecessor basic block to the current one."""
@@ -72,7 +74,7 @@ class LowLevelBasicBlock(MultiDiGraph):
             raise LowLevelBasicBlockException(
                 "Unable to add predecessor basic block of type %r" % \
                 type(bb))
-        self._predecessors.append(bb)
+        self._predecessors.add(bb)
 
     @property
     def function(self):

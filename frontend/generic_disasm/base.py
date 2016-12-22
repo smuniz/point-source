@@ -5,6 +5,7 @@
 #
 import abc
 from traceback import format_exc
+from copy import copy
 
 __all__ = ["BaseDebugger",
            "BaseDebuggerException",
@@ -258,6 +259,39 @@ class BaseDebugger(object):
             #
             # Perform a basic check on newly generated LIR function.
             #
+            change = True
+            N = list()
+            lir_function[0].dom = set(lir_function[0])
+
+            for lir_bb in lir_function[1 : ]:
+                lir_bb.dom = set(copy(lir_function.basic_blocks))
+
+            T = set()
+
+            for n in lir_function[1:]:
+
+                T = set(copy(lir_function.basic_blocks))
+                print T
+
+                print "n = ", n.id
+                print "   preds = ", [x.id for x in n.predecessors()]
+
+                for p in n.predecessors():
+                    print "p = ", p.id
+                    print "n --->", [x.id for x in n.dom]
+                    print "p --->", [x.id for x in p.dom]
+                    print "----> intersection = ", [x.id for x in T.intersection(p.dom)]
+                break
+
+
+            print "--------------------------------------"
+            print "      i          Domin(i)"
+            print "--------------------------------------"
+            #for lir_bb in lir_function:
+            #    print "    0x%08X {%2d}    {%s}" % (
+            #        lir_bb.start_address, lir_bb.id, ", ".join(
+            #        [str(x.id) for x in lir_bb.dom]))
+
             if lir_function.get_basic_blocks_count() == 0:
                 raise BaseDebuggerException(
                     "No basic blocks found during the analysis.")
@@ -265,6 +299,7 @@ class BaseDebugger(object):
             if lir_function.instructions_count == 0:
                 raise BaseDebuggerException(
                     "No instructions found during the analysis.")
+            #raise Exception("blablabla")
 
             try:
                 #print "[+] Generating DU and UD chains for Low level IR..."

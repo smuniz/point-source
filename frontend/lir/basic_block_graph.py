@@ -68,6 +68,7 @@ class BasicBlockGraphOutput(GraphOutputMedia):
 
             for idx, bb in enumerate(self.ir):
                 for succ in bb.successors():
+                #for succ in bb.predecessors():
                     node_a = nodes[bb]
                     node_b = nodes[succ]
                     #print "Adding %s ---> %s" % (node_a, node_b)
