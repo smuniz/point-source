@@ -47,7 +47,6 @@ class LowLevelBasicBlock(MultiDiGraph):
         """Override the default Equals behavior"""
         #print "=== eq (%d)" % self.id
         if isinstance(other, self.__class__):
-            #return self.id == other.id
             return self.id == other.id
         return NotImplemented
 
@@ -92,19 +91,19 @@ class LowLevelBasicBlock(MultiDiGraph):
 
 
     def __hash__(self):
-        """Override the default hash behavior (that returns the id or the object)"""
+        """Override the default hash behavior (that returns object ID)"""
         #return hash(tuple(sorted(self.__dict__.items())))
         return hash(self.start_address)
 
-    @property
-    def id(self):
-        """Indicate the current basic block ID."""
-        return self._id
-
-    @id.setter
-    def id(self, _id):
-        """Store the current basic block ID."""
-        self._id = _id
+#    @property
+#    def id(self):
+#        """Indicate the current basic block ID."""
+#        return self._id
+#
+#    @id.setter
+#    def id(self, _id):
+#        """Store the current basic block ID."""
+#        self._id = _id
 
     def successors(self):
         """"Return a list of every successor stored."""
@@ -140,13 +139,13 @@ class LowLevelBasicBlock(MultiDiGraph):
         """Store the current function it belongs to."""
         self._function = function
 
-    @property
-    def start_address(self):
-        return self._start_address
-
-    @start_address.setter
-    def start_address(self, address):
-        self._start_address = address
+#    @property
+#    def start_address(self):
+#        return self._start_address
+#
+#    @start_address.setter
+#    def start_address(self, address):
+#        self._start_address = address
 
     @property
     def end_address(self):

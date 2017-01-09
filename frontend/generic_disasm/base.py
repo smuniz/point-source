@@ -55,7 +55,7 @@ class BaseDebugger(object):
     def __init__(self):
         """Instance initialization."""
         # Generate verbose output when debugging flag is activated.
-        self._debug = True
+        self._debug = False
 
         # This variable contains the debugger instance in case that the current
         # debugger has to be accessed through class methods instead of
