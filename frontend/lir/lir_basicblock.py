@@ -71,10 +71,6 @@ class LowLevelBasicBlock(MultiDiGraph):
             return self.id <= other.id
         return NotImplemented
 
-    #def __eq__(self, other)
-    #  # return comparison
-    #def __ne__(self, other)
-    #  # return comparison
     def __gt__(self, other):
       # return comparison
         #print "=== gt (%d)" % self.id
@@ -89,13 +85,7 @@ class LowLevelBasicBlock(MultiDiGraph):
             return self.id >= other.id
         return NotImplemented
 
-
-    def __hash__(self):
-        """Override the default hash behavior (that returns object ID)"""
-        #return hash(tuple(sorted(self.__dict__.items())))
-        return hash(self.start_address)
-
-# TODO enhance profiling
+# TODO : To improve performance it is know directly accessed from the outside.
 #    @property
 #    def id(self):
 #        """Indicate the current basic block ID."""
@@ -105,7 +95,7 @@ class LowLevelBasicBlock(MultiDiGraph):
 #    def id(self, _id):
 #        """Store the current basic block ID."""
 #        self._id = _id
-
+#
     def successors(self):
         """"Return a list of every successor stored."""
         return self._successors
@@ -140,14 +130,13 @@ class LowLevelBasicBlock(MultiDiGraph):
         """Store the current function it belongs to."""
         self._function = function
 
-# TODO enhance profiling
-#    @property
-#    def start_address(self):
-#        return self._start_address
-#
-#    @start_address.setter
-#    def start_address(self, address):
-#        self._start_address = address
+    @property
+    def start_address(self):
+        return self._start_address
+
+    @start_address.setter
+    def start_address(self, address):
+        self._start_address = address
 
     @property
     def end_address(self):
