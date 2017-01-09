@@ -95,6 +95,7 @@ class LowLevelBasicBlock(MultiDiGraph):
         #return hash(tuple(sorted(self.__dict__.items())))
         return hash(self.start_address)
 
+# TODO enhance profiling
 #    @property
 #    def id(self):
 #        """Indicate the current basic block ID."""
@@ -139,6 +140,7 @@ class LowLevelBasicBlock(MultiDiGraph):
         """Store the current function it belongs to."""
         self._function = function
 
+# TODO enhance profiling
 #    @property
 #    def start_address(self):
 #        return self._start_address
