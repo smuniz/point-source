@@ -276,8 +276,12 @@ class BaseDebugger(object):
             if x not in purged_succ_list:
                 purged_succ_list.append(x)
 
-        while change is True:
+        while change:
             #print "purged_succ_list = ", [x.id for x in purged_succ_list]
+
+            if len(purged_succ_list) == 1:
+                break # TODO is this right?
+
             for n in purged_succ_list[1:]:
 
                 T = set(purged_succ_list)
@@ -299,6 +303,7 @@ class BaseDebugger(object):
                     change = True
                     n.dom = D
                 else:
+                    print "A" * 20
                     change = False
 
         print "---------------------------------------------"
