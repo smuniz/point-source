@@ -303,7 +303,6 @@ class BaseDebugger(object):
                     change = True
                     n.dom = D
                 else:
-                    print "A" * 20
                     change = False
 
         print "---------------------------------------------"
